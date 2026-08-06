@@ -265,6 +265,27 @@ button:active,.nbtn:active,.ibtn:active,.qbtn:active,.ngrid-btn:active{transform
 .listen-history-chip{padding:4px 10px;border-radius:999px;background:var(--chbg);border:1px solid rgba(251,191,36,.3);font-family:var(--mono);font-size:12px;color:var(--chord);cursor:pointer;transition:all .12s}
 .listen-history-chip:hover{background:var(--chord);color:#000}
 
+/* ── RECORDING STUDIO ── */
+.studio-wrap{padding:28px 32px;max-width:720px;margin:0 auto;width:100%;overflow-y:auto}
+.studio-header{margin-bottom:20px}
+.studio-title{font-size:22px;font-weight:700;color:var(--tx)}
+.studio-sub{font-size:12px;color:var(--mu);margin-top:4px;line-height:1.5}
+.studio-controls{background:var(--glass-bg);border:1px solid var(--glass-border);border-radius:var(--rad-lg);padding:18px}
+.studio-toggle{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--mu);margin-bottom:16px;cursor:pointer;line-height:1.4}
+.studio-toggle input{accent-color:var(--acc);flex-shrink:0}
+.studio-record-row{display:flex;align-items:center;gap:16px}
+.studio-record-btn{padding:12px 24px;border-radius:var(--rad-pill);border:none;background:var(--acc-grad);color:#fff;font-size:14px;font-weight:600;cursor:pointer;transition:all .2s;box-shadow:var(--glow-purple)}
+.studio-record-btn:hover{filter:brightness(1.1)}
+.studio-record-btn.recording{background:var(--red);box-shadow:0 0 20px rgba(252,113,113,.5);animation:pulseDot 1.2s ease-in-out infinite}
+.studio-timer{font-family:var(--mono);font-size:16px;color:var(--tx)}
+.studio-takes-list{display:flex;flex-direction:column;gap:8px}
+.studio-take-item{background:var(--s2);border:1px solid var(--bd-def);border-radius:var(--rad-lg);padding:12px;display:flex;flex-direction:column;gap:8px}
+.studio-take-head{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap}
+.studio-take-name{font-size:12px;color:var(--tx);font-weight:600}
+.studio-take-meta{font-size:10px;color:var(--mu)}
+.studio-take-item audio{width:100%}
+.studio-take-actions{display:flex;gap:6px}
+
 /* ── DRUMS ── */
 .drum-wrap{padding:20px 24px;flex:1;overflow-y:auto}
 .drum-controls{display:flex;align-items:center;gap:10px;margin-bottom:18px;flex-wrap:wrap}
@@ -605,6 +626,8 @@ button:active,.nbtn:active,.ibtn:active,.qbtn:active,.ngrid-btn:active{transform
     <button class="nav-tab" onclick="showPage('learn',this)"><span class="ic">🎓</span>Learn</button>
     <button class="nav-tab" onclick="showPage('metro',this)"><span class="ic">⏱</span>Metro</button>
     <button class="nav-tab" onclick="showPage('classic',this)"><span class="ic">🎸</span>Guitar</button>
+    <button class="nav-tab" onclick="showPage('listen',this)"><span class="ic">🎤</span>Listen</button>
+    <button class="nav-tab" onclick="showPage('studio',this)"><span class="ic">⏺</span>Studio</button>
     <button class="nav-tab" onclick="showPage('struct',this)"><span class="ic">☰</span>Struct</button>
   </div>
   <div class="nav-right">
@@ -612,6 +635,8 @@ button:active,.nbtn:active,.ibtn:active,.qbtn:active,.ngrid-btn:active{transform
     <input class="song-title-nav" id="titleNav" value="Creep" oninput="syncTitle(this)">
     <button class="nbtn" onclick="transposeDown()">↓</button>
     <button class="nbtn" onclick="transposeUp()">↑</button>
+    <button class="nbtn" onclick="deleteLastClickedChord()" title="Click a chord in the sheet, then click here to delete it">🗑 Delete Chord</button>
+    <button class="nbtn" onclick="newSong()">📄 New Song</button>
     <button class="nbtn" onclick="openImportModal()">📂 Import</button>
     <button class="nbtn detect-btn" onclick="openDetector()">🔍 Detect</button>
     <button class="nbtn" id="installAppBtn" style="display:none" onclick="installApp()">📲 Install App</button>
@@ -635,6 +660,8 @@ button:active,.nbtn:active,.ibtn:active,.qbtn:active,.ngrid-btn:active{transform
   <button class="rail-btn" title="Learn" onclick="showPage('learn',this);railOn(this)">🎓</button>
   <button class="rail-btn" title="Metronome" onclick="showPage('metro',this);railOn(this)">⏱</button>
   <button class="rail-btn" title="Classic Guitar" onclick="showPage('classic',this);railOn(this)">🎸</button>
+  <button class="rail-btn" title="Listen" onclick="showPage('listen',this);railOn(this)">🎤</button>
+  <button class="rail-btn" title="Recording Studio" onclick="showPage('studio',this);railOn(this)">⏺</button>
   <button class="rail-btn" title="Structure" onclick="showPage('struct',this);railOn(this)">☰</button>
   <div class="rail-sep"></div>
   <button class="rail-btn play-big" title="Play" onclick="togglePlay()" id="railPlay">▶</button>
@@ -682,7 +709,6 @@ button:active,.nbtn:active,.ibtn:active,.qbtn:active,.ngrid-btn:active{transform
     <div class="piano-mode-tabs">
       <button class="piano-mode-tab on" data-mode="chart" onclick="switchPianoMode('chart')">📊 Chord Chart</button>
       <button class="piano-mode-tab" data-mode="keyboard" onclick="switchPianoMode('keyboard')">🎹 Keyboard</button>
-      <button class="piano-mode-tab" data-mode="listen" onclick="switchPianoMode('listen')">🎤 Listen</button>
     </div>
 
     <!-- CHORD CHART MODE -->
@@ -717,26 +743,52 @@ button:active,.nbtn:active,.ibtn:active,.qbtn:active,.ngrid-btn:active{transform
       </div>
     </div>
 
-    <!-- LISTEN MODE -->
-    <div class="piano-mode" id="pianoMode-listen">
-      <div class="listen-mode-wrap">
-        <div style="font-size:13px;color:var(--tx);font-weight:600;text-align:center">LISTEN MODE — Play your piano or guitar and I'll detect the chord</div>
-        <div class="listen-status">
-          <div class="listen-pulse" id="listenPulseDot" style="display:none"></div>
-          <span id="listenStatus">Press Start to detect chords from your microphone</span>
-        </div>
-        <div class="listen-chord-display" id="listenChordDisplay">—</div>
-        <div class="listen-confidence"><div class="listen-confidence-bar" id="listenConfBar" style="width:0%"></div></div>
-        <div style="display:flex;gap:8px">
-          <button class="nbtn prim" onclick="startListening()">🎤 Start Listening</button>
-          <button class="nbtn" onclick="stopListening()">Stop</button>
-          <button class="nbtn" onclick="clearListenHistory()">Clear History</button>
-        </div>
-        <div style="font-size:11px;color:var(--mu);text-align:center;max-width:400px">Play a chord on your piano or guitar near your microphone. The app will detect the notes and identify the chord in real time.</div>
-        <div class="listen-history" id="listenHistory"></div>
+  </div>
+</div>
+
+<!-- LISTEN (mic-based chord detection — used to live only inside Piano; now its own page since
+     it detects guitar, piano, or anything else played near the mic) -->
+<div class="page" id="page-listen">
+  <div class="listen-mode-wrap">
+    <div style="font-size:13px;color:var(--tx);font-weight:600;text-align:center">LISTEN MODE — Play your piano or guitar and I'll detect the chord</div>
+    <div class="listen-status">
+      <div class="listen-pulse" id="listenPulseDot" style="display:none"></div>
+      <span id="listenStatus">Press Start to detect chords from your microphone</span>
+    </div>
+    <div class="listen-chord-display" id="listenChordDisplay">—</div>
+    <div class="listen-confidence"><div class="listen-confidence-bar" id="listenConfBar" style="width:0%"></div></div>
+    <div style="display:flex;gap:8px">
+      <button class="nbtn prim" onclick="startListening()">🎤 Start Listening</button>
+      <button class="nbtn" onclick="stopListening()">Stop</button>
+      <button class="nbtn" onclick="clearListenHistory()">Clear History</button>
+    </div>
+    <div style="font-size:11px;color:var(--mu);text-align:center;max-width:400px">Play a chord on your piano or guitar near your microphone. The app will detect the notes and identify the chord in real time.</div>
+    <div class="listen-history" id="listenHistory"></div>
+  </div>
+</div>
+
+<!-- RECORDING STUDIO -->
+<div class="page" id="page-studio">
+  <div class="studio-wrap">
+    <div class="studio-header">
+      <div class="studio-title">⏺ Recording Studio</div>
+      <div class="studio-sub">Record yourself singing or playing over the backing track — or just capture raw mic audio — then download the take.</div>
+    </div>
+
+    <div class="studio-controls">
+      <label class="studio-toggle">
+        <input type="checkbox" id="studioBackingToggle" checked> Include backing track (plays &amp; records the chord/drum sequence together with your mic)
+      </label>
+      <div class="studio-record-row">
+        <button class="studio-record-btn" id="studioRecordBtn" onclick="toggleStudioRecording()">⏺ Start Recording</button>
+        <div class="studio-timer" id="studioTimer" style="display:none">00:00</div>
       </div>
     </div>
 
+    <div class="studio-takes">
+      <div class="rp-sec-label" style="margin:18px 0 8px">Takes (this session)</div>
+      <div id="studioTakesList" class="studio-takes-list"><div style="font-size:11px;color:var(--mu);padding:8px 0">No takes recorded yet — press Start Recording above.</div></div>
+    </div>
   </div>
 </div>
 
@@ -936,9 +988,7 @@ button:active,.nbtn:active,.ibtn:active,.qbtn:active,.ngrid-btn:active{transform
   <div class="rp-tabs">
     <button class="rp-tab on" onclick="rpTab('songs')">Songs</button>
     <button class="rp-tab" onclick="rpTab('chords')">Chords</button>
-    <button class="rp-tab" onclick="rpTab('ai')">AI</button>
-    <button class="rp-tab" onclick="rpTab('detect')">Detect</button>
-    <button class="rp-tab" onclick="rpTab('scale')">Scale</button>
+    <button class="rp-tab" onclick="rpTab('tools')">Tools</button>
     <button class="rp-tab" onclick="rpTab('play')">Play</button>
     <button class="rp-tab" onclick="rpTab('export')">Export</button>
   </div>
@@ -963,38 +1013,35 @@ button:active,.nbtn:active,.ibtn:active,.qbtn:active,.ngrid-btn:active{transform
     <div class="rp-sec"><div class="rp-sec-label">Quick</div><div class="note-grid" id="quickGrid"></div></div>
   </div>
 
-  <!-- AI TAB -->
-  <div class="rp-body" id="rp-ai">
+  <!-- TOOLS TAB — merged AI + Scale + Detect (was 3 separate tabs; the AI generator's own key
+       dropdown was a straight duplicate of the Scale section's key picker below, so that's the
+       one removed — generateProgression() now reads scaleKey/scaleType directly instead). -->
+  <div class="rp-body" id="rp-tools">
+    <div class="rp-sec"><div class="rp-sec-label">Key</div><div class="note-grid" id="scaleKeyGrid"></div></div>
+    <div class="rp-sec"><div class="rp-sec-label">Scale</div><div class="qual-grid" id="scaleTypeGrid"></div></div>
+    <div class="rp-sec"><div class="rp-sec-label">Notes in scale</div><div class="scale-note-row" id="scaleNotes"></div></div>
+    <div class="rp-sec"><div class="rp-sec-label">Chords that fit</div><div class="scale-note-row" id="scaleChordsRow"></div></div>
+
     <div class="rp-sec">
       <div class="rp-sec-label">Chord progression generator</div>
       <input class="ai-input" id="aiMood" placeholder="Mood: sad, uplifting, jazzy, tense…">
-      <select class="ai-input" id="aiKey" style="margin-bottom:6px"><option value="C">C major</option><option value="G">G major</option><option value="D">D major</option><option value="A">A major</option><option value="E">E major</option><option value="Am">A minor</option><option value="Em">E minor</option><option value="Dm">D minor</option></select>
-      <select class="ai-input" id="aiStyle"><option value="pop">Pop</option><option value="jazz">Jazz</option><option value="blues">Blues</option><option value="latin">Latin</option><option value="folk">Folk</option><option value="rock">Rock</option></select>
+      <select class="ai-input" id="aiStyle" style="margin-bottom:6px"><option value="pop">Pop</option><option value="jazz">Jazz</option><option value="blues">Blues</option><option value="latin">Latin</option><option value="folk">Folk</option><option value="rock">Rock</option></select>
+      <div style="font-size:9px;color:var(--mu);margin-bottom:6px">Uses the Key/Scale selected above</div>
       <button class="ai-btn" onclick="generateProgression()">✦ Generate progression</button>
       <div class="ai-result" id="aiResult"><span style="font-size:10px;color:var(--mu)">Generated chords appear here</span></div>
       <button class="ins-btn" style="margin-top:6px" onclick="insertAIResult()">Add to sheet</button>
     </div>
+
+    <div class="rp-sec"><div class="rp-sec-label">Click notes you hear</div>
+    <div class="detect-keys" id="detectKeys"></div>
+    <div class="detect-result"><div class="detect-chord-name" id="detectName">—</div><div class="detect-sub" id="detectSub">Select 2+ notes</div></div>
+    <button class="ins-btn" style="margin-top:6px" onclick="clearDetect()">Clear</button></div>
+
     <div class="rp-sec">
       <div class="rp-sec-label">Rhyme helper</div>
       <input class="ai-input" id="rhymeInput" placeholder="Type a word…" oninput="getRhymes()">
       <div class="rhyme-words" id="rhymeWords"></div>
     </div>
-  </div>
-
-  <!-- DETECT TAB -->
-  <div class="rp-body" id="rp-detect">
-    <div class="rp-sec"><div class="rp-sec-label">Click notes you hear</div>
-    <div class="detect-keys" id="detectKeys"></div>
-    <div class="detect-result"><div class="detect-chord-name" id="detectName">—</div><div class="detect-sub" id="detectSub">Select 2+ notes</div></div></div>
-    <button class="ins-btn" onclick="clearDetect()">Clear</button>
-  </div>
-
-  <!-- SCALE TAB -->
-  <div class="rp-body" id="rp-scale">
-    <div class="rp-sec"><div class="rp-sec-label">Key</div><div class="note-grid" id="scaleKeyGrid"></div></div>
-    <div class="rp-sec"><div class="rp-sec-label">Scale</div><div class="qual-grid" id="scaleTypeGrid"></div></div>
-    <div class="rp-sec"><div class="rp-sec-label">Notes in scale</div><div class="scale-note-row" id="scaleNotes"></div></div>
-    <div class="rp-sec"><div class="rp-sec-label">Chords that fit</div><div class="scale-note-row" id="scaleChordsRow"></div></div>
   </div>
 
   <!-- PLAY TAB -->
@@ -1945,6 +1992,7 @@ const SONG_YOUTUBE={
 let audioCtx=null,analyser=null;
 let selNote='G',selQual='maj';
 let activeLine=null;
+let lastClickedChordWrap=null; // feeds the "Delete Chord" top-bar button — set whenever a .ctok is clicked
 let inst='piano';
 let isPlaying=false,playTimer=null,playIdx=0;
 let isDrumPlaying=false,drumTimer=null,drumStep=0;
@@ -2669,6 +2717,18 @@ function loadSong(key){
   updateSheetVideo(key);
   toast('Loaded: '+s.title);
 }
+// Clears the sheet to a blank song — title/meta reset, no sections, nothing loaded. Confirms
+// first since it overwrites the autosave slot: anything unsaved in the current song is only
+// recoverable via "Save current song" beforehand, not after.
+function newSong(){
+  if(!confirm('Start a new blank song? Unsaved changes to the current one will be lost — use "Save current song" first if you want to keep it.')) return;
+  applySongData({title:'Untitled Song',meta:'',sections:[]});
+  renderMySongs(null);
+  showPage('sheet');
+  const videoBar=document.getElementById('sheetVideoBar'); if(videoBar) videoBar.style.display='none';
+  autosaveSong();
+  toast('New blank song — add a section below to get started');
+}
 function loadSongFromLibrary(title){
   const lib=loadLibrary();
   const song=lib[title];
@@ -2835,8 +2895,12 @@ function addChordToken(row,name,beats){
   const tok=document.createElement('span');
   tok.className='ctok';
   tok.textContent=name;
-  tok.title='Click = play • Right-click wrapper = remove';
-  tok.onclick=()=>previewChord(tok.textContent.trim());
+  tok.title='Click = play (and show the enlarged diagram) • Right-click wrapper = remove';
+  tok.onclick=()=>{
+    lastClickedChordWrap=wrap; // feeds deleteLastClickedChord() in the top bar
+    previewChord(tok.textContent.trim());
+    openChordPopup(tok.textContent.trim()); // reuses the Learn page's enlarged diagram popup
+  };
   const badge=document.createElement('span');
   badge.className='ctok-beats';
   badge.textContent=beats;
@@ -2865,6 +2929,21 @@ function renderStrip(){
   });
   detectKey();
   autosaveSong();
+}
+// Top-bar "Delete Chord" button — deletes whichever chord token was last clicked in the sheet
+// (right-click-on-wrapper already removes a chord too; this is the same action made visible
+// and reachable from the nav bar instead of requiring that discovery).
+function deleteLastClickedChord(){
+  if(!lastClickedChordWrap || !lastClickedChordWrap.isConnected){
+    toast('Click a chord in the sheet first, then use this to delete it');
+    return;
+  }
+  const tokEl=lastClickedChordWrap.querySelector('.ctok');
+  const name=tokEl?tokEl.textContent.trim():'chord';
+  lastClickedChordWrap.remove();
+  lastClickedChordWrap=null;
+  renderStrip();updateSeq();autosaveSong();
+  toast('Deleted '+name);
 }
 
 // ── TYPE-A-CHORD (inline chord entry above lyric lines) ─────────────────────
@@ -3139,7 +3218,7 @@ function buildChordCard(name){
   }
   prevBtn.onclick=()=>{ cardVoicingIndex[name]=(cardVoicingIndex[name]-1+voicings.length)%voicings.length; refresh(); };
   nextBtn.onclick=()=>{ cardVoicingIndex[name]=(cardVoicingIndex[name]+1)%voicings.length; refresh(); };
-  playBtn.onclick=()=>playCardVoicing(voicings[cardVoicingIndex[name]]);
+  playBtn.onclick=()=>{ playCardVoicing(voicings[cardVoicingIndex[name]]); openChordPopup(name); };
 
   refresh();
   return card;
@@ -3253,7 +3332,7 @@ function updateQualAliases(){
   }catch(e){ el.textContent=''; }
 }
 function buildQuickChords(){
-  const quick=['G','Am','C','D','Em','F','A','E','Bm','Dm','B','Cm'];
+  const quick=['G','Am','C','D','Em','F','A','E','Bm','Dm','B','Cm','Bbm'];
   const grid=document.getElementById('quickGrid');
   quick.forEach(ch=>{
     const b=document.createElement('button');
@@ -4046,7 +4125,6 @@ function switchPianoMode(mode){
   if(modeEl) modeEl.classList.add('on');
   document.querySelectorAll(`.piano-mode-tab[data-mode="${mode}"]`).forEach(t=>t.classList.add('on'));
   if(mode==='keyboard') updatePianoInstLabel();
-  if(mode!=='listen') stopListening();
 }
 
 // ── PIANO ROLL ─────────────────────────────────────────────────────
@@ -5101,7 +5179,7 @@ function pickMood(text){
 }
 function generateProgression(){
   const style=document.getElementById('aiStyle').value;
-  const key=document.getElementById('aiKey').value;
+  const key=scaleKey+(scaleType==='minor'?'m':''); // reuses the Tools tab's Key/Scale picker instead of a separate dropdown
   const mood=pickMood(document.getElementById('aiMood').value)||'uplifting';
   const styleSet=AI_PROGRESSIONS[style]||AI_PROGRESSIONS.pop;
   const base=styleSet[mood]||styleSet.default||Object.values(styleSet)[0];
@@ -5224,6 +5302,12 @@ function setInst(btn,val){
 
 // ── TABS / NAV ─────────────────────────────────────────────────────
 function showPage(name,btn){
+  // Listen mode used to stop itself via switchPianoMode() whenever the user left the Piano
+  // page's Listen sub-tab; now that it's a top-level page, do the same thing here instead —
+  // otherwise navigating away would leave the mic (and the RAF-driven UI it's updating) running.
+  const listenPage=document.getElementById('page-listen');
+  if(listenPage && listenPage.classList.contains('on') && name!=='listen') stopListening();
+  if(studioRecording && name!=='studio') stopStudioRecording();
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('on'));
   const target=document.getElementById('page-'+name);
   if(target) target.classList.add('on');
@@ -5461,6 +5545,168 @@ async function exportM4A(){
 
   dlBlob(new Blob(chunks,{type:mime}),(document.getElementById('shTitle').value||'song')+'.m4a');
   toast('Downloaded .m4a');
+}
+
+// ── RECORDING STUDIO ───────────────────────────────────────────────
+// Records real mic input (singing/playing along), optionally mixed live with whatever the app
+// itself is currently outputting (chords/drums/metronome all already route through the shared
+// `analyser` bus) — same tap-the-bus technique exportM4A() above uses, just recording
+// continuously instead of driving a fixed chord sequence. Session-only: takes live in memory
+// (as object URLs) and are gone on reload — this is a scratch pad for grabbing a take and
+// downloading it, not a persisted multitrack project.
+let studioStream=null;
+let studioMicSourceNode=null;
+let studioDest=null;
+let studioRecorder=null;
+let studioChunks=[];
+let studioRecording=false;
+let studioStartTime=0;
+let studioTimerInterval=null;
+let studioAutoStartedPlayback=false; // only stop playback on Stop if WE started it
+let studioTakes=[]; // {id,blob,url,mimeType,name,durationSecs,withBacking,createdAt}
+
+function toggleStudioRecording(){
+  if(studioRecording) stopStudioRecording();
+  else startStudioRecording();
+}
+async function startStudioRecording(){
+  if(studioRecording) return;
+  try{
+    studioStream=await navigator.mediaDevices.getUserMedia(MIC_CONSTRAINTS);
+  }catch(e){
+    toast('Microphone access denied — check browser permissions');
+    return;
+  }
+  const ctx=getCtx();
+  studioDest=ctx.createMediaStreamDestination();
+  studioMicSourceNode=ctx.createMediaStreamSource(studioStream);
+  studioMicSourceNode.connect(studioDest);
+
+  const includeBacking=document.getElementById('studioBackingToggle').checked;
+  studioAutoStartedPlayback=false;
+  if(includeBacking){
+    analyser.connect(studioDest); // still plays through speakers as normal too, same as exportM4A()
+    if(!isPlaying){ togglePlay(); studioAutoStartedPlayback=true; }
+  }
+
+  const mimeCandidates=['audio/webm;codecs=opus','audio/webm','audio/mp4'];
+  const mimeType=(typeof MediaRecorder!=='undefined')?mimeCandidates.find(m=>MediaRecorder.isTypeSupported&&MediaRecorder.isTypeSupported(m)):null;
+  studioChunks=[];
+  try{
+    studioRecorder=mimeType?new MediaRecorder(studioDest.stream,{mimeType}):new MediaRecorder(studioDest.stream);
+  }catch(e){
+    toast("This browser can't record audio");
+    if(studioMicSourceNode){ try{studioMicSourceNode.disconnect();}catch(e2){} }
+    if(includeBacking){ try{analyser.disconnect(studioDest);}catch(e2){} }
+    if(studioStream){ studioStream.getTracks().forEach(t=>t.stop()); studioStream=null; }
+    return;
+  }
+  studioRecorder.ondataavailable=e=>{ if(e.data.size>0) studioChunks.push(e.data); };
+  studioRecorder.onstop=()=>finishStudioRecording(includeBacking);
+  studioRecorder.start();
+
+  studioRecording=true;
+  studioStartTime=Date.now();
+  const btn=document.getElementById('studioRecordBtn');
+  if(btn){ btn.textContent='⏹ Stop Recording'; btn.classList.add('recording'); }
+  const timerEl=document.getElementById('studioTimer');
+  if(timerEl){ timerEl.style.display='inline-block'; timerEl.textContent='00:00'; }
+  studioTimerInterval=setInterval(updateStudioTimer,250);
+}
+function stopStudioRecording(){
+  if(!studioRecording) return;
+  if(studioRecorder && studioRecorder.state!=='inactive') studioRecorder.stop(); // onstop -> finishStudioRecording()
+  if(studioMicSourceNode){ try{ studioMicSourceNode.disconnect(); }catch(e){} studioMicSourceNode=null; }
+  try{ analyser.disconnect(studioDest); }catch(e){} // no-op if the backing track wasn't tapped in
+  if(studioStream){ studioStream.getTracks().forEach(t=>t.stop()); studioStream=null; }
+  if(studioAutoStartedPlayback && isPlaying) stopAll();
+  studioAutoStartedPlayback=false;
+
+  studioRecording=false;
+  const btn=document.getElementById('studioRecordBtn');
+  if(btn){ btn.textContent='⏺ Start Recording'; btn.classList.remove('recording'); }
+  if(studioTimerInterval){ clearInterval(studioTimerInterval); studioTimerInterval=null; }
+  const timerEl=document.getElementById('studioTimer'); if(timerEl) timerEl.style.display='none';
+}
+function updateStudioTimer(){
+  const el=document.getElementById('studioTimer');
+  if(!el) return;
+  const secs=Math.floor((Date.now()-studioStartTime)/1000);
+  el.textContent=String(Math.floor(secs/60)).padStart(2,'0')+':'+String(secs%60).padStart(2,'0');
+}
+function finishStudioRecording(includeBacking){
+  const mimeType=(studioRecorder&&studioRecorder.mimeType)||'audio/webm';
+  const blob=new Blob(studioChunks,{type:mimeType});
+  const take={
+    id:Date.now(),
+    blob,
+    url:URL.createObjectURL(blob),
+    mimeType,
+    name:'Take '+(studioTakes.length+1),
+    durationSecs:Math.round((Date.now()-studioStartTime)/1000),
+    withBacking:includeBacking,
+    createdAt:new Date(),
+  };
+  studioTakes.unshift(take);
+  renderStudioTakes();
+  toast('Recording saved — '+take.name);
+}
+function renderStudioTakes(){
+  const list=document.getElementById('studioTakesList');
+  if(!list) return;
+  if(!studioTakes.length){
+    list.innerHTML='<div style="font-size:11px;color:var(--mu);padding:8px 0">No takes recorded yet — press Start Recording above.</div>';
+    return;
+  }
+  list.innerHTML='';
+  studioTakes.forEach(take=>{
+    const item=document.createElement('div');
+    item.className='studio-take-item';
+
+    const head=document.createElement('div');
+    head.className='studio-take-head';
+    const nameEl=document.createElement('span');
+    nameEl.className='studio-take-name';
+    nameEl.textContent=take.name;
+    const metaEl=document.createElement('span');
+    metaEl.className='studio-take-meta';
+    const mm=String(Math.floor(take.durationSecs/60)).padStart(2,'0');
+    const ss=String(take.durationSecs%60).padStart(2,'0');
+    metaEl.textContent=`${mm}:${ss} • ${take.withBacking?'with backing track':'mic only'} • ${take.createdAt.toLocaleTimeString()}`;
+    head.appendChild(nameEl);head.appendChild(metaEl);
+    item.appendChild(head);
+
+    const audio=document.createElement('audio');
+    audio.controls=true;
+    audio.src=take.url;
+    item.appendChild(audio);
+
+    const actions=document.createElement('div');
+    actions.className='studio-take-actions';
+    const dlBtn=document.createElement('button');
+    dlBtn.className='nbtn';dlBtn.textContent='⬇ Download';
+    dlBtn.onclick=()=>downloadStudioTake(take.id);
+    const delBtn=document.createElement('button');
+    delBtn.className='nbtn';delBtn.textContent='🗑 Delete';
+    delBtn.onclick=()=>deleteStudioTake(take.id);
+    actions.appendChild(dlBtn);actions.appendChild(delBtn);
+    item.appendChild(actions);
+
+    list.appendChild(item);
+  });
+}
+function downloadStudioTake(id){
+  const take=studioTakes.find(t=>t.id===id);
+  if(!take) return;
+  const ext=take.mimeType.includes('mp4')?'m4a':(take.mimeType.includes('ogg')?'ogg':'webm');
+  dlBlob(take.blob,take.name.replace(/\s+/g,'_')+'.'+ext); // dlBlob already defined above for WAV/MP3/M4A export
+}
+function deleteStudioTake(id){
+  const idx=studioTakes.findIndex(t=>t.id===id);
+  if(idx<0) return;
+  URL.revokeObjectURL(studioTakes[idx].url);
+  studioTakes.splice(idx,1);
+  renderStudioTakes();
 }
 
 // ── IMPORT ─────────────────────────────────────────────────────────
