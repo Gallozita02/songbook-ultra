@@ -3731,7 +3731,13 @@ function getRMS(buffer){
   for(let i=0;i<buffer.length;i++) sum+=buffer[i]*buffer[i];
   return Math.sqrt(sum/buffer.length);
 }
-const MIN_RMS_THRESHOLD=0.02; // silence gate — below this, don't even attempt pitch detection
+const MIN_RMS_THRESHOLD=0.01; // silence gate — below this, don't even attempt pitch detection
+// getUserMedia's default constraints turn on echo cancellation, noise suppression, and
+// auto-gain — all tuned for voice calls, and all liable to attenuate or distort an instrument
+// signal (especially something picked up from a few feet away, like a guitar into a laptop
+// mic) before it ever reaches the YIN detector. Disabling them is standard practice for
+// pitch-detection/tuner apps; shared by both Listen mode and the Song Detector below.
+const MIC_CONSTRAINTS={audio:{echoCancellation:false,noiseSuppression:false,autoGainControl:false}};
 // YIN pitch detection — cumulative mean normalized difference function, with parabolic
 // interpolation around the first sub-threshold dip. Substantially more reliable on real
 // instrument tone (fewer octave errors, less prone to locking onto a strong harmonic) than
@@ -3807,7 +3813,16 @@ function tryDetectChordFromAccumulator(tracker){
     .map(([note])=>note);
   tracker.noteAccumulator.clear();
 
-  if(strongNotes.length<2) return null; // need at least 2 notes for a chord
+  // A single sustained/dominant note is a very common real case (one guitar string, a riff, or
+  // a strummed chord where one string simply rings loudest into a monophonic pitch tracker) —
+  // discarding it entirely here was the actual bug behind "the detector doesn't pick up anything
+  // at all": pitch tracking was working fine (confirmed against a live capture while diagnosing
+  // this — the confidence meter was reading ~100%), but this function silently returned null for
+  // every single-note read, so nothing ever reached the display. Show the note itself in that
+  // case rather than nothing; only fall through to full chord matching once 2+ distinct notes
+  // actually accumulate.
+  if(strongNotes.length===1) return strongNotes[0];
+  if(strongNotes.length<2) return null;
   return detectChordStrict(strongNotes);
 }
 // Strict chord match: every surviving note must belong to the candidate chord (not just
@@ -3838,7 +3853,7 @@ function detectChordStrict(notes){
 async function startListening(){
   if(listenInterval) return; // already running
   try{
-    micStream=await navigator.mediaDevices.getUserMedia({audio:true});
+    micStream=await navigator.mediaDevices.getUserMedia(MIC_CONSTRAINTS);
   }catch(e){
     toast('Microphone access denied — check browser permissions');
     return;
@@ -5757,7 +5772,7 @@ function closeDetector(){
 async function startDetector(){
   if(detectorActive) return;
   try{
-    detectorStream=await navigator.mediaDevices.getUserMedia({audio:true});
+    detectorStream=await navigator.mediaDevices.getUserMedia(MIC_CONSTRAINTS);
   }catch(e){
     toast('Microphone access needed for detection');
     return;
