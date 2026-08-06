@@ -3389,7 +3389,7 @@ function renderScale(){
 // ── PIANO PAGE ─────────────────────────────────────────────────────
 let selectedPianoNotes=new Set();  // keys like "C4", "C#3" — pitch letter + octave, no separators
 let lastDetectedChordName=null;    // last chord shown in the keyboard-mode detection bar (feeds "+ Add to sheet")
-let micStream=null,micSourceNode=null,micAnalyser=null,listenInterval=null;
+let micStream=null,micSourceNode=null,micAnalyser=null,micChromaAnalyser=null,listenInterval=null;
 let listenHistory=[];              // most-recent-first, capped at 5, shown as chips in Listen mode
 let listenPitchTracker=createPitchTracker(); // stability buffer + note accumulator for the YIN pipeline below
 let currentPianoMode='chart';
@@ -3780,10 +3780,64 @@ function freqToNoteName(freq){
   return NOTES[((rounded%12)+12)%12];
 }
 // One tracker per detector instance (Listen mode / Song Detector) — holds the pitch-stability
-// buffer and the note-frequency accumulator that tryDetectChordFromAccumulator() drains.
+// buffer, the note-frequency accumulator, and the running chroma sum that
+// tryDetectChordFromAccumulator() drains.
 function createPitchTracker(){
-  return{ pitchBuffer:[], noteAccumulator:new Map(), lastChordDetectTime:0 };
+  return{ pitchBuffer:[], noteAccumulator:new Map(), lastChordDetectTime:0, chromaSum:new Float32Array(12), chromaWeight:0 };
 }
+// Chroma ("pitch-class profile") chord matching — this is what actually sees more than one
+// simultaneous note, unlike detectPitchYIN below which can only ever report one frequency per
+// read. Every audible tick folds the analyser's full spectrum into a 12-bin profile (one bin
+// per pitch class, summing energy across every octave that note appears in — the same trick
+// real chord-recognition tools use), those profiles average out over the same 1.5s window the
+// note accumulator already uses, and the result gets matched against every root+quality via
+// cosine similarity. A single note still produces a usable (if less conclusive) chroma — one
+// dominant bin — so this subsumes the monophonic single-note case too; the older pitch-tracker
+// path below only serves as a fallback for whatever this doesn't confidently resolve.
+function computeChroma(freqDataDb,sampleRate,fftSize){
+  const chroma=new Float32Array(12);
+  const binHz=sampleRate/fftSize;
+  const minBin=Math.max(1,Math.round(60/binHz));    // ~B1 and up — skips sub-bass rumble/DC offset
+  const maxBin=Math.min(freqDataDb.length-1,Math.round(1500/binHz)); // ~F#6 — fundamentals + early harmonics of guitar/piano range
+  for(let i=minBin;i<=maxBin;i++){
+    const mag=Math.pow(10,freqDataDb[i]/20); // getFloatFrequencyData returns dB — back to linear magnitude
+    const freq=i*binHz;
+    const midi=69+12*Math.log2(freq/440);
+    const pc=((Math.round(midi)%12)+12)%12;
+    chroma[pc]+=mag;
+  }
+  return chroma;
+}
+// Triads + simple 7ths only, same cutoff detectChordStrict() below already uses — complex jazz
+// voicings aren't reliably distinguishable from a chroma profile built out of a noisy mic feed.
+const CHORD_TEMPLATE_QUALITIES=QUALITIES.filter(q=>q.iv.length<=4);
+const CHORD_TIE_MARGIN=0.03; // see comment below
+function matchChordFromChroma(chroma){
+  const chromaMax=Math.max(...chroma,1e-9);
+  const norm=Array.from(chroma,v=>v/chromaMax); // scale-invariant: only the *shape* of the profile matters
+
+  const candidates=[];
+  NOTES.forEach((root,ri)=>{
+    CHORD_TEMPLATE_QUALITIES.forEach(q=>{
+      const template=new Array(12).fill(0);
+      q.iv.forEach(iv=>{ template[(ri+iv)%12]=1; });
+      let dot=0,a=0,b=0;
+      for(let i=0;i<12;i++){ dot+=norm[i]*template[i]; a+=norm[i]*norm[i]; b+=template[i]; }
+      const score=dot/(Math.sqrt(a*b)||1e-9); // cosine similarity between the profile and this candidate
+      candidates.push({root,qual:q.l,score,size:q.iv.length});
+    });
+  });
+  candidates.sort((a,b)=>b.score-a.score);
+  const top=candidates[0];
+  // A real spectrum always leaks a little energy into neighboring bins (windowing, harmonics,
+  // mic noise), which can let a superset chord — a 7th that contains the triad actually being
+  // played, say — edge out the plainer, far more common triad by a hair purely on that leakage.
+  // Confirmed happening on a clean synthesized G major triad while tuning this: it kept coming
+  // back "Gmaj7". Prefer the simplest (fewest-note) chord within a small margin of the top score
+  // instead of always taking the literal best.
+  return candidates.find(c=>c.size<top.size && c.score>=top.score-CHORD_TIE_MARGIN)||top;
+}
+const CHORD_MATCH_MIN_SCORE=0.8; // cosine-similarity floor before trusting a chroma chord match
 const PITCH_CONFIRM_FRAMES=3;   // pitch must read stable 3 frames running before it counts
 const PITCH_TOLERANCE_CENTS=30; // within 30 cents = "the same pitch" frame-to-frame
 function addPitchToBuffer(tracker,freq){
@@ -3799,12 +3853,23 @@ function addPitchToBuffer(tracker,freq){
 function accumulateNote(tracker,noteName){
   tracker.noteAccumulator.set(noteName,(tracker.noteAccumulator.get(noteName)||0)+1);
 }
-const CHORD_DETECT_WINDOW_MS=1500; // collect notes for 1.5s before ever emitting a chord
+const CHORD_DETECT_WINDOW_MS=1500; // collect notes/chroma for 1.5s before ever emitting a chord
 const NOTE_MIN_COUNT=3;            // a note must recur at least this many times to "count"
 function tryDetectChordFromAccumulator(tracker){
   const now=Date.now();
   if(now-tracker.lastChordDetectTime<CHORD_DETECT_WINDOW_MS) return null;
   tracker.lastChordDetectTime=now;
+
+  // Chroma match first — it's the only one of the two signals that can actually distinguish a
+  // real 3+ note chord from a single dominant string (see computeChroma()'s comment above).
+  let chordResult=null;
+  if(tracker.chromaWeight>0){
+    const avgChroma=tracker.chromaSum.map(v=>v/tracker.chromaWeight);
+    const match=matchChordFromChroma(avgChroma);
+    if(match && match.score>=CHORD_MATCH_MIN_SCORE) chordResult=match.root+(match.qual==='maj'?'':match.qual);
+  }
+  tracker.chromaSum=new Float32Array(12);
+  tracker.chromaWeight=0;
 
   const strongNotes=Array.from(tracker.noteAccumulator.entries())
     .filter(([,count])=>count>=NOTE_MIN_COUNT)
@@ -3813,14 +3878,13 @@ function tryDetectChordFromAccumulator(tracker){
     .map(([note])=>note);
   tracker.noteAccumulator.clear();
 
-  // A single sustained/dominant note is a very common real case (one guitar string, a riff, or
-  // a strummed chord where one string simply rings loudest into a monophonic pitch tracker) —
-  // discarding it entirely here was the actual bug behind "the detector doesn't pick up anything
-  // at all": pitch tracking was working fine (confirmed against a live capture while diagnosing
-  // this — the confidence meter was reading ~100%), but this function silently returned null for
-  // every single-note read, so nothing ever reached the display. Show the note itself in that
-  // case rather than nothing; only fall through to full chord matching once 2+ distinct notes
-  // actually accumulate.
+  if(chordResult) return chordResult;
+
+  // Fallback for whatever the chroma match wasn't confident about: a single sustained/dominant
+  // note is a very common real case (one guitar string, a riff) — showing it here rather than
+  // nothing was the fix for "the detector doesn't pick up anything at all" (confirmed via a live
+  // capture while diagnosing that bug: pitch tracking was working, at ~100% confidence, but
+  // this function used to discard every single-note read outright).
   if(strongNotes.length===1) return strongNotes[0];
   if(strongNotes.length<2) return null;
   return detectChordStrict(strongNotes);
@@ -3861,8 +3925,18 @@ async function startListening(){
   const ctx=getCtx();
   micSourceNode=ctx.createMediaStreamSource(micStream);
   micAnalyser=ctx.createAnalyser();
-  micAnalyser.fftSize=2048;
+  micAnalyser.fftSize=2048; // sized for YIN's time-domain reads only now (see micChromaAnalyser below)
   micSourceNode.connect(micAnalyser);
+  // A second, independent analyser on the same source, sized much larger purely for frequency
+  // resolution: at 2048, each bin is ~21.5Hz wide, wider than a whole semitone (~4.8Hz) down at
+  // a guitar's low E (82Hz) — low notes were smearing into the WRONG neighboring pitch class
+  // entirely, not just adding noise, confirmed while tuning this (a clean synthesized E minor
+  // triad's own low E string was showing up contaminating the F#/C# bins). The FFT itself runs
+  // natively in the browser, not in JS, so a big fftSize here is nearly free — it's only
+  // YIN's O(n²) JS loop (on micAnalyser above, kept small) that actually costs CPU per tick.
+  micChromaAnalyser=ctx.createAnalyser();
+  micChromaAnalyser.fftSize=16384;
+  micSourceNode.connect(micChromaAnalyser);
 
   const statusEl=document.getElementById('listenStatus'); if(statusEl) statusEl.textContent='Listening...';
   const dotEl=document.getElementById('listenPulseDot'); if(dotEl) dotEl.style.display='block';
@@ -3874,6 +3948,7 @@ function stopListening(){
   if(micStream){ micStream.getTracks().forEach(t=>t.stop()); micStream=null; }
   if(micSourceNode){ try{ micSourceNode.disconnect(); }catch(e){} micSourceNode=null; }
   micAnalyser=null;
+  micChromaAnalyser=null;
   if(listenInterval){ clearInterval(listenInterval); listenInterval=null; }
 
   const statusEl=document.getElementById('listenStatus'); if(statusEl) statusEl.textContent='Press Start to detect chords from your microphone';
@@ -3886,19 +3961,40 @@ function runListenDetection(){
   micAnalyser.getFloatTimeDomainData(buffer);
 
   const rms=getRMS(buffer);
-  if(rms<MIN_RMS_THRESHOLD) return; // gate: too quiet to be a real note
-
-  const pitchResult=detectPitchYIN(buffer,getCtx().sampleRate);
   const confBar=document.getElementById('listenConfBar');
-  if(confBar) confBar.style.width=Math.round((pitchResult?pitchResult.clarity:0)*100)+'%';
+  if(rms<MIN_RMS_THRESHOLD){
+    if(confBar) confBar.style.width='0%';
+  }else{
+    // Chroma capture happens on every audible tick regardless of whether the monophonic pitch
+    // tracker below locks onto anything — a real chord can easily leave YIN unstable (several
+    // simultaneous fundamentals fighting each other frame to frame) while still being perfectly
+    // visible to the chroma profile, which is the whole reason this exists alongside it.
+    const freqData=new Float32Array(micChromaAnalyser.frequencyBinCount);
+    micChromaAnalyser.getFloatFrequencyData(freqData);
+    const chroma=computeChroma(freqData,getCtx().sampleRate,micChromaAnalyser.fftSize);
+    // Weight by this tick's own loudness (rms²) rather than counting every tick equally — a
+    // strummed chord decays for the rest of the 1.5s window, and averaging those later, quieter,
+    // proportionally noisier ticks in at full strength was diluting the clean shape the initial
+    // strum actually had. Confirmed while tuning this: without the weighting, a clean synthesized
+    // triad's own accumulated shape drifted enough over the full window to occasionally match
+    // the wrong chord by the time the window closed.
+    const weight=rms*rms;
+    for(let i=0;i<12;i++) listenPitchTracker.chromaSum[i]+=chroma[i]*weight;
+    listenPitchTracker.chromaWeight+=weight;
 
-  const stablePitch=addPitchToBuffer(listenPitchTracker,pitchResult?pitchResult.freq:null);
-  if(!stablePitch) return; // not confirmed stable yet — don't let it vote
+    const pitchResult=detectPitchYIN(buffer,getCtx().sampleRate);
+    if(confBar) confBar.style.width=Math.round((pitchResult?pitchResult.clarity:0)*100)+'%';
+    const stablePitch=addPitchToBuffer(listenPitchTracker,pitchResult?pitchResult.freq:null);
+    if(stablePitch){
+      const noteName=freqToNoteName(stablePitch);
+      if(noteName) accumulateNote(listenPitchTracker,noteName);
+    }
+  }
 
-  const noteName=freqToNoteName(stablePitch);
-  if(!noteName) return;
-  accumulateNote(listenPitchTracker,noteName);
-
+  // Self-paces on its own 1.5s window (CHORD_DETECT_WINDOW_MS) independent of whatever happened
+  // above this tick, so a real chord — which may never produce a "stable" monophonic pitch at
+  // all — still gets its accumulated chroma checked on schedule instead of only when the
+  // fallback note path happens to fire.
   const chord=tryDetectChordFromAccumulator(listenPitchTracker);
   if(chord) displayDetectedChord(chord);
 }
@@ -5755,6 +5851,7 @@ let detectorActive=false;
 let detectorStream=null;
 let detectorSourceNode=null;
 let detectorAnalyser=null;
+let detectorChromaAnalyser=null;
 let detectorInterval=null;
 let detectorRAF=null;
 let detectedChordHistory=[]; // detected chord NAMES, oldest first, capped — not raw pitches
@@ -5780,8 +5877,14 @@ async function startDetector(){
   const ctx=getCtx();
   detectorSourceNode=ctx.createMediaStreamSource(detectorStream);
   detectorAnalyser=ctx.createAnalyser();
-  detectorAnalyser.fftSize=2048;
+  detectorAnalyser.fftSize=2048; // back to its original size — only feeds YIN + the instrument-band heuristic now
   detectorSourceNode.connect(detectorAnalyser);
+  // Dedicated large-FFT analyser purely for chroma's frequency resolution — see the matching
+  // comment on micChromaAnalyser in startListening() above for why this needs to be separate
+  // from (and much bigger than) the analyser YIN/the instrument heuristic use.
+  detectorChromaAnalyser=ctx.createAnalyser();
+  detectorChromaAnalyser.fftSize=16384;
+  detectorSourceNode.connect(detectorChromaAnalyser);
 
   detectorActive=true;
   const btn=document.getElementById('detectorStartBtn'); if(btn) btn.textContent='■ Stop';
@@ -5794,6 +5897,7 @@ function stopDetector(){
   if(detectorStream){ detectorStream.getTracks().forEach(t=>t.stop()); detectorStream=null; }
   if(detectorSourceNode){ try{ detectorSourceNode.disconnect(); }catch(e){} detectorSourceNode=null; }
   detectorAnalyser=null;
+  detectorChromaAnalyser=null;
   if(detectorInterval){ clearInterval(detectorInterval); detectorInterval=null; }
   if(detectorRAF){ cancelAnimationFrame(detectorRAF); detectorRAF=null; }
   const btn=document.getElementById('detectorStartBtn'); if(btn) btn.textContent='🎤 Start';
@@ -5845,17 +5949,26 @@ function runDetection(){
   const total=(guitarScore+pianoScore+bassScore+drumsScore)||1;
   updateInstrumentMeters({guitar:guitarScore/total,piano:pianoScore/total,bass:bassScore/total,drums:drumsScore/total});
 
-  // Chord detection: same accurate YIN + stability + accumulation pipeline as the Piano page's
-  // Listen mode (see detectPitchYIN/addPitchToBuffer/accumulateNote/tryDetectChordFromAccumulator
-  // above) — a single noisy per-tick pitch read is never enough on its own to name a chord.
+  // Chord detection: same chroma-first + monophonic-fallback pipeline as the Piano page's Listen
+  // mode (see computeChroma/matchChordFromChroma/tryDetectChordFromAccumulator above) — chroma
+  // is what can actually see more than one simultaneous note; a single noisy per-tick pitch read
+  // never could.
   const rms=getRMS(timeData);
-  if(rms<MIN_RMS_THRESHOLD) return; // gate: too quiet to be a real note
-  const pitchResult=detectPitchYIN(timeData,getCtx().sampleRate);
-  const stablePitch=addPitchToBuffer(detectorPitchTracker,pitchResult?pitchResult.freq:null);
-  if(!stablePitch) return;
-  const noteName=freqToNoteName(stablePitch);
-  if(!noteName) return;
-  accumulateNote(detectorPitchTracker,noteName);
+  if(rms>=MIN_RMS_THRESHOLD){
+    const freqDataDb=new Float32Array(detectorChromaAnalyser.frequencyBinCount);
+    detectorChromaAnalyser.getFloatFrequencyData(freqDataDb);
+    const chroma=computeChroma(freqDataDb,getCtx().sampleRate,detectorChromaAnalyser.fftSize);
+    const weight=rms*rms; // see the matching comment in runListenDetection() above
+    for(let i=0;i<12;i++) detectorPitchTracker.chromaSum[i]+=chroma[i]*weight;
+    detectorPitchTracker.chromaWeight+=weight;
+
+    const pitchResult=detectPitchYIN(timeData,getCtx().sampleRate);
+    const stablePitch=addPitchToBuffer(detectorPitchTracker,pitchResult?pitchResult.freq:null);
+    if(stablePitch){
+      const noteName=freqToNoteName(stablePitch);
+      if(noteName) accumulateNote(detectorPitchTracker,noteName);
+    }
+  }
   const chord=tryDetectChordFromAccumulator(detectorPitchTracker);
   if(chord) updateDetectedChord(chord);
 }
