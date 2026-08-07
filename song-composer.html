@@ -91,6 +91,17 @@ button:active,.nbtn:active,.ibtn:active,.qbtn:active,.ngrid-btn:active{transform
 
 /* ── NAV ── */
 .topnav{display:flex;align-items:center;gap:0;background:rgba(3,3,13,.92);backdrop-filter:var(--glass-blur);-webkit-backdrop-filter:var(--glass-blur);border-bottom:1px solid var(--glass-border);box-shadow:0 1px 0 rgba(139,92,246,.15),0 4px 24px rgba(0,0,0,.6);height:46px;width:100%;max-width:100vw;position:sticky;top:0;z-index:100;flex-shrink:0;overflow:hidden}
+
+/* ── SERVING-CONTEXT WARNING BANNER (shown only when opened via file://) ── */
+#contextBanner{position:sticky;top:46px;z-index:49;width:100%;background:linear-gradient(135deg,rgba(124,58,237,.18),rgba(8,8,24,.95));border-bottom:1px solid rgba(253,230,138,.25);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);box-shadow:0 2px 16px rgba(0,0,0,.4)}
+.context-banner-inner{display:flex;align-items:center;gap:10px;padding:7px 16px;max-width:100vw;flex-wrap:wrap}
+.context-banner-icon{font-size:16px;flex-shrink:0}
+.context-banner-text{flex:1;font-size:12px;color:var(--tx);line-height:1.5;min-width:0}
+.context-banner-highlight{color:var(--chord);font-weight:600}
+.context-banner-link{color:var(--sec);text-decoration:underline;text-underline-offset:2px;cursor:pointer;font-weight:600;margin:0 4px;transition:color .15s}
+.context-banner-link:hover{color:var(--acc)}
+.context-banner-close{background:transparent;border:1px solid rgba(255,255,255,.12);border-radius:5px;color:var(--mu);font-size:12px;padding:3px 8px;cursor:pointer;flex-shrink:0;transition:all .15s}
+.context-banner-close:hover{background:rgba(255,255,255,.08);color:var(--tx)}
 .nav-logo{padding:0 20px;font-size:16px;font-weight:800;display:flex;align-items:center;gap:8px;border-right:1px solid var(--glass-border);white-space:nowrap;letter-spacing:-.5px;flex-shrink:0}
 .nav-logo .note{color:var(--acc);filter:drop-shadow(0 0 6px rgba(167,139,250,.65))}
 .nav-logo .lg-white{background:linear-gradient(135deg,var(--acc),var(--pnk));-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;color:transparent;font-weight:800;filter:drop-shadow(0 0 8px rgba(167,139,250,.5))}
@@ -427,7 +438,20 @@ button:active,.nbtn:active,.ibtn:active,.qbtn:active,.ngrid-btn:active{transform
 .strum-beat.down{color:var(--sec)}
 .strum-beat.up{color:var(--blu)}
 .strum-beat.muted{color:var(--mu);opacity:.4}
-.strum-beat.active{transform:scale(1.2);background:var(--s3);border-color:var(--acc)}
+.strum-beat.compound{font-size:9px;letter-spacing:-1px;color:var(--pnk)}
+.strum-beat.active{transform:scale(1.2);background:var(--s3);border-color:var(--acc);box-shadow:var(--glow-purple)}
+/* ── Standalone strum-pattern player (tempo + play/stop, added under the existing beat row) ── */
+.strum-tempo-row{display:flex;align-items:center;gap:6px;margin-top:10px}
+.strum-tempo-label{font-size:10px;color:var(--mu);white-space:nowrap}
+.strum-tempo-slider{flex:1;accent-color:var(--acc);height:3px}
+.strum-tempo-val{font-size:11px;font-family:var(--mono);color:var(--tx);min-width:24px;text-align:right}
+.strum-controls{display:flex;gap:6px;margin-top:8px}
+.strum-controls .nbtn{flex:1;text-align:center;font-size:11px}
+.strum-legend{display:flex;gap:10px;flex-wrap:wrap;margin-top:8px}
+.strum-legend-item{font-size:9px;display:flex;align-items:center;gap:3px}
+.strum-legend-item.down{color:var(--sec)}
+.strum-legend-item.up{color:var(--blu)}
+.strum-legend-item.muted{color:var(--mu)}
 
 /* ── LEARN: section jump, difficulty badges, loop, chord popup ── */
 .learn-section-jump{display:flex;gap:6px;flex-wrap:wrap;padding:8px 16px;background:var(--s1);border-bottom:1px solid var(--bd-sub);flex-shrink:0}
@@ -456,6 +480,10 @@ button:active,.nbtn:active,.ibtn:active,.qbtn:active,.ngrid-btn:active{transform
 .video-tab.on{background:rgba(167,139,250,.15);border-color:var(--acc);color:var(--acc);box-shadow:var(--glow-purple)}
 .video-tab:hover:not(.on){background:rgba(167,139,250,.07);color:var(--tx)}
 .video-embed-wrap{width:100%;border-radius:10px;overflow:hidden;border:1px solid var(--glass-border);background:rgba(3,3,13,.8);margin-bottom:8px;position:relative;aspect-ratio:16/9}
+.video-file-overlay{position:absolute;inset:0;background:rgba(8,8,24,.96);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;padding:16px;text-align:center;z-index:2}
+.video-file-overlay .overlay-icon{font-size:28px;color:var(--acc);opacity:.5;filter:drop-shadow(0 0 10px rgba(167,139,250,.4))}
+.video-file-overlay .overlay-msg{font-size:10px;color:var(--mu);line-height:1.5}
+.video-file-overlay a{color:var(--sec);font-size:11px;font-weight:600;text-decoration:underline;text-underline-offset:2px}
 .video-placeholder{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;background:rgba(8,8,24,.95)}
 .video-placeholder-icon{font-size:36px;color:var(--acc);opacity:.6;filter:drop-shadow(0 0 12px rgba(167,139,250,.5))}
 .video-placeholder-text{font-size:11px;color:var(--mu);text-align:center;padding:0 16px}
@@ -899,6 +927,21 @@ button:active,.nbtn:active,.ibtn:active,.qbtn:active,.ngrid-btn:active{transform
       <div class="learn-panel-section">
         <div class="learn-panel-label">Strumming pattern</div>
         <div class="strum-pattern" id="learnStrumPattern"></div>
+        <div class="strum-tempo-row">
+          <span class="strum-tempo-label">Tempo:</span>
+          <input type="range" id="strumTempoSlider" min="40" max="200" value="90" class="strum-tempo-slider" oninput="updateStrumPlayerTempo(this.value)">
+          <span class="strum-tempo-val" id="strumTempoVal">90</span>
+          <span class="strum-tempo-label">BPM</span>
+        </div>
+        <div class="strum-controls">
+          <button class="nbtn prim" id="strumPlayBtn" onclick="toggleStrumPlayer()">▶ Play pattern</button>
+          <button class="nbtn" onclick="stopStrumPlayer()">■ Stop</button>
+        </div>
+        <div class="strum-legend">
+          <span class="strum-legend-item down">↓ Downstroke</span>
+          <span class="strum-legend-item up">↑ Upstroke</span>
+          <span class="strum-legend-item muted">✕ Muted</span>
+        </div>
       </div>
       <div class="learn-panel-section">
         <div class="learn-panel-label">Song info</div>
@@ -4990,13 +5033,70 @@ function renderStrumPattern(key){
   // Prefer a per-song strumPattern field (FULL_SONGS[key].strumPattern) if present, falling
   // back to the separate STRUM_PATTERNS lookup table for any song that doesn't have one inline.
   const pattern=(learnSong&&learnSong.strumPattern)||STRUM_PATTERNS[key]||['↓','↑','↓','↑'];
-  pattern.forEach(sym=>{
+  pattern.forEach((sym,i)=>{
     const beat=document.createElement('div');
-    const cls=sym[0]==='↓'?'down':sym[0]==='↑'?'up':'muted';
+    // Two-character symbols like '↓↑' are a quick double-stroke within one beat — classify those
+    // as 'compound' before falling back to single down/up/muted, and give every beat an id + a
+    // data-beat index so the standalone strum player (below) can highlight/schedule them by index.
+    const cls=(sym.includes('↓')&&sym.includes('↑'))?'compound':sym[0]==='↓'?'down':sym[0]==='↑'?'up':'muted';
     beat.className='strum-beat '+cls;
     beat.textContent=sym;
+    beat.id='strum-beat-'+i;
+    beat.dataset.beat=i+1;
     wrap.appendChild(beat);
   });
+  stopStrumPlayer(); // switching songs/transposing mid-playback would otherwise keep ticking against the old pattern
+}
+// ── Standalone strum-pattern player — independent of "Play Along", lets you hear/see just the
+// strum rhythm at its own tempo without stepping through the whole song's chord changes. ──
+let strumPlayerPlaying=false,strumPlayerTimer=null,strumPlayerBeatIdx=0;
+function updateStrumPlayerTempo(val){
+  const lbl=document.getElementById('strumTempoVal'); if(lbl) lbl.textContent=val;
+}
+function toggleStrumPlayer(){
+  if(strumPlayerPlaying){ stopStrumPlayer(); return; }
+  const pattern=(learnSong&&learnSong.strumPattern)||STRUM_PATTERNS[learnCurrentKey]||[];
+  if(!pattern.length){ toast('No strumming pattern for this song'); return; }
+  strumPlayerPlaying=true;
+  strumPlayerBeatIdx=0;
+  const btn=document.getElementById('strumPlayBtn'); if(btn) btn.textContent='■ Stop pattern';
+  stepStrumPlayer();
+}
+function stepStrumPlayer(){
+  if(!strumPlayerPlaying) return;
+  const pattern=(learnSong&&learnSong.strumPattern)||STRUM_PATTERNS[learnCurrentKey]||[];
+  if(!pattern.length){ stopStrumPlayer(); return; }
+  document.querySelectorAll('#learnStrumPattern .strum-beat').forEach(b=>b.classList.remove('active'));
+  const i=strumPlayerBeatIdx%pattern.length;
+  const sym=pattern[i];
+  const beatEl=document.getElementById('strum-beat-'+i);
+  if(beatEl) beatEl.classList.add('active');
+  // Strum whichever chord the Chord Teacher panel is currently showing (kept in sync by
+  // displayChordInTeacher/showChordInTeacher), falling back to the song's key chord.
+  const nameEl=document.getElementById('learnChordName');
+  const chordName=(nameEl&&nameEl.textContent&&nameEl.textContent!=='—')?nameEl.textContent:((learnSong&&learnSong.key)||'G');
+  if(sym.includes('↓')) playStrumDirection(chordName,'down');
+  else if(sym.includes('↑')) playStrumDirection(chordName,'up');
+  // muted ('✕'/'x') beats stay silent — just the visual tick above
+  strumPlayerBeatIdx++;
+  const bpm=parseInt(document.getElementById('strumTempoSlider')?.value)||90;
+  const beatMs=(60/bpm)*1000; // one quarter note per beat
+  strumPlayerTimer=setTimeout(stepStrumPlayer,beatMs);
+}
+function playStrumDirection(chordName,direction){
+  const freqs=chordFreqs(chordName);
+  const t=getCtx().currentTime;
+  const ordered=direction==='up'?[...freqs].reverse():freqs;
+  ordered.forEach((f,i)=>{
+    const dur=direction==='up'?0.9:1.2; // upstroke rings out a touch softer/shorter than a downstroke
+    playTone(f,t+i*0.015,dur);
+  });
+}
+function stopStrumPlayer(){
+  strumPlayerPlaying=false;
+  clearTimeout(strumPlayerTimer);
+  document.querySelectorAll('#learnStrumPattern .strum-beat').forEach(b=>b.classList.remove('active'));
+  const btn=document.getElementById('strumPlayBtn'); if(btn) btn.textContent='▶ Play pattern';
 }
 function toggleLearnPlay(){
   if(learnPlaying){ stopLearnPlay(); return; }
@@ -6309,6 +6409,7 @@ function openFullSongInSheet(key){
 // ── YOUTUBE TUTORIAL VIDEOS ────────────────────────────────────────
 let currentVideoType='tutorial';
 let currentVideoSongKey=null;
+let currentVideoId=null; // tracked separately from embed.src since the file:// fallback path leaves embed.src empty
 
 function loadSongVideos(songKey){
   currentVideoSongKey=songKey;
@@ -6317,6 +6418,7 @@ function loadSongVideos(songKey){
   const embed=document.getElementById('youtubeEmbed');
   const controls=document.getElementById('videoControls');
   if(!videos){
+    currentVideoId=null;
     if(placeholder) placeholder.style.display='flex';
     if(embed){ embed.style.display='none'; embed.src=''; }
     if(controls) controls.style.display='none';
@@ -6328,10 +6430,29 @@ function loadSongVideos(songKey){
 }
 function playVideo(videoId){
   if(!videoId) return;
+  currentVideoId=videoId;
   const embed=document.getElementById('youtubeEmbed');
   const placeholder=document.getElementById('videoPlaceholder');
   const controls=document.getElementById('videoControls');
+  const wrap=document.getElementById('videoEmbedWrap');
   if(!embed) return;
+  // Remove any leftover file:// overlay from a previous call before deciding what to show.
+  wrap && wrap.querySelectorAll('.video-file-overlay').forEach(el=>el.remove());
+  if(window.location.protocol==='file:'){
+    // Chrome/etc. block YouTube embeds opened straight off disk — show a direct link instead of
+    // a guaranteed-broken iframe.
+    embed.style.display='none';
+    embed.src='';
+    if(placeholder) placeholder.style.display='none';
+    if(wrap){
+      const overlay=document.createElement('div');
+      overlay.className='video-file-overlay';
+      overlay.innerHTML=`<div class="overlay-icon">▶</div><div class="overlay-msg">YouTube embeds need a server.<br>Open the video directly instead:</div><a href="https://www.youtube.com/watch?v=${videoId}" target="_blank" rel="noopener">Watch on YouTube ↗</a>`;
+      wrap.appendChild(overlay);
+    }
+    if(controls) controls.style.display='flex';
+    return;
+  }
   embed.src=`https://www.youtube.com/embed/${videoId}?rel=0&modestbranding=1`;
   embed.style.display='block';
   if(placeholder) placeholder.style.display='none';
@@ -6381,20 +6502,26 @@ function renderVideoList(songKey,videos){
 }
 function openVideoFullscreen(){
   const embed=document.getElementById('youtubeEmbed');
+  // On file:// the embed stays hidden (see playVideo's overlay branch) — fullscreening a hidden
+  // iframe does nothing useful, so just open the video in a new tab instead.
+  if(window.location.protocol==='file:'){ openVideoNewTab(); return; }
   if(embed && embed.requestFullscreen) embed.requestFullscreen();
 }
 function openVideoNewTab(){
-  const embed=document.getElementById('youtubeEmbed');
-  if(embed && embed.src){
-    const videoId=embed.src.match(/embed\/([^?]+)/)?.[1];
-    if(videoId) window.open(`https://www.youtube.com/watch?v=${videoId}`,'_blank');
-  }
+  if(currentVideoId) window.open(`https://www.youtube.com/watch?v=${currentVideoId}`,'_blank');
 }
 
 // Compact tutorial-video toggle on the Sheet page (separate from the Learn-page panel above —
 // this one's driven by loadSong(), which uses SONGS' keys, not FULL_SONGS').
 let sheetVideoVisible=false;
+let sheetVideoId=null;
 function toggleSheetVideo(){
+  // file:// blocks the embed outright — skip the broken iframe and just open YouTube directly.
+  if(window.location.protocol==='file:'){
+    if(sheetVideoId) window.open(`https://www.youtube.com/watch?v=${sheetVideoId}`,'_blank');
+    else toast('No tutorial video for this song');
+    return;
+  }
   sheetVideoVisible=!sheetVideoVisible;
   const mini=document.getElementById('sheetVideoMini');
   const btn=document.getElementById('sheetVideoToggle');
@@ -6406,12 +6533,44 @@ function updateSheetVideo(songKey){
   const bar=document.getElementById('sheetVideoBar');
   const embed=document.getElementById('sheetVideoEmbed');
   if(!bar || !embed) return;
-  if(!videos){ bar.style.display='none'; return; }
+  if(!videos){ bar.style.display='none'; sheetVideoId=null; return; }
+  sheetVideoId=videos.tutorial;
   bar.style.display='block';
+  const btn=document.getElementById('sheetVideoToggle');
+  if(window.location.protocol==='file:'){
+    // Don't even point the iframe at YouTube on file:// — just relabel the button as a direct link.
+    embed.src='';
+    if(btn) btn.textContent='📺 Open Tutorial ↗';
+    return;
+  }
   embed.src=`https://www.youtube.com/embed/${videos.tutorial}?rel=0&modestbranding=1`;
   sheetVideoVisible=false;
   const mini=document.getElementById('sheetVideoMini'); if(mini) mini.style.display='none';
-  const btn=document.getElementById('sheetVideoToggle'); if(btn) btn.textContent='📺 Watch Tutorial';
+  if(btn) btn.textContent='📺 Watch Tutorial';
+}
+
+// ── SERVING-CONTEXT BANNER (file:// warning) ─────────────────────────
+function checkServingContext(){
+  if(localStorage.getItem('bannerDismissed')==='1') return; // don't re-show once dismissed
+  const isFile=window.location.protocol==='file:';
+  if(!isFile) return; // http(s)/localhost — everything works, stay silent
+  const banner=document.createElement('div');
+  banner.id='contextBanner';
+  banner.innerHTML=`
+    <div class="context-banner-inner">
+      <span class="context-banner-icon">⚠️</span>
+      <div class="context-banner-text">
+        <strong>Running as a local file</strong> —
+        microphone works, but
+        <span class="context-banner-highlight">YouTube videos</span> and
+        <span class="context-banner-highlight">Install as app</span>
+        need a server.
+        <a class="context-banner-link" href="https://github.com/Gallozita02" target="_blank" rel="noopener">Host on GitHub Pages</a>
+        or use <strong>VS Code &rarr; Go Live</strong> for the full experience.
+      </div>
+      <button class="context-banner-close" onclick="document.getElementById('contextBanner').style.display='none';localStorage.setItem('bannerDismissed','1');">✕</button>
+    </div>`;
+  document.body.insertBefore(banner,document.body.firstChild);
 }
 
 // ── TOAST ──────────────────────────────────────────────────────────
@@ -6586,6 +6745,7 @@ function init(){
   buildPianoQuickLoader();
   initImportDropzone();
   initPWA();
+  checkServingContext();
   window.addEventListener('beforeunload', ()=>{
     try{ localStorage.setItem(AUTOSAVE_KEY, JSON.stringify(serializeSong())); }catch(e){}
   });
