@@ -2,16 +2,17 @@
 
 > A futuristic, all-in-one music composer, chord reference, and song learning app — built as a single HTML file with no dependencies except the browser.
 
-![Songbook Ultra](https://img.shields.io/badge/version-1.0.0-a78bfa?style=for-the-badge)
+![Songbook Ultra](https://img.shields.io/badge/version-2.0.0-a78bfa?style=for-the-badge)
 ![HTML](https://img.shields.io/badge/HTML-single--file-f59e0b?style=for-the-badge&logo=html5)
 ![Web Audio API](https://img.shields.io/badge/Web_Audio_API-built--in-67e8f9?style=for-the-badge)
-![No dependencies](https://img.shields.io/badge/dependencies-zero-6ee7b7?style=for-the-badge)
+![Claude AI](https://img.shields.io/badge/Claude_AI-optional-a78bfa?style=for-the-badge)
+![No backend](https://img.shields.io/badge/backend-none-6ee7b7?style=for-the-badge)
 
 ---
 
 ## 🌌 Overview
 
-**Songbook Ultra** is a browser-based music app that lets you compose songs, learn to play guitar and piano, detect chords from your microphone, record yourself over a backing track, and practice full songs with lyrics and chords — all in one self-contained HTML file with a futuristic universe / constellation visual design.
+**Songbook Ultra** is a browser-based music app that lets you compose songs, learn to play guitar and piano, detect chords from your microphone, record yourself over a backing track, and practice full songs with lyrics and chords — all in one self-contained HTML file with a futuristic universe / constellation visual design. Connect your own Anthropic API key and Claude AI takes over chord generation, lyric writing, and song inspiration throughout the app — everything still works without one, just with the built-in rule-based generators instead.
 
 Built by **Carla Mateus** as part of her portfolio and AI Operations studies at Long Beach City College.
 
@@ -27,8 +28,19 @@ Built by **Carla Mateus** as part of her portfolio and AI Operations studies at 
 - Click any chord to play it and pop open an enlarged, easy-to-read chord diagram
 - Drag and drop sections to reorder
 - Transpose up/down by semitone
-- "New Song" for a blank sheet, "Delete Chord" in the top bar for the last chord you clicked
+- "New Song" opens a full setup modal — title, instrument (piano/guitar), key, BPM, capo, genre, difficulty, plus an inspiration box where Claude (or the built-in mood heuristic) suggests a key/BPM/style/starter chords, or you can copy the structure of a built-in song as a starting point
+- Piano instrument mode shows a mini interactive keyboard strip above the chord strip instead of guitar diagrams
+- "Delete Chord" in the top bar for the last chord you clicked
 - Export as plain text, MIDI-JSON, or real audio (WAV / MP3 / M4A — rendered with your selected instrument and tempo)
+- Chord chips dragged in from the Writing Partner tab drop directly onto any lyric line
+- Click any chord token for a rich preview popup — diagram, notes, tip, insert-again/remove — positioned next to the chord and auto-dismissing
+
+### ✍️ Writing Partner
+- Right-panel tab: describe a mood ("sad rain", "epic battle", "summer love") and get live chord suggestion chips, debounced as you type
+- Key/scale selectors filter suggestions to stay in key, with an optional "keep notes in scale" guard that warns before adding an out-of-scale chord
+- "Generate progression" builds a 4–8 chord progression from the mood (via Claude when connected, a curated mood→progression table otherwise), shown with roman-numeral analysis, reshuffle, and one-click "add all to sheet"
+- "Chords that fit" — a function-color-coded grid (tonic/subdominant/dominant) of chords that work in the current key, click to hear or drag onto the sheet
+- Every chord chip is draggable straight onto a Sheet lyric line
 
 ### 🎹 Piano Page
 - **Chord Chart** — full 12-root × 5-type reference grid (like OKTAV) with interactive mini piano keyboards showing highlighted chord notes in red
@@ -84,7 +96,15 @@ Built by **Carla Mateus** as part of her portfolio and AI Operations studies at 
 - Slide-up panel with live spectrum visualizer
 - Real-time instrument detection (Guitar / Piano / Bass / Drums) with animated confidence meters
 - Live chord detection from microphone (same chroma-based matching as Listen Mode)
-- Song matching — compares detected chord progression against the built-in library and shows top 3 matches with confidence scores
+- Song matching — weights recently-played chords higher than ones played once early on, and checks that the matched chords appear in the same order the song actually uses them, not just that the same chords occur somewhere
+- Match cards explain *why* they matched ("detected G, B, C, Cm — 4/4 chords present") and glow green/amber/purple by confidence tier
+- "Send to Writing Partner" hands the detected progression straight to the Writing Partner tab to keep building on it
+
+### 🔧 Tools Page
+- **Visual Tuner** — real YIN pitch detection, semicircular needle gauge, note + cents readout, selectable reference pitch (432–444 Hz), guitar string reference row
+- **Beat Meter** — a dedicated tap-tempo tool with a big pulse button, consistency meter, tap-interval history bars, tempo-name labels (Largo → Prestissimo), and nearby known-song BPM matches
+- **Record Song** — in-browser mic recorder (MediaRecorder) with a live waveform, playback/download/discard, and a running list of your last 5 takes
+- **Advanced Tools** — chord progression analyzer (key guess, roman numerals, emotional character, matching songs), scale finder (type a few notes, see which scales/keys fit), chord substitution suggestions (tritone sub, relative/parallel major-minor), and an interactive circle of fifths that sets the app's global key
 
 ### 📂 File Import
 - Drag-and-drop import modal
@@ -95,6 +115,12 @@ Built by **Carla Mateus** as part of her portfolio and AI Operations studies at 
 
 ### 📲 Installable App
 - Works as a Progressive Web App when served over `https://` (not when just double-clicked as a local file) — installable to your desktop or phone home screen with its own icon and window
+
+### ✦ Claude AI Integration (optional)
+- "Connect Claude" in the top nav opens a login modal — paste your own [Anthropic API key](https://console.anthropic.com/settings/keys), pick a model (Sonnet 5 / Haiku 4.5 / Opus 5), and it's verified with a live test call before being saved
+- **Bring-your-own-key, no backend**: the key lives only in your browser's `localStorage` and every request goes straight from your browser to `api.anthropic.com` — Songbook Ultra has no server and never sees or stores your key
+- Once connected, Claude powers: mood-based chord progression generation (with a one-sentence explanation and a playing tip), a "✦ complete with Claude" button on every lyric line, and richer AI suggestions in the New Song modal's inspiration box (title ideas, key/BPM/style, starter chords, a lyric-starter line)
+- Every AI feature has a built-in non-AI fallback — nothing stops working if you never connect a key, or if a request fails
 
 ---
 
@@ -156,8 +182,9 @@ Drums (Kick, Snare, Hi-Hat, Clap, Tom, Perc) all use separate physical models �
 
 ### Requirements
 - Any modern browser (Chrome, Edge, Firefox, Safari)
-- Microphone access — optional, only needed for Listen Mode, Recording Studio, and Song Detector
-- Internet connection — optional, only needed for YouTube tutorial videos and richer chord detection (Tonal.js)
+- Microphone access — optional, only needed for Listen Mode, Recording Studio, Song Detector, and the Tools page's Tuner/Recorder
+- Internet connection — optional, only needed for YouTube tutorial videos, richer chord detection (Tonal.js), and Claude AI features
+- Anthropic API key — optional, only needed to unlock Claude AI-powered chord generation, lyric writing, and song suggestions (get one free at [console.anthropic.com](https://console.anthropic.com/settings/keys)); everything else works with zero setup
 
 ---
 
@@ -203,6 +230,7 @@ Everything is self-contained. No build step, no npm, no framework.
 | Local storage | Save/load songs between sessions |
 | Drag and drop | HTML5 Drag and Drop API |
 | Installability | Web App Manifest + runtime-generated icon (no separate files) |
+| AI features | Direct browser → Anthropic Messages API calls (`anthropic-dangerous-direct-browser-calls`), bring-your-own-key, no backend |
 
 ---
 
@@ -230,13 +258,14 @@ Everything is self-contained. No build step, no npm, no framework.
 
 ## 📌 Roadmap Ideas
 
+- [x] Chord progression AI using Claude API
 - [ ] Cloud save / sync across devices
 - [ ] More songs (50+ target)
 - [ ] Custom tuning support (Drop D, Open G, DADGAD)
-- [ ] Chord progression AI using Claude API
 - [ ] Export to PDF chord sheet
 - [ ] Mobile touch support for the guitar fretboard
 - [ ] Collaborative editing via WebSockets
+- [ ] Wire Claude into chord explanations (function ready, not yet on a button) and full song-idea generation
 
 ---
 
