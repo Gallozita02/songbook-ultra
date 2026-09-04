@@ -771,6 +771,71 @@ button:active,.nbtn:active,.ibtn:active,.qbtn:active,.ngrid-btn:active{transform
 .song-match-card.conf-medium{border-color:rgba(253,230,138,.5);box-shadow:0 0 0 1px rgba(253,230,138,.3),var(--glow-amber)}
 .song-match-card.conf-low{border-color:rgba(167,139,250,.4);box-shadow:0 0 0 1px rgba(167,139,250,.25)}
 .song-match-why{font-size:10px;color:var(--mu);margin-bottom:6px;line-height:1.4}
+
+/* ══════════════════ CLAUDE AI LOGIN ══════════════════ */
+.claude-login-btn{display:flex;align-items:center;gap:6px;padding:4px 12px;border-radius:999px;border:1px solid rgba(167,139,250,.35);background:rgba(167,139,250,.08);color:var(--acc);font-size:11px;font-weight:600;cursor:pointer;transition:all .2s;white-space:nowrap}
+.claude-login-btn:hover{background:rgba(167,139,250,.18);box-shadow:var(--glow-purple);border-color:var(--acc)}
+.claude-login-btn.connected{border-color:rgba(110,231,183,.4);background:rgba(110,231,183,.08);color:var(--sec)}
+.claude-login-btn.connected:hover{background:rgba(110,231,183,.15);box-shadow:var(--glow-cyan)}
+.claude-btn-dot{width:7px;height:7px;border-radius:50%;background:var(--mu2);flex-shrink:0;transition:all .3s}
+.claude-btn-dot.connected{background:var(--sec);box-shadow:0 0 6px rgba(110,231,183,.6);animation:pulse-dot 2s infinite}
+.claude-btn-dot.thinking{background:var(--chord);box-shadow:0 0 6px rgba(253,230,138,.6);animation:pulse-dot .6s infinite}
+@keyframes pulse-dot{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.5;transform:scale(.8)}}
+
+.claude-modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.75);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);z-index:800;display:none;animation:fade-in .2s ease}
+.claude-modal-overlay.on{display:block}
+@keyframes fade-in{from{opacity:0}to{opacity:1}}
+.claude-modal{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%) scale(.95);width:420px;max-width:94vw;max-height:88vh;overflow-y:auto;background:linear-gradient(145deg,#0d0d22,#080818);border:1px solid rgba(167,139,250,.3);border-radius:16px;padding:24px;z-index:801;display:none;box-shadow:0 24px 64px rgba(0,0,0,.7),0 0 0 1px rgba(167,139,250,.1),var(--glow-purple)}
+.claude-modal.on{display:block;animation:modal-in .25s cubic-bezier(.34,1.56,.64,1)}
+@keyframes modal-in{from{transform:translate(-50%,-50%) scale(.9);opacity:0}to{transform:translate(-50%,-50%) scale(1);opacity:1}}
+.claude-modal-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px}
+.claude-modal-logo{display:flex;align-items:center;gap:8px}
+.claude-modal-logo-icon{font-size:20px;color:var(--acc);filter:drop-shadow(0 0 8px rgba(167,139,250,.6));display:inline-block;animation:spin-slow 8s linear infinite}
+@keyframes spin-slow{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
+.claude-modal-logo-text{font-size:17px;font-weight:700;background:linear-gradient(135deg,#a78bfa,#67e8f9);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.claude-modal-close{background:transparent;border:1px solid rgba(255,255,255,.1);border-radius:6px;color:var(--mu);font-size:13px;padding:4px 8px;cursor:pointer;transition:all .15s}
+.claude-modal-close:hover{background:rgba(255,255,255,.08);color:var(--tx)}
+.claude-modal-desc{font-size:13px;color:var(--mu);line-height:1.6;margin-bottom:18px}
+.claude-input-group{margin-bottom:14px}
+.claude-input-label{display:block;font-size:11px;font-weight:600;color:var(--mu);text-transform:uppercase;letter-spacing:.08em;margin-bottom:6px}
+.claude-input-wrap{position:relative;display:flex;align-items:center}
+.claude-input{width:100%!important;padding:10px 40px 10px 12px!important;background:rgba(8,8,24,.8)!important;border:1px solid rgba(167,139,250,.2)!important;border-radius:var(--rad)!important;color:var(--tx)!important;font-size:13px!important;font-family:var(--mono)!important;outline:none!important;transition:border-color .15s,box-shadow .15s!important}
+.claude-input:focus{border-color:rgba(167,139,250,.5)!important;box-shadow:0 0 0 3px rgba(167,139,250,.1)!important}
+.claude-input-eye{position:absolute;right:8px;background:transparent;border:none;cursor:pointer;font-size:14px;color:var(--mu);padding:4px;transition:color .15s}
+.claude-input-eye:hover{color:var(--tx)}
+.claude-input-hint{font-size:10px;color:var(--mu2);margin-top:5px;line-height:1.5}
+.claude-select{width:100%!important;padding:9px 10px!important;background:rgba(8,8,24,.8)!important;border:1px solid rgba(167,139,250,.2)!important;border-radius:var(--rad)!important;color:var(--tx)!important;font-size:12px!important;cursor:pointer!important;outline:none!important}
+.claude-select:focus{border-color:rgba(167,139,250,.5)!important}
+.claude-error{padding:9px 12px;background:rgba(248,113,113,.08);border:1px solid rgba(248,113,113,.25);border-radius:var(--rad);color:var(--red);font-size:12px;margin-bottom:12px;line-height:1.5}
+.claude-security-note{font-size:10px;color:var(--mu2);text-align:center;padding:8px 10px;background:rgba(110,231,183,.04);border:1px solid rgba(110,231,183,.1);border-radius:var(--rad);margin-bottom:12px;line-height:1.5}
+.claude-connect-btn{width:100%;padding:12px;border-radius:var(--rad);border:none;background:linear-gradient(135deg,#7c3aed,#a78bfa);color:#fff;font-size:14px;font-weight:700;cursor:pointer;transition:all .2s;box-shadow:var(--glow-purple);margin-bottom:14px;letter-spacing:.02em}
+.claude-connect-btn:hover{box-shadow:0 0 32px rgba(167,139,250,.6);transform:translateY(-1px)}
+.claude-connect-btn:active{transform:translateY(0)}
+.claude-connect-btn:disabled{opacity:.6;cursor:not-allowed;transform:none}
+.claude-divider{text-align:center;color:var(--mu2);font-size:11px;margin:10px 0;position:relative}
+.claude-divider::before,.claude-divider::after{content:'';position:absolute;top:50%;width:35%;height:1px;background:var(--b1)}
+.claude-divider::before{left:0}
+.claude-divider::after{right:0}
+.claude-get-key-btn{display:block;text-align:center;padding:8px;border-radius:var(--rad);border:1px solid var(--b2);color:var(--sec);font-size:11px;text-decoration:none;transition:all .15s;margin-bottom:18px}
+.claude-get-key-btn:hover{background:rgba(103,232,249,.08);border-color:rgba(103,232,249,.3);box-shadow:var(--glow-cyan)}
+.claude-features-list{display:flex;flex-direction:column;gap:10px;padding-top:14px;border-top:1px solid var(--b1)}
+.claude-features-title{font-size:10px;text-transform:uppercase;letter-spacing:.08em;color:var(--mu2);margin-bottom:4px}
+.claude-feat-row{display:flex;align-items:flex-start;gap:10px}
+.claude-feat-icon{font-size:16px;flex-shrink:0}
+.claude-feat-name{font-size:12px;font-weight:600;color:var(--tx)}
+.claude-feat-desc{font-size:10px;color:var(--mu);line-height:1.4;margin-top:1px}
+.claude-connected-state{text-align:center;padding:8px 0}
+.claude-connected-icon{font-size:48px;color:var(--sec);filter:drop-shadow(0 0 16px rgba(110,231,183,.6));margin-bottom:12px;display:inline-block;animation:spin-slow 6s linear infinite}
+.claude-connected-title{font-size:20px;font-weight:700;color:var(--tx);margin-bottom:4px}
+.claude-connected-model{font-size:12px;font-family:var(--mono);color:var(--acc);margin-bottom:10px}
+.claude-connected-desc{font-size:13px;color:var(--mu);margin-bottom:16px;line-height:1.5}
+.claude-connected-features{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin-bottom:4px}
+.claude-feat-chip{padding:4px 10px;border-radius:999px;font-size:10px;border:1px solid var(--b2);color:var(--mu)}
+.claude-feat-chip.on{background:rgba(110,231,183,.1);border-color:rgba(110,231,183,.3);color:var(--sec)}
+
+.lyric-claude-btn{background:transparent;border:none;color:var(--mu2);font-size:12px;cursor:pointer;padding:0 4px;transition:all .15s;vertical-align:middle;border-radius:3px;line-height:1}
+.lyric-claude-btn:hover{color:var(--acc);text-shadow:0 0 8px rgba(167,139,250,.5)}
+.lyric-claude-btn:disabled{animation:pulse-dot .6s infinite;opacity:.6}
 </style>
 </head>
 <body>
@@ -801,6 +866,10 @@ button:active,.nbtn:active,.ibtn:active,.qbtn:active,.ngrid-btn:active{transform
     <button class="nbtn" onclick="openImportModal()">📂 Import</button>
     <button class="nbtn detect-btn" onclick="openDetector()">🔍 Detect</button>
     <button class="nbtn" id="installAppBtn" style="display:none" onclick="installApp()">📲 Install App</button>
+    <button class="nbtn claude-login-btn" id="claudeLoginBtn" onclick="openClaudeLogin()">
+      <span class="claude-btn-dot" id="claudeBtnDot"></span>
+      <span id="claudeBtnLabel">Connect Claude</span>
+    </button>
     <button class="nbtn prim" onclick="rpTab('export')">Export</button>
   </div>
 </nav>
@@ -1351,7 +1420,10 @@ button:active,.nbtn:active,.ibtn:active,.qbtn:active,.ngrid-btn:active{transform
       <input class="ai-input" id="aiMood" placeholder="Mood: sad, uplifting, jazzy, tense…">
       <select class="ai-input" id="aiStyle" style="margin-bottom:6px"><option value="pop">Pop</option><option value="jazz">Jazz</option><option value="blues">Blues</option><option value="latin">Latin</option><option value="folk">Folk</option><option value="rock">Rock</option></select>
       <div style="font-size:9px;color:var(--mu);margin-bottom:6px">Uses the Key/Scale selected above</div>
-      <button class="ai-btn" onclick="generateProgression()">✦ Generate progression</button>
+      <button class="ai-btn" onclick="runGenerateProgression()">
+        <span id="generateBtnLabel">✦ Generate progression</span>
+        <span id="generateBtnBadge" style="display:none;font-size:9px;opacity:0.7">via Claude AI</span>
+      </button>
       <div class="ai-result" id="aiResult"><span style="font-size:10px;color:var(--mu)">Generated chords appear here</span></div>
       <button class="ins-btn" style="margin-top:6px" onclick="insertAIResult()">Add to sheet</button>
     </div>
@@ -3264,6 +3336,22 @@ function addLineToSection(sec,chords,lyric){
   lyr.addEventListener('focus',()=>{activeLine=line;});
   lyr.addEventListener('input',()=>{updateSeq();autosaveSong();});
   line.appendChild(lyr);
+  // Always shown (grays out via CSS when idle) — clicking before Claude is connected opens the
+  // login modal instead of silently doing nothing.
+  const claudeBtn=document.createElement('button');
+  claudeBtn.className='lyric-claude-btn';
+  claudeBtn.title='Complete this lyric with Claude AI';
+  claudeBtn.textContent='✦';
+  claudeBtn.onclick=async()=>{
+    if(!claudeConnected){ openClaudeLogin(); return; }
+    const currentText=lyr.textContent.trim();
+    const lineChords=Array.from(crow.querySelectorAll('.ctok')).map(t=>t.textContent.trim());
+    claudeBtn.textContent='...';claudeBtn.disabled=true;
+    const completed=await claudeCompleteLyric(currentText,lineChords,sec?.dataset?.type);
+    if(completed){ lyr.textContent=completed; updateSeq();autosaveSong(); toast('✦ Claude completed the lyric'); }
+    claudeBtn.textContent='✦';claudeBtn.disabled=false;
+  };
+  line.appendChild(claudeBtn);
   const btn=sec.querySelector('.add-line-btn');
   if(btn) sec.insertBefore(line,btn);
   else sec.appendChild(line);
@@ -7324,13 +7412,54 @@ function wpSyncClassicFretboard(){
 // ── Progression generator (1C) ──────────────────────────────────────────
 function wpGenerateProgression(){
   const input=document.getElementById('wpMoodInput');
-  const mood=wpMatchMood(input?input.value:'');
+  const moodText=input?input.value:'';
+  if(claudeConnected){ wpGenerateProgressionWithClaude(moodText); return; }
+  const mood=wpMatchMood(moodText);
   const pool=(mood && PROGRESSIONS_BY_MOOD[mood])?PROGRESSIONS_BY_MOOD[mood]:Object.values(AI_PROGRESSIONS.pop);
   const base=pool[Math.floor(Math.random()*pool.length)];
   const delta=((NOTES.indexOf(scaleKey)-NOTES.indexOf('C'))+12)%12;
   wpProgression=base.map(c=>transposeChordName(c,delta));
   wpRenderProgression();
   buildChordsThatFit();
+}
+// Claude-powered variant of the above, feeding the Writing Partner tab's own progression row
+// instead of the older Tools-tab #aiResult box that generateProgressionWithClaude() targets.
+async function wpGenerateProgressionWithClaude(moodText){
+  setClaudeThinking(true);
+  const prompt=`You are a music theory expert helping a songwriter.
+
+The user wants a chord progression with this mood: "${moodText||'uplifting'}"
+Key: ${scaleKey} ${scaleType}
+
+Reply with ONLY a JSON object in this exact format, nothing else:
+{"chords":["G","Em","C","D"],"numerals":["I","vi","IV","V"]}
+
+Rules:
+- 4 to 6 chords
+- All chords must be in ${scaleKey} ${scaleType}
+- Use standard chord names (C, Am, F#m, Cmaj7 etc)`;
+  try{
+    const result=await callClaudeAPI(prompt,null,null,300);
+    if(!result) throw new Error('No response');
+    const jsonMatch=result.match(/\{[\s\S]*\}/);
+    if(!jsonMatch) throw new Error('No JSON in response');
+    const data=JSON.parse(jsonMatch[0]);
+    if(!data.chords || !data.chords.length) throw new Error('Empty chords');
+    wpProgression=data.chords;
+    wpRenderProgression();
+    buildChordsThatFit();
+  }catch(err){
+    toast('Claude could not generate — using built-in generator');
+    const mood=wpMatchMood(moodText);
+    const pool=(mood && PROGRESSIONS_BY_MOOD[mood])?PROGRESSIONS_BY_MOOD[mood]:Object.values(AI_PROGRESSIONS.pop);
+    const base=pool[Math.floor(Math.random()*pool.length)];
+    const delta=((NOTES.indexOf(scaleKey)-NOTES.indexOf('C'))+12)%12;
+    wpProgression=base.map(c=>transposeChordName(c,delta));
+    wpRenderProgression();
+    buildChordsThatFit();
+  }finally{
+    setClaudeThinking(false);
+  }
 }
 function wpReshuffleProgression(){ wpGenerateProgression(); } // re-rolls from the same mood pool — a new variation, same mood
 function wpRomanNumeral(chordName){
@@ -7467,10 +7596,21 @@ function openNewSongModal(){
   document.getElementById('newSongOverlay').classList.add('on');
 }
 function closeNewSongModal(){ document.getElementById('newSongOverlay').classList.remove('on'); }
+let nsSuggestTimer=null;
 function nsSuggestFromInspiration(){
   const text=document.getElementById('nsInspiration').value;
   const box=document.getElementById('nsSuggestBox');
-  if(!text.trim()){ if(box) box.classList.remove('on'); nsSuggestion=null; return; }
+  if(!text.trim()){ if(box) box.classList.remove('on'); nsSuggestion=null; clearTimeout(nsSuggestTimer); return; }
+  if(claudeConnected){
+    clearTimeout(nsSuggestTimer);
+    nsSuggestTimer=setTimeout(()=>nsSuggestFromInspirationWithClaude(text),600); // debounced — this fires on every keystroke otherwise
+    return;
+  }
+  nsSuggestFromInspirationRuleBased(text);
+}
+// Rule-based fallback (also used when Claude isn't connected, or when a Claude call fails).
+function nsSuggestFromInspirationRuleBased(text){
+  const box=document.getElementById('nsSuggestBox');
   const mood=wpMatchMood(text)||'tender';
   const chords=(MOOD_CHORDS[mood]||MOOD_CHORDS.tender).slice(0,4);
   const bpmByMood={sad:70,happy:118,epic:96,jazzy:100,reggae:80,blues:90,latin:104,folk:96,rock:126,dark:74,tender:68,upbeat:132,dreamy:72,angry:140,romantic:84,nostalgic:78};
@@ -7480,6 +7620,23 @@ function nsSuggestFromInspiration(){
   if(box){
     box.innerHTML=`AI suggests based on above:<br><b>Key:</b> ${escapeHtml(nsSuggestion.key)} &nbsp; <b>BPM:</b> ${nsSuggestion.bpm} &nbsp; <b>Style:</b> ${escapeHtml(nsSuggestion.style)}<br><b>Starter chords:</b> ${nsSuggestion.chords.map(c=>escapeHtml(c)).join(' ')}<br><button class="nbtn" style="margin-top:6px" onclick="nsUseSuggestions()">Use these suggestions</button>`;
     box.classList.add('on');
+  }
+}
+// Claude-powered version — reuses claudeGetSongInspiration() (Change 4 #4), falls back to the
+// rule-based path above if the call fails so the box never goes empty.
+async function nsSuggestFromInspirationWithClaude(text){
+  const box=document.getElementById('nsSuggestBox');
+  if(box){ box.innerHTML='<span style="color:var(--mu)">✦ Claude is thinking…</span>'; box.classList.add('on'); }
+  const data=await claudeGetSongInspiration(text);
+  if(!data || !data.starter_chords){ nsSuggestFromInspirationRuleBased(text); return; }
+  nsSuggestion={
+    key:data.key_suggestion||'C',
+    bpm:parseInt(data.bpm_suggestion)||96,
+    style:data.genre_suggestion||'Pop',
+    chords:data.starter_chords,
+  };
+  if(box){
+    box.innerHTML=`✦ Claude suggests based on above:<br>${(data.title_ideas&&data.title_ideas.length)?`<b>Title ideas:</b> ${data.title_ideas.map(t=>escapeHtml(t)).join(', ')}<br>`:''}<b>Key:</b> ${escapeHtml(nsSuggestion.key)} &nbsp; <b>BPM:</b> ${nsSuggestion.bpm} &nbsp; <b>Style:</b> ${escapeHtml(nsSuggestion.style)}<br><b>Starter chords:</b> ${nsSuggestion.chords.map(c=>escapeHtml(c)).join(' ')}${data.lyric_starter?`<br><b>Lyric starter:</b> ${escapeHtml(data.lyric_starter)}`:''}<br><button class="nbtn" style="margin-top:6px" onclick="nsUseSuggestions()">Use these suggestions</button>`;
   }
 }
 function nsUseSuggestions(){
@@ -7972,6 +8129,287 @@ function cofSelectKey(key){
   toast('Key set to '+scaleKey+' major');
 }
 
+// ══════════════════════════════════════════════════════════════════════════
+// CLAUDE AI LOGIN + API — bring-your-own-key. No backend: the key lives only
+// in this browser's localStorage and every call goes straight from here to
+// api.anthropic.com (the anthropic-dangerous-direct-browser-calls header is
+// Anthropic's own opt-in for exactly that pattern).
+// ══════════════════════════════════════════════════════════════════════════
+let claudeApiKey=localStorage.getItem('claudeApiKey')||null;
+let claudeModel=localStorage.getItem('claudeModel')||'claude-sonnet-5';
+let claudeConnected=false;
+
+function initClaudeLogin(){
+  if(claudeApiKey){ claudeConnected=true; updateClaudeUI(true); }
+}
+function openClaudeLogin(){
+  document.getElementById('claudeModalOverlay').classList.add('on');
+  document.getElementById('claudeModal').classList.add('on');
+  if(claudeConnected) showConnectedState(); else showLoginForm();
+}
+function closeClaudeLogin(){
+  document.getElementById('claudeModalOverlay').classList.remove('on');
+  document.getElementById('claudeModal').classList.remove('on');
+}
+function showConnectedState(){
+  document.getElementById('claudeLoginForm').style.display='none';
+  document.getElementById('claudeConnectedState').style.display='block';
+  document.getElementById('claudeConnectedModel').textContent=claudeModel;
+}
+function showLoginForm(){
+  document.getElementById('claudeLoginForm').style.display='block';
+  document.getElementById('claudeConnectedState').style.display='none';
+  const sel=document.getElementById('claudeModelSelect');
+  if(sel) sel.value=claudeModel;
+}
+function toggleApiKeyVisibility(){
+  const input=document.getElementById('claudeApiKeyInput');
+  input.type=input.type==='password'?'text':'password';
+}
+function showClaudeError(msg){
+  const el=document.getElementById('claudeError');
+  el.textContent=msg;el.style.display='block';
+}
+async function connectClaude(){
+  const keyInput=document.getElementById('claudeApiKeyInput');
+  const btn=document.getElementById('claudeConnectBtn');
+  const label=document.getElementById('claudeConnectBtnLabel');
+  const errorEl=document.getElementById('claudeError');
+  const modelSel=document.getElementById('claudeModelSelect');
+
+  const key=keyInput.value.trim();
+  const model=modelSel.value;
+  errorEl.style.display='none';
+
+  if(!key){ showClaudeError('Please enter your API key.'); return; }
+  if(!key.startsWith('sk-ant-')){ showClaudeError("That doesn't look like an Anthropic API key — it should start with sk-ant-"); return; }
+
+  btn.disabled=true;
+  label.textContent='✦ Verifying key...';
+
+  try{
+    const testResult=await callClaudeAPI('Reply with exactly one word: Ready',key,model,20);
+    if(!testResult) throw new Error('No response from API');
+
+    claudeApiKey=key;claudeModel=model;claudeConnected=true;
+    localStorage.setItem('claudeApiKey',key);
+    localStorage.setItem('claudeModel',model);
+
+    updateClaudeUI(true);
+    showConnectedState();
+    toast('✦ Claude AI connected — AI features unlocked');
+  }catch(err){
+    let msg='Connection failed. ';
+    const m=err.message||'';
+    if(m.includes('401')) msg+='Invalid API key — check it and try again.';
+    else if(m.includes('429')) msg+='Rate limit reached — wait a moment and try again.';
+    else if(m.includes('fetch')||m.includes('Network')) msg+='Network error — check your internet connection. Note: direct API calls require the page to be served over http:// or https:// (not opened straight from disk).';
+    else msg+=m||'Unknown error.';
+    showClaudeError(msg);
+  }finally{
+    btn.disabled=false;
+    label.textContent='✦ Connect to Claude AI';
+  }
+}
+function disconnectClaude(){
+  claudeApiKey=null;claudeConnected=false;
+  localStorage.removeItem('claudeApiKey');
+  localStorage.removeItem('claudeModel');
+  updateClaudeUI(false);
+  closeClaudeLogin();
+  toast('Claude AI disconnected');
+}
+function updateClaudeUI(connected){
+  const btn=document.getElementById('claudeLoginBtn');
+  const dot=document.getElementById('claudeBtnDot');
+  const label=document.getElementById('claudeBtnLabel');
+  if(connected){
+    btn.classList.add('connected');
+    dot.classList.add('connected');dot.classList.remove('thinking');
+    label.textContent='✦ Claude';
+  }else{
+    btn.classList.remove('connected');
+    dot.classList.remove('connected','thinking');
+    label.textContent='Connect Claude';
+  }
+  const badge=document.getElementById('generateBtnBadge');
+  if(badge) badge.style.display=connected?'inline':'none';
+  const genLabel=document.getElementById('generateBtnLabel');
+  if(genLabel) genLabel.textContent=connected?'✦ Generate with Claude':'✦ Generate progression';
+}
+function setClaudeThinking(thinking){
+  const dot=document.getElementById('claudeBtnDot');
+  if(!dot) return;
+  if(thinking){ dot.classList.add('thinking');dot.classList.remove('connected'); }
+  else{ dot.classList.remove('thinking'); if(claudeConnected) dot.classList.add('connected'); }
+}
+// Wrapper for the Tools-tab "Generate progression" button — the rule-based generateProgression()
+// keeps its own signature/behavior untouched; this just picks which path to run.
+function runGenerateProgression(){
+  if(claudeConnected){
+    generateProgressionWithClaude(document.getElementById('aiMood').value,scaleKey,scaleType);
+  }else{
+    generateProgression();
+  }
+}
+
+async function callClaudeAPI(prompt,key,model,maxTokens){
+  const apiKey=key||claudeApiKey;
+  const mdl=model||claudeModel;
+  if(!apiKey){ toast('Connect Claude AI first — click "Connect Claude" in the nav'); return null; }
+
+  const response=await fetch('https://api.anthropic.com/v1/messages',{
+    method:'POST',
+    headers:{
+      'Content-Type':'application/json',
+      'x-api-key':apiKey,
+      'anthropic-version':'2023-06-01',
+      'anthropic-dangerous-direct-browser-calls':'true',
+    },
+    body:JSON.stringify({ model:mdl, max_tokens:maxTokens||1000, messages:[{role:'user',content:prompt}] }),
+  });
+
+  if(!response.ok){
+    let detail=String(response.status);
+    try{ const errBody=await response.json(); if(errBody?.error?.message) detail+=' '+errBody.error.message; }catch(e){}
+    throw new Error(detail);
+  }
+  const data=await response.json();
+  return data.content?.[0]?.text||null;
+}
+
+// ── AI-powered features ──────────────────────────────────────────────────
+async function generateProgressionWithClaude(mood,key,scale){
+  if(!claudeConnected){ generateProgression(); return; }
+  setClaudeThinking(true);
+  const prompt=`You are a music theory expert helping a songwriter.
+
+The user wants a chord progression with this mood: "${mood}"
+Key: ${key} ${scale}
+
+Reply with ONLY a JSON object in this exact format, nothing else:
+{
+  "chords": ["G", "Em", "C", "D"],
+  "numerals": ["I", "vi", "IV", "V"],
+  "mood_description": "One sentence describing the emotional feel",
+  "tip": "One practical guitar/piano tip for playing this progression"
+}
+
+Rules:
+- Use 4 chords only
+- All chords must be in ${key} ${scale}
+- Use standard chord names (C, Am, F#m, Cmaj7 etc)
+- Keep it playable for intermediate musicians`;
+
+  try{
+    const result=await callClaudeAPI(prompt,null,null,300);
+    if(!result) throw new Error('No response');
+    const jsonMatch=result.match(/\{[\s\S]*\}/);
+    if(!jsonMatch) throw new Error('No JSON in response');
+    const data=JSON.parse(jsonMatch[0]);
+
+    lastAIChords=data.chords||[];
+    const res=document.getElementById('aiResult');
+    if(res){
+      res.innerHTML=`
+        <div style="width:100%">
+          <div style="display:flex;gap:5px;flex-wrap:wrap;margin-bottom:8px">
+            ${data.chords.map(c=>`<span class="seq-chip" style="cursor:pointer" onclick="previewChord('${c}')">${escapeHtml(c)}</span>`).join('')}
+          </div>
+          <div style="font-size:10px;color:var(--mu);font-family:var(--mono);margin-bottom:4px">${(data.numerals||[]).join(' → ')}</div>
+          <div style="font-size:10px;color:var(--sec);line-height:1.4;margin-bottom:4px">${escapeHtml(data.mood_description||'')}</div>
+          <div style="font-size:10px;color:var(--chord);line-height:1.4">💡 ${escapeHtml(data.tip||'')}</div>
+        </div>
+      `;
+    }
+    if(data.chords.length) previewChord(data.chords[0]);
+  }catch(err){
+    toast('Claude could not generate — using built-in generator');
+    generateProgression();
+  }finally{
+    setClaudeThinking(false);
+  }
+}
+async function claudeCompleteLyric(partialLyric,chords,section){
+  if(!claudeConnected){ toast('Connect Claude AI to use the lyric writing assistant'); return null; }
+  setClaudeThinking(true);
+  const chordList=(chords&&chords.length)?chords.join(' → '):'unknown';
+  const prompt=`You are a lyric writing assistant helping a songwriter complete a line.
+
+Section: ${section||'Verse'}
+Chords: ${chordList}
+Partial lyric: "${partialLyric}"
+
+Complete this lyric line naturally. Keep it:
+- Consistent with the emotional feel of the chords
+- Similar length to the partial line given
+- Natural to sing
+- Poetic but not cliché
+
+Reply with ONLY the completed lyric line, nothing else. No quotes.`;
+  try{
+    const result=await callClaudeAPI(prompt,null,null,100);
+    return result?result.trim():null;
+  }catch(e){
+    toast('Claude request failed — try again');
+    return null;
+  }finally{
+    setClaudeThinking(false);
+  }
+}
+async function claudeExplainChord(chordName,contextChords){
+  if(!claudeConnected) return null;
+  setClaudeThinking(true);
+  const prompt=`You are a music theory teacher. Explain this chord briefly.
+
+Chord: ${chordName}
+In context of: ${(contextChords||[]).join(', ')}
+
+Reply with ONLY a JSON object:
+{
+  "notes": ["C", "E", "G"],
+  "function": "Tonic — home base of the key",
+  "sounds_like": "Bright and stable",
+  "tip": "One sentence practical tip"
+}`;
+  try{
+    const result=await callClaudeAPI(prompt,null,null,200);
+    const jsonMatch=result?result.match(/\{[\s\S]*\}/):null;
+    return jsonMatch?JSON.parse(jsonMatch[0]):null;
+  }catch(e){
+    return null;
+  }finally{
+    setClaudeThinking(false);
+  }
+}
+async function claudeGetSongInspiration(concept){
+  if(!claudeConnected){ toast('Connect Claude AI for song inspiration'); return null; }
+  setClaudeThinking(true);
+  const prompt=`You are a creative songwriting coach.
+
+The songwriter has this concept or theme: "${concept}"
+
+Give them creative inspiration. Reply with ONLY a JSON object:
+{
+  "title_ideas": ["Title One", "Title Two", "Title Three"],
+  "key_suggestion": "Am",
+  "bpm_suggestion": 76,
+  "genre_suggestion": "Folk",
+  "starter_chords": ["Am", "F", "C", "G"],
+  "lyric_starter": "First line of a song that fits this concept",
+  "mood": "melancholic and reflective"
+}`;
+  try{
+    const result=await callClaudeAPI(prompt,null,null,400);
+    const jsonMatch=result?result.match(/\{[\s\S]*\}/):null;
+    return jsonMatch?JSON.parse(jsonMatch[0]):null;
+  }catch(e){
+    return null;
+  }finally{
+    setClaudeThinking(false);
+  }
+}
+
 function init(){
   initStarfield();
   initSuggestionDropdown();
@@ -7999,11 +8437,98 @@ function init(){
   buildWritingPartner();
   buildToolsPage();
   buildNewSongModal();
+  initClaudeLogin();
   window.addEventListener('beforeunload', ()=>{
     try{ localStorage.setItem(AUTOSAVE_KEY, JSON.stringify(serializeSong())); }catch(e){}
   });
 }
 window.addEventListener('DOMContentLoaded', init);
 </script>
+
+<!-- CLAUDE AI LOGIN MODAL -->
+<div class="claude-modal-overlay" id="claudeModalOverlay" onclick="closeClaudeLogin()"></div>
+<div class="claude-modal" id="claudeModal">
+
+  <div class="claude-modal-header">
+    <div class="claude-modal-logo">
+      <span class="claude-modal-logo-icon">✦</span>
+      <span class="claude-modal-logo-text">Connect Claude AI</span>
+    </div>
+    <button class="claude-modal-close" onclick="closeClaudeLogin()">✕</button>
+  </div>
+
+  <!-- Connected state -->
+  <div class="claude-connected-state" id="claudeConnectedState" style="display:none">
+    <div class="claude-connected-icon">✦</div>
+    <div class="claude-connected-title">Claude AI Connected</div>
+    <div class="claude-connected-model" id="claudeConnectedModel">claude-sonnet-5</div>
+    <div class="claude-connected-desc">AI features are now active throughout the app.</div>
+    <div class="claude-connected-features">
+      <div class="claude-feat-chip on">✓ Smart chord generation</div>
+      <div class="claude-feat-chip on">✓ Lyric writing assistant</div>
+      <div class="claude-feat-chip on">✓ Song suggestions</div>
+      <div class="claude-feat-chip on">✓ Progression analysis</div>
+    </div>
+    <button class="nbtn" onclick="disconnectClaude()" style="margin-top:16px;width:100%;color:var(--red);border-color:rgba(248,113,113,0.3)">Disconnect</button>
+  </div>
+
+  <!-- Login form -->
+  <div class="claude-login-form" id="claudeLoginForm">
+    <div class="claude-modal-desc">
+      Enter your Anthropic API key to unlock AI-powered chord suggestions, lyric writing, and song analysis directly in Songbook Ultra.
+    </div>
+
+    <div class="claude-input-group">
+      <label class="claude-input-label">Anthropic API Key</label>
+      <div class="claude-input-wrap">
+        <input type="password" id="claudeApiKeyInput" class="claude-input" placeholder="sk-ant-api03-..." autocomplete="off" spellcheck="false">
+        <button class="claude-input-eye" onclick="toggleApiKeyVisibility()" title="Show/hide key">👁</button>
+      </div>
+      <div class="claude-input-hint">Your key is stored only in your browser's localStorage and never sent anywhere except directly to Anthropic's API.</div>
+    </div>
+
+    <div class="claude-input-group">
+      <label class="claude-input-label">Model</label>
+      <select class="claude-select" id="claudeModelSelect">
+        <option value="claude-sonnet-5" selected>Claude Sonnet 5 — Fast, smart, recommended</option>
+        <option value="claude-haiku-4-5-20251001">Claude Haiku 4.5 — Fastest, most economical</option>
+        <option value="claude-opus-5">Claude Opus 5 — Most capable</option>
+      </select>
+    </div>
+
+    <div class="claude-error" id="claudeError" style="display:none"></div>
+
+    <div class="claude-security-note">
+      🔒 Your key never leaves your browser. Calls go directly from your browser to api.anthropic.com — Songbook Ultra has no server and stores nothing remotely.
+    </div>
+
+    <button class="claude-connect-btn" id="claudeConnectBtn" onclick="connectClaude()">
+      <span id="claudeConnectBtnLabel">✦ Connect to Claude AI</span>
+    </button>
+
+    <div class="claude-divider"><span>Don't have an API key?</span></div>
+    <a href="https://console.anthropic.com/settings/keys" target="_blank" rel="noopener" class="claude-get-key-btn">Get your free API key at console.anthropic.com ↗</a>
+
+    <div class="claude-features-list">
+      <div class="claude-features-title">What Claude AI unlocks:</div>
+      <div class="claude-feat-row">
+        <span class="claude-feat-icon">🎵</span>
+        <div><div class="claude-feat-name">Smart chord progressions</div><div class="claude-feat-desc">Describe a mood and Claude suggests progressions with explanations</div></div>
+      </div>
+      <div class="claude-feat-row">
+        <span class="claude-feat-icon">✍️</span>
+        <div><div class="claude-feat-name">Lyric writing partner</div><div class="claude-feat-desc">Claude helps complete lines, find rhymes, and develop themes</div></div>
+      </div>
+      <div class="claude-feat-row">
+        <span class="claude-feat-icon">🔍</span>
+        <div><div class="claude-feat-name">Song analysis</div><div class="claude-feat-desc">Explains why chords work together and suggests alternatives</div></div>
+      </div>
+      <div class="claude-feat-row">
+        <span class="claude-feat-icon">💡</span>
+        <div><div class="claude-feat-name">Inspiration prompts</div><div class="claude-feat-desc">Claude generates song concepts, titles, and lyric starters</div></div>
+      </div>
+    </div>
+  </div><!-- /login form -->
+</div><!-- /modal -->
 </body>
 </html>
