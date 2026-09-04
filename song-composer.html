@@ -836,6 +836,92 @@ button:active,.nbtn:active,.ibtn:active,.qbtn:active,.ngrid-btn:active{transform
 .lyric-claude-btn{background:transparent;border:none;color:var(--mu2);font-size:12px;cursor:pointer;padding:0 4px;transition:all .15s;vertical-align:middle;border-radius:3px;line-height:1}
 .lyric-claude-btn:hover{color:var(--acc);text-shadow:0 0 8px rgba(167,139,250,.5)}
 .lyric-claude-btn:disabled{animation:pulse-dot .6s infinite;opacity:.6}
+
+/* ══════════════════ CREATE PAGE (Suno-style song generator) ══════════════════ */
+.create-wrap{display:flex;flex:1;height:100%;overflow:hidden;gap:0}
+.create-left{flex:1;min-width:0;overflow-y:auto;padding:24px 28px;display:flex;flex-direction:column;gap:16px}
+.create-header{margin-bottom:4px}
+.create-header-title{font-size:24px;font-weight:800;background:linear-gradient(135deg,#a78bfa,#67e8f9,#f9a8d4);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;display:flex;align-items:center;gap:10px;margin-bottom:4px}
+.create-header-icon{font-size:28px;filter:drop-shadow(0 0 12px rgba(167,139,250,.7));display:inline-block;animation:spin-slow 6s linear infinite;-webkit-text-fill-color:initial;color:var(--acc)}
+.create-header-sub{font-size:13px;color:var(--mu)}
+.create-mode-tabs{display:flex;gap:6px}
+.create-mode-tab{padding:7px 18px;border-radius:999px;border:1px solid var(--b2);background:transparent;color:var(--mu);font-size:12px;font-weight:600;cursor:pointer;transition:all .15s}
+.create-mode-tab.on{background:rgba(167,139,250,.15);border-color:var(--acc);color:var(--acc);box-shadow:var(--glow-purple)}
+.create-mode-tab:hover:not(.on){background:rgba(167,139,250,.07);color:var(--tx)}
+.create-prompt-label{font-size:11px;font-weight:600;color:var(--mu);text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px}
+.create-prompt-input{width:100%;background:rgba(8,8,24,.8);border:1px solid rgba(167,139,250,.2);border-radius:var(--rad);color:var(--tx);font-size:13px;font-family:var(--sans);padding:12px 14px;outline:none;resize:vertical;line-height:1.6;transition:border-color .15s,box-shadow .15s}
+.create-prompt-input:focus{border-color:rgba(167,139,250,.5);box-shadow:0 0 0 3px rgba(167,139,250,.08)}
+.create-prompt-input::placeholder{color:var(--mu2)}
+.create-style-label{font-size:10px;color:var(--mu2);text-transform:uppercase;letter-spacing:.08em;margin-bottom:6px}
+.create-style-row{display:flex;flex-wrap:wrap;gap:5px}
+.create-style-chip{padding:4px 12px;border-radius:999px;border:1px solid var(--b2);background:rgba(13,13,34,.8);color:var(--mu);font-size:11px;cursor:pointer;transition:all .12s;user-select:none}
+.create-style-chip:hover{border-color:rgba(167,139,250,.4);color:var(--acc);background:rgba(167,139,250,.08)}
+.create-style-chip.on{background:rgba(167,139,250,.15);border-color:var(--acc);color:var(--acc);box-shadow:0 0 8px rgba(167,139,250,.2)}
+.create-custom-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+.create-field-group{display:flex;flex-direction:column;gap:5px}
+.create-field-label{font-size:10px;font-weight:600;color:var(--mu);text-transform:uppercase;letter-spacing:.07em}
+.create-field-select{background:rgba(8,8,24,.8);border:1px solid rgba(167,139,250,.2);border-radius:var(--rad);color:var(--tx);font-size:12px;padding:7px 10px;cursor:pointer;outline:none;transition:border-color .15s}
+.create-field-select:focus{border-color:rgba(167,139,250,.5)}
+.create-generate-btn{width:100%;padding:14px;border-radius:12px;border:none;background:linear-gradient(135deg,#4c1d95,#7c3aed,#a78bfa);background-size:200% 200%;color:#fff;font-size:15px;font-weight:800;cursor:pointer;transition:all .3s;display:flex;align-items:center;justify-content:center;gap:10px;letter-spacing:.03em;box-shadow:0 4px 24px rgba(124,58,237,.4),0 0 0 1px rgba(167,139,250,.2);animation:gradient-shift 4s ease infinite}
+@keyframes gradient-shift{0%{background-position:0% 50%}50%{background-position:100% 50%}100%{background-position:0% 50%}}
+.create-generate-btn:hover{box-shadow:0 8px 40px rgba(124,58,237,.6),0 0 0 1px rgba(167,139,250,.4);transform:translateY(-2px)}
+.create-generate-btn:active{transform:translateY(0)}
+.create-generate-btn:disabled{opacity:.7;cursor:not-allowed;transform:none}
+.create-generate-icon{font-size:18px;filter:drop-shadow(0 0 6px rgba(255,255,255,.5))}
+.create-generate-icon.spinning{animation:spin-fast 1s linear infinite}
+@keyframes spin-fast{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
+.create-claude-badge{text-align:center;font-size:11px;color:var(--mu2);padding:4px}
+.create-claude-badge.connected{color:var(--sec)}
+.create-progress{background:rgba(8,8,24,.6);border:1px solid var(--b1);border-radius:var(--rad);padding:14px}
+.create-progress-steps{display:flex;flex-direction:column;gap:8px}
+.create-progress-step{display:flex;align-items:center;gap:10px;font-size:12px;color:var(--mu);transition:color .2s}
+.create-progress-step.done{color:var(--sec)}
+.create-progress-step.active{color:var(--acc)}
+.create-progress-step-dot{width:8px;height:8px;border-radius:50%;background:var(--b2);flex-shrink:0;transition:all .2s}
+.create-progress-step.done .create-progress-step-dot{background:var(--sec)}
+.create-progress-step.active .create-progress-step-dot{background:var(--acc);box-shadow:var(--glow-purple);animation:pulse-dot .6s infinite}
+.create-result{background:linear-gradient(145deg,rgba(13,13,34,.95),rgba(8,8,24,.98));border:1px solid rgba(167,139,250,.2);border-radius:14px;padding:20px;animation:fade-slide-up .4s ease}
+@keyframes fade-slide-up{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+.create-result-header{margin-bottom:14px}
+.create-result-title{font-size:22px;font-weight:800;font-family:Georgia,serif;color:var(--tx);margin-bottom:4px}
+.create-result-meta{font-size:11px;color:var(--mu);font-family:var(--mono);display:flex;gap:10px;flex-wrap:wrap}
+.create-result-meta span{padding:2px 7px;border-radius:4px;background:rgba(167,139,250,.1);border:1px solid rgba(167,139,250,.15);color:var(--acc);font-size:10px}
+.create-playback-bar{display:flex;align-items:center;gap:12px;padding:12px 14px;background:rgba(8,8,24,.7);border-radius:10px;border:1px solid var(--b1);margin-bottom:14px}
+.create-play-btn{width:44px;height:44px;border-radius:50%;border:none;background:linear-gradient(135deg,var(--acc2),var(--acc));color:#fff;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .15s;box-shadow:var(--glow-purple)}
+.create-play-btn:hover{transform:scale(1.08);box-shadow:0 0 24px rgba(167,139,250,.5)}
+.create-playback-info{flex:1;min-width:0}
+.create-playback-title{font-size:12px;color:var(--mu);margin-bottom:5px}
+.create-progress-bar-wrap{height:3px;background:var(--b1);border-radius:2px;overflow:hidden}
+.create-progress-bar{height:100%;width:0%;background:linear-gradient(90deg,var(--acc),var(--sec));border-radius:2px;transition:width .3s linear}
+.create-playback-bpm{font-size:11px;font-family:var(--mono);color:var(--mu);white-space:nowrap}
+.create-chord-strip{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:14px;padding-bottom:14px;border-bottom:1px solid var(--b1)}
+.create-chord-pill{padding:4px 10px;border-radius:999px;background:rgba(253,230,138,.1);border:1px solid rgba(253,230,138,.25);font-family:var(--mono);font-size:12px;font-weight:700;color:var(--chord);cursor:pointer;transition:all .12s}
+.create-chord-pill:hover{background:rgba(253,230,138,.2);box-shadow:var(--glow-amber)}
+.create-chord-pill.active{background:var(--chord);color:#000;box-shadow:var(--glow-amber)}
+.create-lyrics{display:flex;flex-direction:column;gap:18px;margin-bottom:16px}
+.create-section{animation:fade-slide-up .3s ease}
+.create-section-name{font-size:12px;font-style:italic;color:var(--sec);font-family:Georgia,serif;border-left:3px solid var(--sec);padding-left:9px;margin-bottom:8px;text-shadow:0 0 8px rgba(103,232,249,.3)}
+.create-lyric-line{margin-bottom:6px;padding:2px 0;transition:background .1s}
+.create-lyric-line.active{background:rgba(167,139,250,.07);border-radius:4px;padding:2px 6px}
+.create-lyric-chords{font-family:var(--mono);font-size:12px;font-weight:700;color:var(--chord);margin-bottom:1px;text-shadow:0 0 6px rgba(253,230,138,.3)}
+.create-lyric-text{font-size:14px;font-family:Georgia,serif;color:var(--tx);line-height:1.7}
+.create-lyric-text.instrumental{font-style:italic;color:var(--mu);font-size:12px}
+.create-actions{display:flex;gap:7px;flex-wrap:wrap;padding-top:14px;border-top:1px solid var(--b1)}
+.create-actions .nbtn{flex:1;text-align:center;font-size:11px;min-width:80px}
+.create-right{width:250px;flex-shrink:0;background:rgba(8,8,24,.9);border-left:1px solid var(--b1);overflow-y:auto;padding:16px 14px;display:flex;flex-direction:column;gap:8px}
+.create-right-header{font-size:10px;text-transform:uppercase;letter-spacing:.1em;color:var(--mu2);font-weight:600;margin-bottom:4px}
+.create-history-empty{font-size:12px;color:var(--mu2);text-align:center;padding:24px 12px;line-height:1.6}
+.create-history-card{background:rgba(13,13,34,.8);border:1px solid var(--b1);border-radius:9px;padding:10px 12px;cursor:pointer;transition:all .15s;margin-bottom:6px}
+.create-history-card:hover{border-color:rgba(167,139,250,.3);box-shadow:var(--glow-purple);transform:translateX(-2px)}
+.create-history-card.active{border-color:rgba(167,139,250,.5);background:rgba(167,139,250,.06)}
+.create-history-title{font-size:13px;font-weight:700;color:var(--tx);margin-bottom:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.create-history-meta{font-size:10px;color:var(--mu);font-family:var(--mono);margin-bottom:5px}
+.create-history-chords{font-size:10px;font-family:var(--mono);color:var(--chord);opacity:.8;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.create-history-actions{display:flex;gap:4px;margin-top:6px}
+.create-history-btn{flex:1;padding:3px 6px;border-radius:4px;border:1px solid var(--b2);background:transparent;color:var(--mu);font-size:9px;cursor:pointer;transition:all .12s;text-align:center}
+.create-history-btn:hover{background:rgba(167,139,250,.1);color:var(--acc);border-color:var(--acc)}
+.create-variation-card{background:rgba(13,13,34,.6);border:1px solid var(--b1);border-radius:8px;padding:8px 10px;cursor:pointer;transition:all .15s;margin-bottom:5px;font-size:11px;color:var(--mu)}
+.create-variation-card:hover{border-color:rgba(167,139,250,.3);color:var(--tx)}
 </style>
 </head>
 <body>
@@ -845,6 +931,7 @@ button:active,.nbtn:active,.ibtn:active,.qbtn:active,.ngrid-btn:active{transform
   <div class="nav-logo"><span class="note">♪</span><span class="lg-white">Songbook</span><span class="dot"></span><span class="lg-grad">Ultra</span></div>
   <div class="nav-tabs">
     <button class="nav-tab on" onclick="showPage('sheet',this)"><span class="ic">📄</span>Sheet</button>
+    <button class="nav-tab" onclick="showPage('create',this)"><span class="ic">✦</span>Create</button>
     <button class="nav-tab" onclick="showPage('piano',this)"><span class="ic">🎹</span>Piano</button>
     <button class="nav-tab" onclick="showPage('roll',this)"><span class="ic">▦</span>Roll</button>
     <button class="nav-tab" onclick="showPage('drum',this)"><span class="ic">🥁</span>Drums</button>
@@ -884,6 +971,7 @@ button:active,.nbtn:active,.ibtn:active,.qbtn:active,.ngrid-btn:active{transform
 <div class="workspace">
 <div class="left-rail">
   <button class="rail-btn on" title="Sheet" onclick="showPage('sheet',this);railOn(this)">♪</button>
+  <button class="rail-btn" title="Create Song" onclick="showPage('create',this);railOn(this)">✦</button>
   <button class="rail-btn" title="Piano" onclick="showPage('piano',this);railOn(this)">🎹</button>
   <button class="rail-btn" title="Piano Roll" onclick="showPage('roll',this);railOn(this)">▦</button>
   <button class="rail-btn" title="Drums" onclick="showPage('drum',this);railOn(this)">◉</button>
@@ -1331,6 +1419,9 @@ button:active,.nbtn:active,.ibtn:active,.qbtn:active,.ngrid-btn:active{transform
     </div>
   </div>
 </div>
+
+<!-- CREATE PAGE — built by buildCreatePage() -->
+<div class="page" id="page-create"></div>
 
 </div><!-- /center -->
 
@@ -8236,6 +8327,7 @@ function updateClaudeUI(connected){
   if(badge) badge.style.display=connected?'inline':'none';
   const genLabel=document.getElementById('generateBtnLabel');
   if(genLabel) genLabel.textContent=connected?'✦ Generate with Claude':'✦ Generate progression';
+  updateCreateClaudeBadge();
 }
 function setClaudeThinking(thinking){
   const dot=document.getElementById('claudeBtnDot');
@@ -8410,6 +8502,791 @@ Give them creative inspiration. Reply with ONLY a JSON object:
   }
 }
 
+// ══════════════════════════════════════════════════════════════════════════
+// CREATE PAGE — Suno-style song generator. Uses Claude (real lyrics/chords)
+// when connected, otherwise a built-in rule-based generator so the page is
+// fully functional with zero setup.
+// ══════════════════════════════════════════════════════════════════════════
+function buildCreatePage(){
+  const page=document.getElementById('page-create');
+  if(!page || page.dataset.built) return;
+  page.dataset.built='1';
+
+  page.innerHTML=`
+  <div class="create-wrap">
+    <div class="create-left">
+      <div class="create-header">
+        <div class="create-header-title"><span class="create-header-icon">✦</span>Song Creator</div>
+        <div class="create-header-sub">Describe your song — get lyrics, chords, and playback</div>
+      </div>
+
+      <div class="create-mode-tabs">
+        <button class="create-mode-tab on" id="modeTabSimple" onclick="switchCreateMode('simple')">⚡ Simple</button>
+        <button class="create-mode-tab" id="modeTabCustom" onclick="switchCreateMode('custom')">🎛 Custom</button>
+      </div>
+
+      <div class="create-mode-panel" id="createModeSimple">
+        <div class="create-prompt-label">Describe your song</div>
+        <textarea id="createPromptInput" class="create-prompt-input" placeholder="e.g. A sad love song about missing someone in the rain, slow tempo, acoustic guitar, verse-chorus structure…" rows="4"></textarea>
+        <div class="create-style-chips">
+          <div class="create-style-label">Quick styles</div>
+          <div class="create-style-row" id="createStyleChips"></div>
+        </div>
+      </div>
+
+      <div class="create-mode-panel" id="createModeCustom" style="display:none">
+        <div class="create-custom-grid">
+          <div class="create-field-group">
+            <label class="create-field-label">Style / Genre</label>
+            <select class="create-field-select" id="createGenre">
+              <option>Pop</option><option>Rock</option><option>Folk</option>
+              <option>Jazz</option><option>Blues</option><option>R&B</option>
+              <option>Country</option><option>Latin</option><option>Reggae</option>
+              <option>Classical</option><option>Indie</option><option>Soul</option>
+            </select>
+          </div>
+          <div class="create-field-group">
+            <label class="create-field-label">Mood</label>
+            <select class="create-field-select" id="createMood">
+              <option>Happy</option><option>Sad</option><option>Romantic</option>
+              <option>Energetic</option><option>Melancholic</option><option>Hopeful</option>
+              <option>Dark</option><option>Peaceful</option><option>Angry</option>
+              <option>Nostalgic</option><option>Epic</option><option>Dreamy</option>
+            </select>
+          </div>
+          <div class="create-field-group">
+            <label class="create-field-label">Key</label>
+            <select class="create-field-select" id="createKey">
+              <option>C</option><option>G</option><option>D</option><option>A</option>
+              <option>E</option><option>F</option><option>Am</option><option>Em</option>
+              <option>Dm</option><option>Bm</option><option>F#m</option><option>Cm</option>
+            </select>
+          </div>
+          <div class="create-field-group">
+            <label class="create-field-label">Tempo</label>
+            <select class="create-field-select" id="createTempo">
+              <option value="60">Slow (60 BPM)</option>
+              <option value="80">Ballad (80 BPM)</option>
+              <option value="100" selected>Moderate (100 BPM)</option>
+              <option value="120">Upbeat (120 BPM)</option>
+              <option value="140">Fast (140 BPM)</option>
+            </select>
+          </div>
+          <div class="create-field-group">
+            <label class="create-field-label">Instrument</label>
+            <select class="create-field-select" id="createInstrument">
+              <option value="acoustic">Acoustic Guitar</option>
+              <option value="classical">Classical Guitar</option>
+              <option value="piano">Piano</option>
+              <option value="electric">Electric Guitar</option>
+              <option value="organ">Organ</option>
+              <option value="strings">Strings</option>
+            </select>
+          </div>
+          <div class="create-field-group">
+            <label class="create-field-label">Structure</label>
+            <select class="create-field-select" id="createStructure">
+              <option value="verse-chorus">Verse / Chorus</option>
+              <option value="verse-chorus-bridge">Verse / Chorus / Bridge</option>
+              <option value="aaba">AABA (Jazz)</option>
+              <option value="through">Through-composed</option>
+              <option value="blues">12-Bar Blues</option>
+            </select>
+          </div>
+        </div>
+        <div class="create-field-group" style="margin-top:10px">
+          <label class="create-field-label">Song theme / lyrics about</label>
+          <textarea id="createTheme" class="create-prompt-input" rows="2" placeholder="What is the song about? (optional)"></textarea>
+        </div>
+      </div>
+
+      <button class="create-generate-btn" id="createGenerateBtn" onclick="generateSong()">
+        <span class="create-generate-icon" id="createGenerateIcon">✦</span>
+        <span id="createGenerateBtnLabel">Generate Song</span>
+      </button>
+
+      <div class="create-claude-badge" id="createClaudeBadge">
+        <span id="createClaudeBadgeText">Connect Claude AI for real AI-generated lyrics</span>
+      </div>
+
+      <div class="create-progress" id="createProgress" style="display:none">
+        <div class="create-progress-steps" id="createProgressSteps"></div>
+      </div>
+
+      <div class="create-result" id="createResult" style="display:none">
+        <div class="create-result-header">
+          <div class="create-result-title" id="createResultTitle">—</div>
+          <div class="create-result-meta" id="createResultMeta">—</div>
+        </div>
+
+        <div class="create-playback-bar">
+          <button class="create-play-btn" id="createPlayBtn" onclick="toggleCreatePlayback()">▶</button>
+          <div class="create-playback-info">
+            <div class="create-playback-title" id="createPlaybackTitle">Ready to play</div>
+            <div class="create-progress-bar-wrap"><div class="create-progress-bar" id="createProgressBar"></div></div>
+          </div>
+          <div class="create-playback-bpm" id="createPlaybackBpm">— BPM</div>
+        </div>
+
+        <div class="create-chord-strip" id="createChordStrip"></div>
+        <div class="create-lyrics" id="createLyrics"></div>
+
+        <div class="create-actions">
+          <button class="nbtn prim" onclick="sendToSheet()">♪ Open in Sheet</button>
+          <button class="nbtn" onclick="sendToLearn()">📖 Open in Learn</button>
+          <button class="nbtn" onclick="downloadCreatedSong()">⬇ Download</button>
+          <button class="nbtn" onclick="regenerateSong()">🔄 Regenerate</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="create-right">
+      <div class="create-right-header">Recent creations</div>
+      <div class="create-history" id="createHistory">
+        <div class="create-history-empty">Generate your first song to see it here</div>
+      </div>
+      <div class="create-variations" id="createVariations" style="display:none">
+        <div class="create-right-header" style="margin-top:16px">Variations</div>
+        <div id="createVariationsList"></div>
+      </div>
+    </div>
+  </div>
+  `;
+
+  buildCreateStyleChips();
+  updateCreateClaudeBadge();
+}
+
+// ── CREATE PAGE STATE ────────────────────────────────────────────────────
+let createHistory=[],currentCreated=null,createPlaying=false,createPlayTimer=null;
+let createPlayIdx=0,createAllChords=[],lastCreateParams=null;
+
+const CREATE_STYLE_CHIPS=[
+  {label:'😢 Sad ballad',prompt:'A heartfelt sad ballad about loss, slow tempo, minor key, piano'},
+  {label:'🎸 Upbeat rock',prompt:'An energetic upbeat rock anthem, fast tempo, electric guitar, power chords'},
+  {label:'🌊 Chill vibes',prompt:'A relaxed chill song, medium tempo, acoustic guitar, feel-good'},
+  {label:'💕 Love song',prompt:'A romantic love song, tender and warm, acoustic guitar, major key'},
+  {label:'🌙 Midnight jazz',prompt:'A late night jazzy song, smooth chords, minor jazz key, organ'},
+  {label:'🔥 Blues groove',prompt:'A soulful blues song, 12-bar structure, electric guitar, raw emotion'},
+  {label:'🌿 Folk story',prompt:'A folk storytelling song, simple chords, acoustic guitar, narrative lyrics'},
+  {label:'🎉 Dance pop',prompt:'A fun danceable pop song, upbeat tempo, major key, catchy chorus'},
+  {label:'🎻 Classical feel',prompt:'A classical-inspired song, elegant and sophisticated, strings, formal structure'},
+  {label:'🌅 Hopeful',prompt:'An optimistic hopeful song about new beginnings, rising melody, bright major key'},
+  {label:'🤘 Power anthem',prompt:'An epic power anthem, huge chorus, electric guitar, inspirational lyrics'},
+  {label:'🌧 Rainy day',prompt:'A contemplative rainy day song, introspective lyrics, minor key, slow tempo'},
+];
+
+function buildCreateStyleChips(){
+  const row=document.getElementById('createStyleChips');
+  if(!row) return;
+  CREATE_STYLE_CHIPS.forEach(chip=>{
+    const btn=document.createElement('button');
+    btn.className='create-style-chip';
+    btn.textContent=chip.label;
+    btn.onclick=()=>{
+      document.getElementById('createPromptInput').value=chip.prompt;
+      row.querySelectorAll('.create-style-chip').forEach(b=>b.classList.remove('on'));
+      btn.classList.add('on');
+    };
+    row.appendChild(btn);
+  });
+}
+function switchCreateMode(mode){
+  document.getElementById('createModeSimple').style.display=mode==='simple'?'block':'none';
+  document.getElementById('createModeCustom').style.display=mode==='custom'?'block':'none';
+  document.getElementById('modeTabSimple').classList.toggle('on',mode==='simple');
+  document.getElementById('modeTabCustom').classList.toggle('on',mode==='custom');
+}
+function updateCreateClaudeBadge(){
+  const badge=document.getElementById('createClaudeBadge');
+  const text=document.getElementById('createClaudeBadgeText');
+  if(!badge || !text) return;
+  if(claudeConnected){
+    badge.classList.add('connected');
+    text.textContent='✦ Claude AI active — generating real lyrics and smart chords';
+  }else{
+    badge.classList.remove('connected');
+    text.textContent='Connect Claude AI for real AI-generated lyrics ↑';
+  }
+}
+
+// ── MAIN GENERATE ─────────────────────────────────────────────────────────
+async function generateSong(){
+  const btn=document.getElementById('createGenerateBtn');
+  const icon=document.getElementById('createGenerateIcon');
+  const label=document.getElementById('createGenerateBtnLabel');
+
+  const isSimple=document.getElementById('modeTabSimple').classList.contains('on');
+  const params=isSimple?getSimpleParams():getCustomParams();
+  lastCreateParams=params;
+
+  btn.disabled=true;
+  icon.classList.add('spinning');
+  label.textContent='Creating your song...';
+  showCreateProgress();
+
+  try{
+    const song=claudeConnected?await generateSongWithClaude(params):await generateSongBuiltIn(params);
+    if(song){
+      currentCreated=song;
+      addToCreateHistory(song);
+      displayCreatedSong(song);
+    }
+  }catch(err){
+    toast('Generation failed — '+(err.message||'unknown error'));
+    console.error(err);
+    // Claude path failing shouldn't leave the user with nothing — fall back silently.
+    if(claudeConnected){
+      try{
+        const fallback=await generateSongBuiltIn(params);
+        currentCreated=fallback;
+        addToCreateHistory(fallback);
+        displayCreatedSong(fallback);
+        toast('Used the built-in generator instead');
+      }catch(e2){}
+    }
+  }finally{
+    btn.disabled=false;
+    icon.classList.remove('spinning');
+    label.textContent='Generate Song';
+    hideCreateProgress();
+  }
+}
+function getSimpleParams(){
+  const prompt=document.getElementById('createPromptInput')?.value?.trim()||'';
+  const lower=prompt.toLowerCase();
+  return{
+    prompt,
+    genre:inferGenreFromPrompt(lower),
+    mood:inferMoodFromPrompt(lower),
+    key:inferKeyFromPrompt(lower),
+    bpm:inferBpmFromPrompt(lower),
+    instrument:inferInstrumentFromPrompt(lower),
+    structure:lower.includes('blues')?'blues':'verse-chorus',
+  };
+}
+function getCustomParams(){
+  return{
+    prompt:document.getElementById('createTheme')?.value?.trim()||'',
+    genre:document.getElementById('createGenre')?.value||'Pop',
+    mood:document.getElementById('createMood')?.value||'Happy',
+    key:document.getElementById('createKey')?.value||'C',
+    bpm:parseInt(document.getElementById('createTempo')?.value||100),
+    instrument:document.getElementById('createInstrument')?.value||'acoustic',
+    structure:document.getElementById('createStructure')?.value||'verse-chorus',
+  };
+}
+function inferGenreFromPrompt(p){
+  if(p.includes('jazz')) return 'Jazz';
+  if(p.includes('blues')) return 'Blues';
+  if(p.includes('rock')) return 'Rock';
+  if(p.includes('folk')) return 'Folk';
+  if(p.includes('country')) return 'Country';
+  if(p.includes('reggae')) return 'Reggae';
+  if(p.includes('latin')) return 'Latin';
+  if(p.includes('classical')) return 'Classical';
+  return 'Pop';
+}
+function inferMoodFromPrompt(p){
+  if(p.includes('sad')||p.includes('heartbreak')||p.includes('loss')) return 'Sad';
+  if(p.includes('happy')||p.includes('joy')||p.includes('fun')) return 'Happy';
+  if(p.includes('love')||p.includes('romantic')) return 'Romantic';
+  if(p.includes('epic')||p.includes('power')||p.includes('anthem')) return 'Epic';
+  if(p.includes('chill')||p.includes('relax')||p.includes('peace')) return 'Peaceful';
+  if(p.includes('dark')||p.includes('angry')||p.includes('rage')) return 'Dark';
+  return 'Happy';
+}
+function inferKeyFromPrompt(p){
+  if(p.includes('minor')||p.includes('sad')||p.includes('dark')) return 'Am';
+  if(p.includes('jazz')) return 'Dm';
+  if(p.includes('blues')) return 'A';
+  return 'G';
+}
+function inferBpmFromPrompt(p){
+  if(p.includes('slow')||p.includes('ballad')) return 70;
+  if(p.includes('fast')||p.includes('upbeat')||p.includes('dance')) return 130;
+  if(p.includes('medium')||p.includes('moderate')) return 100;
+  return 90;
+}
+function inferInstrumentFromPrompt(p){
+  if(p.includes('piano')) return 'piano';
+  if(p.includes('electric')) return 'electric';
+  if(p.includes('classical')) return 'classical';
+  if(p.includes('organ')) return 'organ';
+  if(p.includes('strings')) return 'strings';
+  return 'acoustic';
+}
+
+// ── BUILT-IN GENERATOR (no Claude needed) ───────────────────────────────
+async function generateSongBuiltIn(params){
+  await setProgressStep(0);
+
+  const titles={
+    Sad:['Fading Light','Broken Wings','Empty Road','Last Goodbye','Silent Storm'],
+    Happy:['Golden Days','Shine On','Feel Alive','Summer High','Dancing Free'],
+    Romantic:['Close to You','Always Yours','Tender Heart','Your Eyes','Stay'],
+    Epic:['Rise Up','Unbreakable','Into the Storm','Battle Cry','Never Fall'],
+    Peaceful:['Still Water','Morning Calm','Gentle Breeze','Open Sky','Quiet Hours'],
+    Dark:['Shadow Falls','Into the Void','Black Rain','Hollow Ground','Burning Down'],
+    Hopeful:['New Dawn','Better Days','Keep Going','The Light','One More Day'],
+    Nostalgic:['Remember When','Old Days','Back to You','Long Ago','Those Times'],
+  };
+  const moodTitles=titles[params.mood]||titles.Happy;
+  const title=moodTitles[Math.floor(Math.random()*moodTitles.length)];
+
+  await setProgressStep(1);
+
+  const progressions={
+    Pop:{major:['C','G','Am','F'],minor:['Am','F','C','G']},
+    Rock:{major:['G','D','Em','C'],minor:['Em','C','G','D']},
+    Folk:{major:['G','C','D','G'],minor:['Am','G','F','E']},
+    Jazz:{major:['Cmaj7','Am7','Dm7','G7'],minor:['Am7','Dm7','G7','Cmaj7']},
+    Blues:{major:['A7','D7','A7','E7'],minor:['Am7','Dm7','Am7','Em7']},
+    Country:{major:['G','C','D','G'],minor:['Am','F','C','G']},
+    Reggae:{major:['C','G','Am','F'],minor:['Am','G','F','E']},
+    Latin:{major:['C','F','G','C'],minor:['Am','Dm','E7','Am']},
+    Classical:{major:['C','F','G7','C'],minor:['Am','E7','Am','E7']},
+    Soul:{major:['Cmaj7','Fmaj7','G7','Cmaj7'],minor:['Am7','Dm7','G7','Cmaj7']},
+    RB:{major:['Cmaj7','Am7','Fmaj7','G7'],minor:['Am7','Dm7','G7','Cmaj7']}, // "R&B" normalizes to "RB" below
+    Indie:{major:['G','D','Am','C'],minor:['Dm','Am','G','F']},
+  };
+  const isMinorKey=params.key?.endsWith('m')||params.mood==='Sad'||params.mood==='Dark';
+  const genreKey=(params.genre||'Pop').replace('&','').replace(/\s/g,'_');
+  const prog=progressions[genreKey]||progressions.Pop;
+  const chords=isMinorKey?prog.minor:prog.major;
+
+  await setProgressStep(2);
+
+  const LYRIC_BANK={
+    Sad:{
+      verse:[['Sitting here alone in the dark','The echo of your voice still haunts my heart'],
+        ['The rain outside keeps falling down','I wear your memory like a heavy crown'],
+        ['I reach for you but you are gone','The silence stretches out so long']],
+      chorus:[['And I cannot let you go','Even though I need to, I know'],
+        ['These tears I cry, they never dry','Under this cold and empty sky']],
+      bridge:[['Maybe someday I will find','A way to leave this all behind']],
+    },
+    Happy:{
+      verse:[['I wake up with a smile today','The sun is shining every way'],
+        ['The world feels new, the sky is bright','Everything is going to be alright'],
+        ['There is a feeling in the air','Of something good beyond compare']],
+      chorus:[['Let the good times roll tonight','Everything is feeling right'],
+        ['We are free and we are young','This is only just begun']],
+      bridge:[['Turn it up and feel the beat','From our heads down to our feet']],
+    },
+    Romantic:{
+      verse:[['You walked into my life that day','And slowly took my breath away'],
+        ['Your eyes like stars that light the night','You make everything feel right'],
+        ['I never thought that I would find','Someone who could free my mind']],
+      chorus:[['With you I am where I belong','You are the words to every song'],
+        ['I would cross the world for you','There is nothing I would not do']],
+      bridge:[['And when the night grows cold and still','I know that you always will']],
+    },
+    Epic:{
+      verse:[['We stand upon the edge of time','The moment has come, now we rise'],
+        ['The storm is coming, hear it roar','We have been here, we have fought before'],
+        ['Look around at who we are','We have come so far, we came so far']],
+      chorus:[['Rise up, rise up and fight','We will not go down tonight'],
+        ['We are stronger than the storm','We will never break, we will reform']],
+      bridge:[['When everything is at its end','We rise again, we rise again']],
+    },
+    Peaceful:{
+      verse:[['The morning light comes soft and slow','A gentle breeze begins to blow'],
+        ['I sit beside the quiet stream','And drift along within a dream'],
+        ['The world is still, the air is clean','The quietest moment I have seen']],
+      chorus:[['Let it be, let it breathe','Let the moment bring you peace'],
+        ['Still and calm, nothing wrong','Just the earth and this old song']],
+      bridge:[['In the silence I have found','All the peace I have been around']],
+    },
+  };
+  const bank=LYRIC_BANK[params.mood]||LYRIC_BANK.Happy;
+  const vLines=bank.verse,cLines=bank.chorus,bLines=bank.bridge;
+  function pickRandom(arr){ return arr[Math.floor(Math.random()*arr.length)]; }
+
+  const sections=[];
+  if(params.structure==='blues'){
+    sections.push({name:'Verse 1',lines:[
+      {chords:[chords[0]],lyric:pickRandom(vLines)[0]},
+      {chords:[chords[0]],lyric:pickRandom(vLines)[1]},
+      {chords:[chords[1]],lyric:pickRandom(vLines)[0]},
+      {chords:[chords[0]],lyric:''},
+      {chords:[chords[2]],lyric:pickRandom(cLines)[0]},
+      {chords:[chords[1]],lyric:pickRandom(cLines)[1]},
+      {chords:[chords[0]],lyric:pickRandom(vLines)[1]},
+      {chords:[chords[3]],lyric:''},
+    ]});
+  }else{
+    sections.push({name:'Verse 1',lines:[
+      {chords:[chords[0]],lyric:pickRandom(vLines)[0]},
+      {chords:[chords[1]],lyric:pickRandom(vLines)[1]},
+      {chords:[chords[2]],lyric:pickRandom(vLines)[0]},
+      {chords:[chords[3]],lyric:pickRandom(vLines)[1]},
+    ]});
+    sections.push({name:'Chorus',lines:[
+      {chords:[chords[0],chords[1]],lyric:pickRandom(cLines)[0]},
+      {chords:[chords[2],chords[3]],lyric:pickRandom(cLines)[1]},
+      {chords:[chords[0],chords[1]],lyric:pickRandom(cLines)[0]},
+      {chords:[chords[2]],lyric:''},
+    ]});
+    sections.push({name:'Verse 2',lines:[
+      {chords:[chords[0]],lyric:pickRandom(vLines)[0]},
+      {chords:[chords[1]],lyric:pickRandom(vLines)[1]},
+      {chords:[chords[2]],lyric:pickRandom(vLines)[0]},
+      {chords:[chords[3]],lyric:pickRandom(vLines)[1]},
+    ]});
+    sections.push({name:'Chorus 2',lines:[
+      {chords:[chords[0],chords[1]],lyric:pickRandom(cLines)[0]},
+      {chords:[chords[2],chords[3]],lyric:pickRandom(cLines)[1]},
+      {chords:[chords[0],chords[1]],lyric:pickRandom(cLines)[0]},
+      {chords:[chords[2]],lyric:pickRandom(cLines)[1]},
+    ]});
+    if(params.structure==='verse-chorus-bridge'){
+      sections.push({name:'Bridge',lines:[
+        {chords:[chords[3]],lyric:pickRandom(bLines)[0]},
+        {chords:[chords[2]],lyric:''},
+      ]});
+      sections.push({name:'Outro Chorus',lines:[
+        {chords:[chords[0],chords[1]],lyric:pickRandom(cLines)[0]},
+        {chords:[chords[2],chords[3]],lyric:pickRandom(cLines)[1]},
+      ]});
+    }
+  }
+
+  await setProgressStep(3);
+
+  return{
+    title,genre:params.genre||'Pop',mood:params.mood||'Happy',key:params.key||'G',
+    bpm:params.bpm||90,instrument:params.instrument||'acoustic',
+    chords,sections,generatedBy:'built-in',timestamp:Date.now(),
+  };
+}
+
+// ── CLAUDE GENERATOR ─────────────────────────────────────────────────────
+async function generateSongWithClaude(params){
+  await setProgressStep(0);
+
+  const prompt=`You are a professional songwriter and music composer.
+Create a complete song based on these parameters:
+${params.prompt?`Theme/Concept: ${params.prompt}`:''}
+Genre: ${params.genre}
+Mood: ${params.mood}
+Key: ${params.key}
+BPM: ${params.bpm}
+Instrument: ${params.instrument}
+Structure: ${params.structure}
+
+Reply with ONLY a valid JSON object in this exact format:
+{
+  "title": "Song Title Here",
+  "genre": "${params.genre}",
+  "mood": "${params.mood}",
+  "key": "${params.key}",
+  "bpm": ${params.bpm},
+  "instrument": "${params.instrument}",
+  "chords": ["G", "Em", "C", "D"],
+  "sections": [
+    {"name":"Verse 1","lines":[
+      {"chords":["G"],"lyric":"First line of verse lyrics here"},
+      {"chords":["Em"],"lyric":"Second line of verse lyrics here"},
+      {"chords":["C"],"lyric":"Third line of verse lyrics here"},
+      {"chords":["D"],"lyric":"Fourth line of verse lyrics here"}
+    ]},
+    {"name":"Chorus","lines":[
+      {"chords":["G","Em"],"lyric":"Chorus line one here"},
+      {"chords":["C","D"],"lyric":"Chorus line two here"},
+      {"chords":["G","Em"],"lyric":"Chorus line three here"},
+      {"chords":["C","D"],"lyric":"Chorus line four here"}
+    ]},
+    {"name":"Verse 2","lines":[
+      {"chords":["G"],"lyric":"Second verse line one"},
+      {"chords":["Em"],"lyric":"Second verse line two"},
+      {"chords":["C"],"lyric":"Second verse line three"},
+      {"chords":["D"],"lyric":"Second verse line four"}
+    ]},
+    {"name":"Chorus 2","lines":[
+      {"chords":["G","Em"],"lyric":"Chorus repeated with variation"},
+      {"chords":["C","D"],"lyric":"Second chorus line two"},
+      {"chords":["G"],"lyric":"Final powerful chorus line"}
+    ]}
+  ]
+}
+
+Rules:
+- Write real, singable, emotionally resonant lyrics (not placeholder text)
+- All chords must be valid guitar/piano chords in the key of ${params.key}
+- Lyrics should match the mood: ${params.mood}
+- Each lyric line should be 5-10 words, natural to sing
+- Make the chorus memorable and different from the verse
+- Use the structure: ${params.structure}
+- Return ONLY the JSON, no other text`;
+
+  await setProgressStep(1);
+  const result=await callClaudeAPI(prompt,null,null,1500);
+  await setProgressStep(2);
+
+  if(!result) throw new Error('No response from Claude');
+  const jsonMatch=result.match(/\{[\s\S]*\}/);
+  if(!jsonMatch) throw new Error('Could not parse Claude response as JSON');
+
+  const song=JSON.parse(jsonMatch[0]);
+  song.generatedBy='claude';
+  song.timestamp=Date.now();
+
+  await setProgressStep(3);
+  return song;
+}
+
+// ── PROGRESS STEPS UI ────────────────────────────────────────────────────
+const PROGRESS_STEPS_TEXT=['Analyzing your description…','Composing chord progression…','Writing lyrics…','Finalizing song structure…'];
+function showCreateProgress(){
+  const el=document.getElementById('createProgress');
+  const steps=document.getElementById('createProgressSteps');
+  if(!el||!steps) return;
+  el.style.display='block';
+  document.getElementById('createResult').style.display='none';
+  steps.innerHTML=PROGRESS_STEPS_TEXT.map((t,i)=>`
+    <div class="create-progress-step" id="cpstep${i}">
+      <div class="create-progress-step-dot"></div><span>${t}</span>
+    </div>`).join('');
+}
+function hideCreateProgress(){
+  const el=document.getElementById('createProgress');
+  if(el) el.style.display='none';
+}
+async function setProgressStep(idx){
+  for(let i=0;i<=idx;i++){
+    const el=document.getElementById(`cpstep${i}`);
+    if(!el) continue;
+    el.className='create-progress-step '+(i<idx?'done':'active');
+  }
+  await new Promise(r=>setTimeout(r,400));
+}
+
+// ── DISPLAY GENERATED SONG ───────────────────────────────────────────────
+function displayCreatedSong(song){
+  document.getElementById('createResult').style.display='block';
+  document.getElementById('createResultTitle').textContent=song.title;
+  const meta=document.getElementById('createResultMeta');
+  meta.innerHTML=[
+    `<span>${escapeHtml(song.genre)}</span>`,
+    `<span>${escapeHtml(song.mood)}</span>`,
+    `<span>Key: ${escapeHtml(song.key)}</span>`,
+    `<span>${song.bpm} BPM</span>`,
+    `<span>${escapeHtml(song.instrument)}</span>`,
+    song.generatedBy==='claude'
+      ?'<span style="color:var(--sec);border-color:rgba(110,231,183,0.3)">✦ Claude AI</span>'
+      :'<span>Built-in</span>',
+  ].join('');
+
+  const strip=document.getElementById('createChordStrip');
+  strip.innerHTML='';
+  const uniqueChords=[...new Set(song.sections.flatMap(s=>s.lines.flatMap(l=>l.chords||[])))];
+  createAllChords=uniqueChords;
+  uniqueChords.forEach(c=>{
+    const pill=document.createElement('span');
+    pill.className='create-chord-pill';
+    pill.textContent=c;
+    pill.onclick=()=>previewChord(c);
+    strip.appendChild(pill);
+  });
+
+  document.getElementById('createPlaybackBpm').textContent=song.bpm+' BPM';
+
+  const lyricsEl=document.getElementById('createLyrics');
+  lyricsEl.innerHTML='';
+  song.sections.forEach(section=>{
+    const secDiv=document.createElement('div');
+    secDiv.className='create-section';
+    const nameDiv=document.createElement('div');
+    nameDiv.className='create-section-name';
+    nameDiv.textContent=section.name;
+    secDiv.appendChild(nameDiv);
+    (section.lines||[]).forEach(line=>{
+      const lineDiv=document.createElement('div');
+      lineDiv.className='create-lyric-line';
+      const chordsDiv=document.createElement('div');
+      chordsDiv.className='create-lyric-chords';
+      chordsDiv.textContent=(line.chords||[]).join('  ');
+      const lyricDiv=document.createElement('div');
+      lyricDiv.className='create-lyric-text'+(!line.lyric?' instrumental':'');
+      lyricDiv.textContent=line.lyric||'(instrumental)';
+      lineDiv.appendChild(chordsDiv);
+      lineDiv.appendChild(lyricDiv);
+      secDiv.appendChild(lineDiv);
+    });
+    lyricsEl.appendChild(secDiv);
+  });
+
+  // Sets the global instrument for playback via the existing helper (also updates the Play
+  // tab's own instrument buttons), rather than only clearing their .on state.
+  setInstByName(song.instrument);
+
+  document.getElementById('createPlaybackTitle').textContent='Press ▶ to play';
+  document.getElementById('createProgressBar').style.width='0%';
+}
+
+// ── PLAYBACK ──────────────────────────────────────────────────────────────
+function toggleCreatePlayback(){
+  if(createPlaying){ stopCreatePlayback(); return; }
+  if(!currentCreated) return;
+
+  createPlaying=true;
+  createPlayIdx=0;
+  document.getElementById('createPlayBtn').textContent='■';
+
+  const allLines=currentCreated.sections.flatMap(s=>s.lines);
+
+  function step(){
+    if(!createPlaying) return;
+    const allLyricLines=document.querySelectorAll('.create-lyric-line');
+    allLyricLines.forEach(l=>l.classList.remove('active'));
+    document.querySelectorAll('.create-chord-pill').forEach(p=>p.classList.remove('active'));
+
+    if(createPlayIdx>=allLines.length) createPlayIdx=0;
+
+    const line=allLines[createPlayIdx];
+    if(allLyricLines[createPlayIdx]){
+      allLyricLines[createPlayIdx].classList.add('active');
+      allLyricLines[createPlayIdx].scrollIntoView({behavior:'smooth',block:'nearest'});
+    }
+
+    if(line.chords && line.chords.length){
+      line.chords.forEach((chord,i)=>{
+        const freqs=chordFreqs(chord);
+        const t=getCtx().currentTime+i*0.5;
+        freqs.forEach((f,fi)=>playTone(f,t+fi*0.02,1.0));
+      });
+      document.querySelectorAll('.create-chord-pill').forEach(p=>{
+        if(line.chords.includes(p.textContent.trim())) p.classList.add('active');
+      });
+    }
+
+    const progress=(createPlayIdx/allLines.length)*100;
+    document.getElementById('createProgressBar').style.width=progress+'%';
+    document.getElementById('createPlaybackTitle').textContent=
+      `${currentCreated.sections.find(s=>s.lines.includes(line))?.name||''} — Line ${createPlayIdx+1}`;
+
+    createPlayIdx++;
+    const bpm=currentCreated.bpm||90;
+    const msPerLine=(60/bpm)*2*1000;
+    createPlayTimer=setTimeout(step,msPerLine);
+  }
+  step();
+}
+function stopCreatePlayback(){
+  createPlaying=false;
+  clearTimeout(createPlayTimer);
+  document.getElementById('createPlayBtn').textContent='▶';
+  document.getElementById('createProgressBar').style.width='0%';
+  document.getElementById('createPlaybackTitle').textContent='Press ▶ to play';
+  document.querySelectorAll('.create-lyric-line').forEach(l=>l.classList.remove('active'));
+  document.querySelectorAll('.create-chord-pill').forEach(p=>p.classList.remove('active'));
+}
+
+// ── HISTORY ───────────────────────────────────────────────────────────────
+function addToCreateHistory(song){
+  createHistory.unshift(song);
+  if(createHistory.length>20) createHistory.pop();
+  renderCreateHistory();
+}
+function renderCreateHistory(){
+  const container=document.getElementById('createHistory');
+  if(!container) return;
+  if(!createHistory.length){
+    container.innerHTML='<div class="create-history-empty">Generate your first song to see it here</div>';
+    return;
+  }
+  container.innerHTML='';
+  createHistory.forEach((song,i)=>{
+    const card=document.createElement('div');
+    card.className='create-history-card'+(i===0?' active':'');
+    const uniqueChords=[...new Set(song.sections.flatMap(s=>s.lines.flatMap(l=>l.chords||[])))].slice(0,6);
+    card.innerHTML=`
+      <div class="create-history-title">${escapeHtml(song.title)}</div>
+      <div class="create-history-meta">${escapeHtml(song.genre)} · ${escapeHtml(song.key)} · ${song.bpm} BPM${song.generatedBy==='claude'?' · ✦ AI':''}</div>
+      <div class="create-history-chords">${uniqueChords.map(c=>escapeHtml(c)).join('  ')}</div>
+      <div class="create-history-actions">
+        <button class="create-history-btn" onclick="loadHistorySong(${i})">Load</button>
+        <button class="create-history-btn" onclick="sendHistoryToSheet(${i})">→ Sheet</button>
+      </div>
+    `;
+    card.addEventListener('click',(e)=>{
+      if(e.target.classList.contains('create-history-btn')) return;
+      loadHistorySong(i);
+    });
+    container.appendChild(card);
+  });
+}
+function loadHistorySong(idx){
+  currentCreated=createHistory[idx];
+  displayCreatedSong(currentCreated);
+  document.querySelectorAll('.create-history-card').forEach((c,i)=>c.classList.toggle('active',i===idx));
+}
+
+// ── SEND TO SHEET / LEARN / DOWNLOAD ─────────────────────────────────────
+// Reuses applySongData() — the app's one canonical "load a song into the Sheet" path — instead
+// of re-deriving the same title/meta/sections/renderStrip/buildStruct steps here.
+function sendToSheet(song){
+  const s=song||currentCreated;
+  if(!s) return;
+  applySongData({
+    title:s.title,
+    meta:`${s.genre} · ${s.mood} · Key of ${s.key} · ${s.bpm} BPM`,
+    sections:s.sections.map(sec=>({type:sec.name,lines:sec.lines})),
+  });
+  renderMySongs(null);
+  showPage('sheet');
+  autosaveSong();
+  toast(`"${s.title}" loaded into Sheet`);
+}
+function sendHistoryToSheet(idx){ sendToSheet(createHistory[idx]); }
+// FULL_SONGS lines expect {name,pos} chord objects (pos = pixel offset above the lyric), not
+// bare strings — spacing them out here so the Learn page doesn't render every chord stacked at 0.
+function sendToLearn(){
+  if(!currentCreated) return;
+  const key='created_'+Date.now();
+  FULL_SONGS[key]={
+    title:currentCreated.title,
+    artist:'Created by you',
+    key:currentCreated.key,
+    bpm:currentCreated.bpm,
+    tuning:'Standard',
+    capo:0,
+    difficulty:'Custom',
+    genre:currentCreated.genre,
+    strumPattern:['↓','↑','↓','↑'],
+    sections:currentCreated.sections.map(sec=>({
+      name:sec.name,
+      lines:sec.lines.map(l=>({
+        chords:(l.chords||[]).map((c,i)=>({name:c,pos:i*12})),
+        lyric:l.lyric||'',
+      })),
+    })),
+  };
+  if(typeof loadLearnSong==='function'){
+    loadLearnSong(key);
+    showPage('learn');
+    toast(`"${currentCreated.title}" opened in Learn`);
+  }
+}
+function regenerateSong(){ if(lastCreateParams) generateSong(); }
+function downloadCreatedSong(){
+  const s=currentCreated;
+  if(!s){ toast('Generate a song first'); return; }
+  let out=s.title+'\n'+`${s.genre} · ${s.mood} · Key of ${s.key} · ${s.bpm} BPM · ${s.instrument}`+'\n\n';
+  s.sections.forEach(sec=>{
+    out+=sec.name+'\n\n';
+    sec.lines.forEach(line=>{
+      const chordLine=(line.chords||[]).join('  ');
+      if(chordLine) out+=chordLine+'\n';
+      if(line.lyric) out+=line.lyric+'\n';
+      out+='\n';
+    });
+  });
+  dl(out,'text/plain',(s.title||'song')+'.txt');
+  toast('Downloaded "'+s.title+'"');
+}
+
 function init(){
   initStarfield();
   initSuggestionDropdown();
@@ -8437,6 +9314,7 @@ function init(){
   buildWritingPartner();
   buildToolsPage();
   buildNewSongModal();
+  buildCreatePage();
   initClaudeLogin();
   window.addEventListener('beforeunload', ()=>{
     try{ localStorage.setItem(AUTOSAVE_KEY, JSON.stringify(serializeSong())); }catch(e){}
