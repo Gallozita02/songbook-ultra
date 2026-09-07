@@ -406,122 +406,389 @@ button:active,.nbtn:active,.ibtn:active,.qbtn:active,.ngrid-btn:active{transform
 .studio-loop-add-btn:hover{border-color:var(--acc);color:var(--acc)}
 .studio-loop-add-btn.added{border-color:var(--acc);color:var(--acc);background:rgba(255,123,84,.1)}
 
-/* ══════════════════════ STUDIO REBUILD (new DAW) ══════════════════════ */
-#page-daw{padding:0!important}
-#daw-root{display:flex;flex-direction:column;height:100%;background:var(--s1);color:var(--tx);font-size:12px;position:relative}
-#daw-topbar{height:44px;flex-shrink:0;display:flex;align-items:center;gap:8px;padding:0 12px;background:var(--s2);border-bottom:1px solid var(--bd-def)}
-#dawProjectName{background:transparent;border:1px solid transparent;color:var(--tx);font-size:13px;font-weight:600;padding:4px 8px;border-radius:6px;max-width:220px}
-#dawProjectName:hover,#dawProjectName:focus{border-color:var(--bd-def);outline:none}
-#dawKeyBpmLabel{font-size:10px;color:var(--mu);font-family:var(--mono)}
-.daw-top-btn{background:transparent;border:1px solid var(--bd-def);color:var(--mu);border-radius:6px;padding:5px 10px;font-size:11px;cursor:pointer}
-.daw-top-btn:hover{border-color:var(--acc);color:var(--tx)}
-.daw-top-btn.prim{background:var(--acc-grad);color:#fff;border-color:transparent}
-#daw-transport{height:42px;flex-shrink:0;display:flex;align-items:center;gap:10px;padding:0 12px;background:var(--s2);border-bottom:1px solid var(--bd-def);flex-wrap:wrap}
-.daw-select{background:var(--s1);border:1px solid var(--bd-def);color:var(--tx);border-radius:5px;padding:4px 6px;font-size:11px}
-.daw-field{display:flex;align-items:center;gap:4px;font-size:10px;color:var(--mu)}
-.daw-field input[type=number]{width:44px;background:var(--s1);border:1px solid var(--bd-def);color:var(--tx);border-radius:4px;padding:2px 4px}
-.daw-time{font-family:var(--mono);font-size:12px;color:var(--acc);min-width:60px}
-.daw-transport-btn{width:28px;height:28px;border-radius:50%;border:1px solid var(--bd-def);background:var(--s1);color:var(--tx);cursor:pointer}
-.daw-transport-btn:hover{border-color:var(--acc);color:var(--acc)}
-#dawPlayBtn.playing{background:var(--acc-grad);color:#fff;border-color:transparent}
-#dawRecordBtn.armed{background:var(--red);color:#fff;border-color:transparent;animation:pulse-dot 1s infinite}
-#daw-body{flex:1;display:flex;min-height:0;overflow:hidden}
-#daw-tracklist{width:240px;flex-shrink:0;overflow-y:auto;border-right:1px solid var(--bd-def);background:var(--s2)}
-#daw-timeline-wrap{flex:1;min-width:0;display:flex;flex-direction:column;overflow:hidden;position:relative}
-#daw-ruler{height:24px;flex-shrink:0;background:var(--s2);border-bottom:1px solid var(--bd-def);position:relative;overflow:hidden;cursor:pointer}
-#daw-canvas-scroll{flex:1;overflow:auto;position:relative}
-#daw-canvas{display:block;cursor:crosshair}
-#daw-sidebar{width:280px;flex-shrink:0;border-left:1px solid var(--bd-def);background:var(--s2);padding:10px;overflow-y:auto}
-.daw-sidebar-title{font-size:11px;font-weight:600;color:var(--tx);margin-bottom:8px;text-transform:uppercase;letter-spacing:.06em}
-.daw-pill-row{display:flex;gap:4px;flex-wrap:wrap}
-.daw-pill{padding:3px 9px;font-size:9px;border-radius:999px;border:1px solid var(--bd-def);background:transparent;color:var(--mu);cursor:pointer}
-.daw-pill.on{background:var(--acc-grad);color:#fff;border-color:transparent}
-#daw-bottombar{height:40px;flex-shrink:0;display:flex;align-items:center;gap:8px;padding:0 12px;background:var(--s2);border-top:1px solid var(--bd-def)}
+/* ══════════════════════ STUDIO REBUILD (new DAW) ══════════════════════
+   Ported verbatim from studio-visual-reference.html: same custom-property
+   names/values, same class names, same DOM structure/measurements. The
+   reference's own `:root` block is scoped to `#page-daw` instead of the
+   document root (this app already has global --bg/--tx/--red tokens used by
+   every other page — redeclaring them globally would repaint the whole app),
+   and every reference selector is scoped under `#page-daw` for the same
+   reason: this file's `.btn`/`.tab`/`.panel`/`.grid`/`.pill` etc. class names
+   are also used, with different rules, by other pages. The class names
+   themselves, and every value, are unchanged from the reference. The
+   reference's own `body{}`/`.wrap{}`/`.note{}`/`h2{}`/`.swatches{}` rules are
+   the standalone demo document's harness (page padding, section headings,
+   the color-token gallery) — not part of the Studio component — so they're
+   not ported; `.app{height:760px}` becomes `height:100%` so the Studio fills
+   its real page area instead of the demo's fixed box. ── */
+#page-daw{
+  --bg:#17171c; --bg-2:#1e1e24; --bg-3:#26262e; --bg-4:#2e2e38;
+  --line:rgba(255,255,255,.07); --line-2:rgba(255,255,255,.12);
+  --tx:#e9e9ee; --tx-2:#9a9aa8; --tx-3:#6b6b78;
+  --purple:#7c5cd6; --purple-lt:#9b7ce8; --blue:#4d5ae5; --cyan:#22d3ee;
+  --green:#4ade80; --amber:#e8b53a; --magenta:#e8459c; --violet:#8b5cf6;
+  --red:#ef4444; --brand:#6c47d6;
+  --r:4px;
+  padding:0!important;height:100%;
+}
+#page-daw *{box-sizing:border-box}
+#page-daw .app{background:var(--bg);border:1px solid var(--line);border-radius:8px;
+  overflow:hidden;display:flex;flex-direction:column;height:100%;color:var(--tx);
+  font:13px/1.4 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif}
 
-.daw-track-row{display:flex;align-items:center;gap:6px;padding:6px 8px;border-bottom:1px solid var(--bd-def);cursor:pointer}
-.daw-track-row.selected{background:rgba(255,123,84,.1)}
-.daw-track-row .drag-handle{color:var(--mu2);cursor:grab;font-size:11px}
-.daw-track-row .track-icon{font-size:15px;cursor:pointer}
-.daw-track-row .track-meta{flex:1;min-width:0}
-.daw-track-row .track-name{font-size:11px;color:var(--tx);font-weight:500;outline:none;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.daw-track-row .track-btns{display:flex;gap:3px;margin-top:3px}
-.daw-track-row .tbtn{width:18px;height:16px;font-size:9px;border-radius:3px;border:1px solid var(--bd-def);background:transparent;color:var(--mu);cursor:pointer;line-height:1}
-.daw-track-row .tbtn.m.on{background:#f59e0b;color:#000;border-color:transparent}
-.daw-track-row .tbtn.s.on{background:#3b82f6;color:#fff;border-color:transparent}
-.daw-track-row .tbtn.r.on{background:var(--red);color:#fff;border-color:transparent;animation:pulse-dot 1s infinite}
-.daw-track-row .track-mix{display:flex;flex-direction:column;gap:2px;width:70px;flex-shrink:0}
-.daw-track-row .track-mix input{width:100%;height:10px}
-.daw-track-row .track-meter{flex-shrink:0;border-radius:2px;background:#000}
+/* ── TOP BAR ───────────────────────────────── */
+#page-daw .topbar{height:40px;flex:0 0 40px;background:var(--bg-2);
+  border-bottom:1px solid var(--line);display:flex;align-items:center;
+  padding:0 10px;gap:2px;position:relative}
+#page-daw .logo{width:22px;height:22px;border-radius:50%;background:var(--brand);
+  display:grid;place-items:center;font-size:11px;margin-right:8px}
+#page-daw .mi{padding:5px 9px;border-radius:var(--r);color:var(--tx-2);font-size:12px;
+  cursor:pointer;position:relative}
+#page-daw .mi:hover{background:var(--bg-3);color:var(--tx)}
+#page-daw .proj{margin-left:16px;font-size:12px;color:var(--tx);outline:none;
+  padding:3px 6px;border-radius:var(--r);max-width:220px;overflow:hidden;
+  text-overflow:ellipsis;white-space:nowrap}
+#page-daw .proj:hover,#page-daw .proj:focus{background:var(--bg-3)}
+#page-daw .spacer{flex:1}
+#page-daw .btn{background:transparent;border:1px solid var(--line-2);color:var(--tx-2);
+  padding:5px 11px;border-radius:var(--r);font-size:12px;cursor:pointer;
+  font-family:inherit;display:flex;align-items:center;gap:5px}
+#page-daw .btn:hover{background:var(--bg-3);color:var(--tx)}
+#page-daw .btn.primary{background:var(--brand);border-color:var(--brand);color:#fff}
+#page-daw .btn.primary:hover{background:#7d54e8}
+#page-daw .midd{position:absolute;top:36px;left:0;background:var(--bg-3);
+  border:1px solid var(--line-2);border-radius:var(--r);box-shadow:0 8px 24px rgba(0,0,0,.5);
+  z-index:900;min-width:190px;padding:4px 0;display:none}
+#page-daw .midd.on{display:block}
+#page-daw .midd-item{padding:7px 14px;font-size:11.5px;color:var(--tx-2);cursor:pointer;white-space:nowrap}
+#page-daw .midd-item:hover{background:var(--bg-4);color:var(--tx)}
 
-.daw-clip-context-menu-item{padding:6px 14px;font-size:11px;color:var(--tx);cursor:pointer;white-space:nowrap}
-.daw-clip-context-menu-item:hover{background:rgba(255,123,84,.15)}
-.daw-clip-context-menu-sep{height:1px;background:var(--bd-def);margin:4px 0}
-.daw-context-menu{position:fixed;background:var(--s2);border:1px solid var(--bd-def);border-radius:6px;box-shadow:0 8px 24px rgba(0,0,0,.5);z-index:900;padding:4px 0;min-width:180px}
+/* ── TRANSPORT ─────────────────────────────── */
+#page-daw .transport{height:38px;flex:0 0 38px;background:var(--bg-2);
+  border-bottom:1px solid var(--line);display:flex;align-items:center;
+  padding:0 10px;gap:10px;flex-wrap:wrap}
+#page-daw .tinput{background:var(--bg);border:1px solid var(--line);color:var(--tx);
+  width:46px;padding:3px 5px;border-radius:3px;font-size:11px;
+  text-align:center;font-family:inherit}
+#page-daw .lbl{font-size:10px;color:var(--tx-3);letter-spacing:.06em}
+#page-daw .zoom{width:78px;accent-color:var(--purple)}
+#page-daw select.tinput{width:auto;padding:3px 4px}
 
-#daw-panel{flex-shrink:0;overflow:hidden;transition:height .18s ease;background:var(--s2);border-top:1px solid var(--bd-acc)}
-#daw-panel.closed{height:0}
-#daw-panel.open{height:380px}
-#daw-panel.expanded{height:600px}
-#daw-panel-header{height:38px;display:flex;align-items:center;gap:8px;padding:0 10px;border-bottom:1px solid var(--bd-def)}
-#daw-panel-tabs{display:flex;gap:4px;flex:1}
-.daw-ptab{padding:5px 12px;font-size:11px;border-radius:6px 6px 0 0;border:1px solid transparent;background:transparent;color:var(--mu);cursor:pointer}
-.daw-ptab.on{background:var(--s1);color:var(--tx);border-color:var(--bd-def);border-bottom-color:var(--s1)}
-#daw-panel-body{height:calc(100% - 38px);overflow:auto;padding:10px}
+/* ── BODY GRID ─────────────────────────────── */
+#page-daw .body{flex:1;display:flex;min-height:0}
 
-.daw-keyboard-wrap{position:relative;height:150px;display:flex;align-items:flex-end;padding:4px 4px 0;overflow-x:auto}
-.daw-white-key{position:relative;width:38px;height:140px;background:linear-gradient(#f5f5f5,#e0e0e0);border:1px solid #999;border-radius:0 0 4px 4px;flex-shrink:0;cursor:pointer;display:flex;align-items:flex-end;justify-content:center;padding-bottom:6px}
-.daw-white-key.pressed{background:linear-gradient(var(--acc),#c94)}
-.daw-black-key{position:absolute;width:24px;height:88px;background:linear-gradient(#333,#000);border-radius:0 0 3px 3px;z-index:2;cursor:pointer;display:flex;align-items:flex-end;justify-content:center;padding-bottom:5px}
-.daw-black-key.pressed{background:linear-gradient(var(--acc),#742)}
-.daw-key-letter{font-size:9px;font-family:var(--mono);color:#333;background:rgba(255,255,255,.7);border-radius:3px;padding:0 3px}
-.daw-black-key .daw-key-letter{color:#fff;background:rgba(255,255,255,.15)}
-.daw-key-octlabel{position:absolute;bottom:-14px;left:0;font-size:9px;color:var(--mu)}
-.daw-inst-toolbar{display:flex;align-items:center;gap:10px;margin-bottom:8px;flex-wrap:wrap}
+/* track list */
+#page-daw .tracklist{width:248px;flex:0 0 248px;background:var(--bg-2);
+  border-right:1px solid var(--line);overflow-y:auto}
+#page-daw .trow{height:56px;border-bottom:1px solid var(--line);display:flex;
+  align-items:center;gap:7px;padding:0 8px;cursor:pointer;position:relative}
+#page-daw .trow:hover{background:var(--bg-3)}
+#page-daw .trow.sel{background:var(--bg-3)}
+#page-daw .trow.sel::before{content:'';position:absolute;left:0;top:0;bottom:0;
+  width:2px;background:var(--cyan)}
+#page-daw .tico{width:24px;height:24px;flex:0 0 24px;border-radius:3px;
+  display:grid;place-items:center;font-size:11px;cursor:pointer}
+#page-daw .tbody{flex:1;min-width:0}
+#page-daw .tname{font-size:11px;color:var(--tx);white-space:nowrap;overflow:hidden;
+  text-overflow:ellipsis;margin-bottom:4px;outline:none}
+#page-daw .tctl{display:flex;align-items:center;gap:3px}
+#page-daw .msr{width:15px;height:15px;border-radius:2px;background:var(--bg-4);
+  border:none;color:var(--tx-3);font-size:8px;cursor:pointer;
+  display:grid;place-items:center;font-family:inherit}
+#page-daw .msr:hover{color:var(--tx)}
+#page-daw .msr.on-m{background:#c47a1a;color:#fff}
+#page-daw .msr.on-s{background:var(--blue);color:#fff}
+#page-daw .msr.on-r{background:var(--red);color:#fff}
+#page-daw .vol{width:58px;height:3px;-webkit-appearance:none;appearance:none;
+  background:var(--bg-4);border-radius:2px;margin-left:3px}
+#page-daw .vol::-webkit-slider-thumb{-webkit-appearance:none;width:9px;height:9px;
+  border-radius:50%;background:var(--tx-2);cursor:pointer}
+#page-daw .dots{color:var(--tx-3);font-size:13px;cursor:grab;padding:0 2px}
+#page-daw .addtrack{height:38px;display:flex;align-items:center;padding:0 12px;
+  color:var(--tx-2);font-size:11px;cursor:pointer;gap:5px}
+#page-daw .addtrack:hover{background:var(--bg-3);color:var(--tx)}
 
-.daw-roll-wrap{display:flex;gap:8px;height:100%}
-.daw-roll-tools{width:110px;flex-shrink:0;display:flex;flex-direction:column;gap:6px;font-size:10px}
-.daw-roll-main{flex:1;display:flex;flex-direction:column;min-width:0}
-.daw-roll-toolbar{display:flex;gap:6px;align-items:center;margin-bottom:6px;flex-wrap:wrap}
-.daw-roll-grid-wrap{flex:1;overflow:auto;position:relative;border:1px solid var(--bd-def);border-radius:6px}
-#daw-roll-canvas{display:block;cursor:crosshair}
-.daw-roll-velocity-wrap{height:60px;border:1px solid var(--bd-def);border-top:none;border-radius:0 0 6px 6px;overflow:hidden}
-#daw-roll-velocity-canvas{display:block;cursor:ns-resize}
-.daw-roll-infobar{font-size:10px;color:var(--mu);margin-top:4px;font-family:var(--mono)}
-.daw-roll-mode-btn{padding:4px 8px;font-size:10px;border-radius:5px;border:1px solid var(--bd-def);background:transparent;color:var(--mu);cursor:pointer}
-.daw-roll-mode-btn.on{background:var(--acc-grad);color:#fff;border-color:transparent}
+/* timeline */
+#page-daw .tlwrap{flex:1;min-width:0;display:flex;flex-direction:column;
+  background:var(--bg);position:relative}
+#page-daw .ruler{height:22px;flex:0 0 22px;background:var(--bg-2);
+  border-bottom:1px solid var(--line);position:relative;overflow:hidden;cursor:pointer}
+#page-daw .bar{position:absolute;top:0;bottom:0;border-left:1px solid var(--line-2);
+  padding-left:4px;font-size:9px;color:var(--tx-3);line-height:22px;pointer-events:none}
+#page-daw .grid{flex:1;position:relative;overflow:hidden}
+#page-daw .gline{position:absolute;top:0;bottom:0;width:1px;
+  background:rgba(255,255,255,.055)}
+#page-daw .gline.b{background:rgba(255,255,255,.1)}
+#page-daw .lane{position:absolute;left:0;right:0;height:56px;
+  border-bottom:1px solid var(--line)}
+#page-daw .lane.sel{background:rgba(124,92,214,.06)}
+#page-daw .clip{position:absolute;border-radius:3px;overflow:hidden;cursor:grab;
+  border:1px solid rgba(255,255,255,.16)}
+#page-daw .clip:hover{border-color:rgba(255,255,255,.4)}
+#page-daw .clip.sel{border:1.5px solid #fff}
+#page-daw .clip.muted{opacity:.35}
+#page-daw .clip-resize{position:absolute;right:0;top:0;bottom:0;width:6px;cursor:ew-resize}
+#page-daw .cname{font-size:8.5px;color:rgba(255,255,255,.92);padding:2px 4px;
+  white-space:nowrap;overflow:hidden;line-height:1.2}
+#page-daw .wave{display:flex;align-items:center;height:calc(100% - 13px);
+  gap:1px;padding:0 3px}
+#page-daw .wbar{flex:1;background:rgba(255,255,255,.42);min-width:1px;border-radius:.5px}
+#page-daw .midi{position:relative;height:calc(100% - 13px)}
+#page-daw .mnote{position:absolute;height:2.5px;background:rgba(255,255,255,.75);
+  border-radius:1px}
+#page-daw .step{position:relative;height:calc(100% - 13px);padding:2px 3px}
+#page-daw .sdot{position:absolute;width:2.5px;height:2.5px;border-radius:50%;
+  background:rgba(255,255,255,.8)}
+#page-daw .play{position:absolute;top:0;bottom:0;width:2px;background:var(--red);
+  z-index:20;pointer-events:none}
+#page-daw .play::before{content:'';position:absolute;top:0;left:-4px;
+  border-left:5px solid transparent;border-right:5px solid transparent;
+  border-top:6px solid var(--red)}
+#page-daw .loopregion{position:absolute;top:0;bottom:0;background:rgba(232,181,58,.08);pointer-events:none}
 
-.daw-fx-columns{display:flex;gap:12px;height:100%}
-.daw-fx-chain-col{flex:1;min-width:0;overflow-y:auto}
-.daw-fx-lib-col{width:320px;flex-shrink:0;overflow-y:auto}
-.daw-fx-card{border:1px solid var(--bd-def);border-radius:8px;padding:8px;margin-bottom:8px;background:rgba(26,15,20,.5)}
-.daw-fx-card.bypassed{opacity:.4}
-.daw-fx-card-head{display:flex;align-items:center;gap:6px;margin-bottom:6px}
-.daw-fx-card-head strong{font-size:11px;flex:1}
-.daw-fx-card-head button{background:transparent;border:0;color:var(--mu);cursor:pointer;font-size:12px}
-.daw-fx-card-knobs{display:flex;flex-wrap:wrap;gap:10px}
-.daw-fx-lib-cats{display:flex;flex-wrap:wrap;gap:4px;margin-bottom:8px}
-.daw-fx-lib-card{border:1px solid var(--bd-def);border-radius:8px;padding:8px;margin-bottom:8px;cursor:pointer}
-.daw-fx-lib-card:hover{border-color:var(--acc)}
-.daw-fx-lib-card strong{font-size:11px}
+/* right loop panel */
+#page-daw .side{width:262px;flex:0 0 262px;background:var(--bg-2);
+  border-left:1px solid var(--line);display:flex;flex-direction:column}
+#page-daw .sh{height:34px;flex:0 0 34px;border-bottom:1px solid var(--line);
+  display:flex;align-items:center;padding:0 9px;gap:6px}
+#page-daw .search{flex:1;background:var(--bg);border:1px solid var(--line);
+  color:var(--tx);padding:4px 7px;border-radius:3px;font-size:11px;
+  font-family:inherit}
+#page-daw .search::placeholder{color:var(--tx-3)}
+#page-daw .pills{padding:7px 9px;display:flex;flex-wrap:wrap;gap:4px;
+  border-bottom:1px solid var(--line)}
+#page-daw .pill{background:var(--bg-4);border:none;color:var(--tx-2);padding:3px 8px;
+  border-radius:9px;font-size:10px;cursor:pointer;font-family:inherit}
+#page-daw .pill:hover{color:var(--tx)}
+#page-daw .pill.on{background:var(--brand);color:#fff}
+#page-daw .loops{flex:1;overflow-y:auto}
+#page-daw .loop{height:30px;display:flex;align-items:center;gap:7px;padding:0 9px;
+  border-bottom:1px solid rgba(255,255,255,.03);cursor:pointer;font-size:10.5px}
+#page-daw .loop:hover{background:var(--bg-3)}
+#page-daw .loop.playing{background:rgba(124,92,214,.12)}
+#page-daw .pbtn{width:16px;height:16px;flex:0 0 16px;border-radius:50%;
+  background:var(--bg-4);border:none;color:var(--tx-2);font-size:7px;
+  cursor:pointer;display:grid;place-items:center}
+#page-daw .loop:hover .pbtn{background:var(--brand);color:#fff}
+#page-daw .lw{display:flex;align-items:center;gap:.8px;width:22px;height:11px;flex:0 0 22px}
+#page-daw .lwb{flex:1;background:var(--tx-3);border-radius:.5px;min-width:.8px}
+#page-daw .ln{flex:1;color:var(--tx-2);white-space:nowrap;overflow:hidden;
+  text-overflow:ellipsis}
+#page-daw .loop:hover .ln{color:var(--tx)}
+#page-daw .hrt,#page-daw .plus{color:var(--tx-3);font-size:10px;cursor:pointer;padding:0 1px}
+#page-daw .hrt.on{color:var(--magenta)}
+#page-daw .hrt:hover,#page-daw .plus:hover{color:var(--tx)}
 
-.daw-knob-wrap{display:flex;flex-direction:column;align-items:center;gap:2px;width:52px}
-.daw-knob{width:38px;height:38px;position:relative;cursor:ns-resize;touch-action:none}
-.daw-knob-val{font-size:9px;color:var(--tx);font-family:var(--mono)}
-.daw-knob-label{font-size:8px;color:var(--mu2);text-align:center;line-height:1.2}
+/* phone mini */
+#page-daw .phone{width:198px;flex:0 0 198px;background:#0b0b0e;
+  border-left:1px solid var(--line);padding:9px;display:none;
+  flex-direction:column;gap:7px}
+#page-daw .phone.on{display:flex}
+#page-daw .ph{display:flex;align-items:center;gap:6px;font-size:10px}
+#page-daw .pht{flex:1;min-width:0}
+#page-daw .pht b{display:block;font-weight:500;font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#page-daw .pht span{color:var(--tx-3);font-size:9px}
+#page-daw .pav{width:16px;height:16px;border-radius:50%;background:var(--magenta);
+  display:grid;place-items:center;font-size:7px;color:#fff;flex:0 0 16px}
+#page-daw .pruler{display:flex;font-size:8px;color:var(--tx-3);padding-left:2px;gap:0}
+#page-daw .pruler span{flex:1}
+#page-daw .pgrid{flex:1;position:relative;overflow:hidden}
+#page-daw .prow{height:19px;display:flex;align-items:center;gap:4px;
+  font-size:8px;color:var(--tx-3)}
+#page-daw .prn{width:52px;flex:0 0 52px;white-space:nowrap;overflow:hidden;
+  text-overflow:ellipsis;cursor:pointer}
+#page-daw .pclips{flex:1;position:relative;height:11px}
+#page-daw .pc{position:absolute;height:11px;border-radius:1.5px;top:0}
+#page-daw .pplay{position:absolute;top:0;bottom:0;width:1px;background:var(--red);
+  z-index:5;pointer-events:none}
+#page-daw .ptr{display:flex;justify-content:space-around;align-items:center;
+  padding:6px 0;border-top:1px solid var(--line)}
+#page-daw .ptb{background:none;border:none;color:var(--tx-2);font-size:11px;
+  cursor:pointer}
+#page-daw .ptb:hover{color:var(--tx)}
+#page-daw .pico{display:flex;justify-content:space-between;padding-top:5px;
+  border-top:1px solid var(--line)}
+#page-daw .pi{display:flex;flex-direction:column;align-items:center;gap:2px;
+  font-size:7px;color:var(--tx-3);cursor:pointer;background:none;border:none;font-family:inherit}
+#page-daw .pi i{font-size:11px;font-style:normal}
+#page-daw .pi:hover{color:var(--tx)}
 
-.daw-beatmaker-grid{display:grid;grid-template-columns:70px repeat(16,1fr);gap:2px;align-items:center}
-.daw-bm-label{font-size:9px;color:var(--mu);text-align:right;padding-right:6px}
-.daw-bm-step{width:100%;aspect-ratio:1;border-radius:3px;border:1px solid var(--bd-def);background:transparent;cursor:pointer}
-.daw-bm-step.on{background:var(--acc-grad);border-color:transparent}
-.daw-bm-step.beat-start{border-left:2px solid var(--mu2)}
-.daw-bm-step.current{box-shadow:0 0 0 2px #fff inset}
+/* bottom bar */
+#page-daw .bottom{height:46px;flex:0 0 46px;background:var(--bg-2);
+  border-top:1px solid var(--line);display:flex;align-items:center;
+  padding:0 12px;gap:8px}
+#page-daw .bbtn{background:var(--bg-3);border:1px solid var(--line);color:var(--tx-2);
+  padding:6px 12px;border-radius:var(--r);font-size:11px;cursor:pointer;
+  display:flex;align-items:center;gap:6px;font-family:inherit}
+#page-daw .bbtn:hover{background:var(--bg-4);color:var(--tx)}
+#page-daw .rec{width:26px;height:26px;border-radius:50%;background:var(--red);
+  border:none;cursor:pointer;display:grid;place-items:center}
+#page-daw .rec.armed{box-shadow:0 0 0 3px rgba(239,68,68,.35);animation:pulseDot 1s infinite}
+#page-daw .pbig{width:30px;height:30px;border-radius:50%;background:var(--bg-4);
+  border:1px solid var(--line-2);color:var(--tx);cursor:pointer;
+  display:grid;place-items:center;font-size:11px}
+#page-daw .pbig:hover{background:var(--brand);border-color:var(--brand)}
+#page-daw .pbig.on{background:var(--brand);border-color:var(--brand)}
+#page-daw .meta{display:flex;align-items:center;gap:11px;font-size:11px;color:var(--tx-2)}
 
-.daw-pad-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;max-width:400px}
-.daw-pad{aspect-ratio:1;border-radius:10px;border:1px solid var(--bd-def);background:rgba(255,123,84,.08);color:var(--tx);font-size:12px;cursor:pointer;display:flex;align-items:center;justify-content:center}
-.daw-pad:active,.daw-pad.active{background:var(--acc-grad);color:#fff}
+/* ── PANEL ─────────────────────────────────── */
+#page-daw .panel{background:var(--bg-2);border-top:1px solid var(--line-2);
+  display:flex;flex-direction:column;flex-shrink:0;overflow:hidden;height:0;transition:height .18s ease}
+#page-daw .panel.open{height:380px}
+#page-daw .panel.expanded{height:min(640px,70vh)}
+#page-daw .ph2{height:34px;flex:0 0 34px;display:flex;align-items:center;
+  padding:0 10px;gap:2px;border-bottom:1px solid var(--line)}
+#page-daw .tab{background:none;border:none;color:var(--tx-3);padding:8px 11px;
+  font-size:11.5px;cursor:pointer;font-family:inherit;position:relative}
+#page-daw .tab:hover{color:var(--tx-2)}
+#page-daw .tab.on{color:var(--tx)}
+#page-daw .tab.on::after{content:'';position:absolute;bottom:0;left:9px;right:9px;
+  height:1.5px;background:var(--tx)}
+#page-daw .pb{padding:12px;overflow:auto;flex:1;min-height:0}
 
-.daw-mini-panel{position:absolute;right:12px;bottom:52px;width:260px;background:var(--s2);border:1px solid var(--bd-def);border-radius:10px;box-shadow:0 8px 30px rgba(0,0,0,.5);z-index:50;padding:8px;display:none}
-.daw-mini-panel.on{display:block}
+/* keyboard */
+#page-daw .krow{display:flex;align-items:center;gap:8px;margin-bottom:11px;flex-wrap:wrap}
+#page-daw .tog{background:var(--bg-3);border:1px solid var(--line);color:var(--tx-2);
+  padding:4px 10px;border-radius:var(--r);font-size:10.5px;cursor:pointer;
+  font-family:inherit}
+#page-daw .tog:hover{color:var(--tx)}
+#page-daw .tog.on{background:var(--brand);border-color:var(--brand);color:#fff}
+#page-daw .instsel{display:flex;align-items:center;gap:7px;background:var(--bg-3);
+  border:1px solid var(--line);border-radius:var(--r);padding:4px 9px;
+  font-size:11px}
+#page-daw .arw{background:none;border:none;color:var(--tx-3);cursor:pointer;
+  font-size:10px;font-family:inherit}
+#page-daw .arw:hover{color:var(--tx)}
+
+#page-daw .kb{position:relative;height:104px;display:flex;
+  background:var(--bg);border-radius:var(--r);padding:3px;
+  border:1px solid var(--line);overflow-x:auto}
+#page-daw .wk{flex:1;background:linear-gradient(#f5f5f7,#dcdce2);border-radius:0 0 3px 3px;
+  margin-right:1px;position:relative;cursor:pointer;min-width:22px;
+  display:flex;flex-direction:column;justify-content:flex-end;
+  align-items:center;padding-bottom:5px}
+#page-daw .wk:active,#page-daw .wk.dn{background:linear-gradient(#c9c9d4,#b4b4c0)}
+#page-daw .wk .kl{font-size:8.5px;color:#5a5a68;background:rgba(0,0,0,.07);
+  padding:1px 4px;border-radius:2px;font-weight:500}
+#page-daw .wk .nn{font-size:7px;color:#8a8a98;margin-top:2px}
+#page-daw .bk{position:absolute;top:3px;width:22px;height:62px;
+  background:linear-gradient(#2a2a34,#111117);border-radius:0 0 2px 2px;
+  z-index:2;cursor:pointer;display:flex;flex-direction:column;
+  justify-content:flex-end;align-items:center;padding-bottom:4px}
+#page-daw .bk:active,#page-daw .bk.dn{background:linear-gradient(#4a4a5a,#2a2a36)}
+#page-daw .bk .kl{font-size:8px;color:#d8d8e2;font-weight:500}
+
+/* piano roll */
+#page-daw .pr{display:flex;height:196px;background:var(--bg);border-radius:var(--r);
+  border:1px solid var(--line);overflow:hidden}
+#page-daw .prkeys{width:34px;flex:0 0 34px;border-right:1px solid var(--line);overflow:hidden}
+#page-daw .prk{height:14px;border-bottom:1px solid rgba(255,255,255,.04);
+  font-size:6.5px;color:var(--tx-3);padding-left:3px;line-height:14px;
+  background:#f0f0f4;color:#5a5a68}
+#page-daw .prk.blk{background:#22222a;color:var(--tx-3)}
+#page-daw .prgrid{flex:1;position:relative;overflow:hidden;cursor:crosshair}
+#page-daw .prrow{height:14px;border-bottom:1px solid rgba(255,255,255,.035)}
+#page-daw .prrow.blk{background:rgba(255,255,255,.018)}
+#page-daw .prn2{position:absolute;height:11px;border-radius:2px;
+  background:var(--purple-lt);border:1px solid rgba(255,255,255,.3);
+  cursor:grab}
+#page-daw .prn2.sel{border:1.5px solid #fff}
+#page-daw .prtool{width:96px;flex:0 0 96px;border-right:1px solid var(--line);
+  padding:7px;display:flex;flex-direction:column;gap:6px;overflow-y:auto}
+#page-daw .prtool .lbl{font-size:8.5px}
+#page-daw .prtool .tog{font-size:9.5px;padding:3px 6px;text-align:left}
+#page-daw .vellane{height:38px;background:var(--bg);border:1px solid var(--line);
+  border-top:none;display:flex;align-items:flex-end;gap:2px;padding:3px;
+  border-radius:0 0 var(--r) var(--r)}
+#page-daw .velb{width:9px;background:var(--purple);border-radius:1px 1px 0 0;
+  cursor:ns-resize}
+#page-daw .velb:hover{background:var(--purple-lt)}
+
+/* effects */
+#page-daw .fxwrap{display:flex;gap:11px}
+#page-daw .fxchain{flex:1;display:flex;gap:8px;overflow-x:auto;padding-bottom:4px}
+#page-daw .fxc{width:132px;flex:0 0 132px;background:var(--bg-3);
+  border:1px solid var(--line);border-radius:5px;overflow:hidden}
+#page-daw .fxc.bypassed{opacity:.4}
+#page-daw .fxh{height:22px;display:flex;align-items:center;gap:4px;padding:0 5px;
+  font-size:9.5px;color:#1a1a1f;font-weight:500}
+#page-daw .fxx{background:rgba(0,0,0,.22);border:none;width:12px;height:12px;
+  border-radius:2px;font-size:7px;cursor:pointer;color:inherit;
+  display:grid;place-items:center}
+#page-daw .fxb{padding:7px 6px;display:flex;flex-direction:column;gap:6px;
+  align-items:center}
+#page-daw .knobs{display:flex;flex-wrap:wrap;gap:6px;justify-content:center}
+#page-daw .kn{width:34px;text-align:center}
+#page-daw .knd{width:32px;height:32px;margin:0 auto;position:relative;cursor:ns-resize;touch-action:none}
+#page-daw .knl{font-size:7px;color:var(--tx-3);margin-top:2px}
+#page-daw .knv{font-size:7.5px;color:var(--tx-2)}
+#page-daw .eqc{width:100%;height:34px;background:var(--bg);border-radius:3px}
+#page-daw .grm{width:100%;height:22px;background:var(--bg);border-radius:3px;
+  display:flex;align-items:flex-end;gap:1.5px;padding:2px}
+#page-daw .grb{flex:1;background:var(--green);border-radius:.5px}
+#page-daw .fxsel{width:96px;flex:0 0 96px;background:var(--bg-3);
+  border:1px dashed var(--line-2);border-radius:5px;display:grid;
+  place-items:center;text-align:center;font-size:9.5px;color:var(--tx-3);
+  padding:8px;cursor:pointer}
+#page-daw .fxsel:hover{border-color:var(--tx-3);color:var(--tx-2)}
+
+#page-daw .fxlib{width:274px;flex:0 0 274px;background:var(--bg);
+  border:1px solid var(--line);border-radius:5px;padding:8px;overflow-y:auto}
+#page-daw .fxcats{display:flex;flex-wrap:wrap;gap:3px;margin-bottom:8px}
+#page-daw .fxcat{background:var(--bg-3);border:none;color:var(--tx-2);padding:2.5px 7px;
+  border-radius:8px;font-size:9px;cursor:pointer;font-family:inherit}
+#page-daw .fxcat:hover{color:var(--tx)}
+#page-daw .fxcat.on{background:var(--brand);color:#fff}
+#page-daw .fxgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+#page-daw .fxcard{background:var(--bg-3);border:1px solid var(--line);border-radius:4px;
+  overflow:hidden;cursor:pointer}
+#page-daw .fxcard:hover{border-color:var(--line-2)}
+#page-daw .fxch{height:16px;font-size:7.5px;display:grid;place-items:center;
+  color:#1a1a1f;font-weight:500;padding:0 3px;text-align:center}
+#page-daw .fxcb{height:38px;display:grid;place-items:center;background:var(--bg)}
+#page-daw .fxcp{height:15px;display:grid;place-items:center;font-size:7px;
+  color:var(--brand)}
+
+/* beat machine */
+#page-daw .bm{background:var(--bg);border:1px solid var(--line);border-radius:var(--r);
+  overflow:hidden}
+#page-daw .bmr{display:flex;align-items:center;height:22px;
+  border-bottom:1px solid rgba(255,255,255,.04)}
+#page-daw .bmn{width:64px;flex:0 0 64px;font-size:9px;color:var(--tx-2);
+  padding-left:7px;border-right:1px solid var(--line)}
+#page-daw .bmsteps{flex:1;display:flex;gap:1.5px;padding:0 3px}
+#page-daw .st{flex:1;height:15px;background:var(--bg-3);border-radius:2px;
+  cursor:pointer;border:none}
+#page-daw .st:hover{background:var(--bg-4)}
+#page-daw .st.on{background:var(--purple)}
+#page-daw .st.on.acc{background:var(--purple-lt)}
+#page-daw .st.beat{background:#2c2c36}
+#page-daw .st.beat:hover{background:var(--bg-4)}
+#page-daw .st.current{box-shadow:0 0 0 1.5px #fff inset}
+#page-daw .bmnums{display:flex;align-items:center;height:16px}
+#page-daw .bmnums .bmn{border:none}
+#page-daw .bmnums .bmsteps{gap:1.5px}
+#page-daw .bmnums span{flex:1;text-align:center;font-size:7px;color:var(--tx-3)}
+
+/* clip right-click menu (reference doesn't spec a context-menu component;
+   matched to the reference's own bg-3/line/tx tokens) */
+#page-daw .daw-context-menu{position:fixed;background:var(--bg-3);border:1px solid var(--line-2);
+  border-radius:var(--r);box-shadow:0 8px 24px rgba(0,0,0,.5);z-index:900;padding:4px 0;min-width:180px;
+  font:12px/1.4 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif}
+#page-daw .daw-clip-context-menu-item{padding:6px 14px;font-size:11px;color:var(--tx);cursor:pointer;white-space:nowrap}
+#page-daw .daw-clip-context-menu-item:hover{background:var(--bg-4)}
+#page-daw .daw-clip-context-menu-sep{height:1px;background:var(--line);margin:4px 0}
+
+/* chords tab (reference doesn't spec a chords-tab component; matched to the
+   same visual language as everything else it does spec) */
+#page-daw .chordgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;max-width:420px}
+#page-daw .chordpad{aspect-ratio:1.3;border-radius:var(--r);border:1px solid var(--line);
+  background:var(--bg-3);color:var(--tx);font-size:12px;cursor:pointer;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px}
+#page-daw .chordpad:hover{background:var(--bg-4)}
+#page-daw .chordpad:active,#page-daw .chordpad.active{background:var(--brand);color:#fff}
+#page-daw .chordpad small{font-size:8px;color:var(--tx-3)}
+#page-daw .chordpad.active small{color:rgba(255,255,255,.75)}
 .studio-project-meta{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin-bottom:12px}.studio-project-meta label{font-size:9px;color:var(--mu);text-transform:uppercase;letter-spacing:.08em}.studio-project-meta input,.studio-project-meta select{display:block;width:100%;margin-top:4px;background:var(--s2);border:1px solid var(--bd-def);color:var(--tx);border-radius:5px;padding:6px 7px;font-size:10px}.studio-production-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}.studio-check-list{display:grid;gap:5px}.studio-check{display:flex;align-items:center;gap:7px;padding:6px 7px;border:1px solid var(--bd-def);border-radius:5px;font-size:10px;color:var(--mu)}.studio-check.ok{color:var(--sec);border-color:rgba(255,107,157,.22)}.studio-check.warn{color:var(--chord);border-color:rgba(255,209,102,.22)}.studio-export-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px}.studio-export-grid button{padding:8px 6px;background:var(--s2);border:1px solid var(--bd-def);border-radius:5px;color:var(--tx);font-size:10px;cursor:pointer}.studio-export-grid button:hover{background:var(--s3);border-color:var(--bd-strong)}
 @media(max-width:900px){.studio-wrap{padding:18px 14px}.studio-sidebar{width:110px;flex-basis:110px}.studio-bottom-grid,.studio-project-grid,.studio-production-grid,.studio-progress-grid{grid-template-columns:1fr}.studio-daw-topbar{position:static}.studio-project-field{flex-basis:100%;margin-right:0}.studio-project-meta{grid-template-columns:repeat(2,1fr)}.studio-monitor-grid{grid-template-columns:1fr 1fr}.studio-recording-summary{grid-column:1/-1}.studio-recent-take audio{width:110px}}
 .studio-region{padding:4px 7px;cursor:pointer}.studio-region.recorded{border-color:rgba(255,107,157,.55);background:linear-gradient(90deg,rgba(255,107,157,.3),rgba(52,211,153,.16))}.studio-region strong,.studio-region span{position:relative;z-index:1;display:block;font-size:9px;color:var(--tx);white-space:nowrap}.studio-region span{color:var(--mu);font-size:8px}
@@ -1635,21 +1902,43 @@ button:active,.nbtn:active,.ibtn:active,.qbtn:active,.ngrid-btn:active{transform
 
 <!-- STUDIO REBUILD (Soundtrap-style DAW) -->
 <div class="page" id="page-daw">
-  <div id="daw-root">
-    <header id="daw-topbar">
-      <input id="dawProjectName" value="Untitled Project" oninput="dawProject.name=this.value">
-      <span id="dawKeyBpmLabel">120 BPM · C</span>
-      <div style="flex:1"></div>
-      <button class="daw-top-btn" onclick="dawExportChordSheet()">Chord Sheet PDF</button>
-      <button class="daw-top-btn" onclick="dawSaveProject()">Save Project</button>
-      <button class="daw-top-btn" onclick="document.getElementById('dawLoadInput').click()">Load Project</button>
+  <div id="daw-root" class="app">
+
+    <!-- top bar -->
+    <div class="topbar">
+      <div class="logo">♪</div>
+      <div class="mi" onclick="dawToggleMenu('file',event)">File
+        <div class="midd" id="dawMenuFile">
+          <div class="midd-item" onclick="dawSaveProject()">💾 Save Project</div>
+          <div class="midd-item" onclick="document.getElementById('dawLoadInput').click()">📂 Load Project</div>
+          <div class="midd-item" onclick="dawExportMIDI()">🎼 Export MIDI</div>
+          <div class="midd-item" onclick="dawExportWAV()">🔊 Export WAV</div>
+          <div class="midd-item" onclick="dawExportChordSheet()">📄 Chord Sheet PDF</div>
+        </div>
+      </div>
+      <div class="mi" onclick="dawToggleMenu('edit',event)">Edit
+        <div class="midd" id="dawMenuEdit">
+          <div class="midd-item" onclick="dawRollUndoFromMenu()">↺ Undo (Piano Roll)</div>
+          <div class="midd-item" onclick="dawClipClipboard?toast('Use right-click on a clip to paste'):toast('Nothing copied yet')">📋 Clipboard</div>
+        </div>
+      </div>
+      <div class="mi" onclick="dawToggleMenu('settings',event)">Settings
+        <div class="midd" id="dawMenuSettings">
+          <div class="midd-item" onclick="dawToggleMiniPanel()">📱 Toggle phone view</div>
+          <div class="midd-item" onclick="document.getElementById('dawLoopToggle').click()">🔁 Toggle loop region</div>
+        </div>
+      </div>
+      <div class="mi" onclick="toast('Songbook Studio — double-click the timeline to create a clip, right-click a clip for more options.')">Help</div>
       <input type="file" id="dawLoadInput" accept="application/json" style="display:none" onchange="dawLoadProjectFile(this)">
-      <button class="daw-top-btn" onclick="dawExportMIDI()">Export MIDI</button>
-      <button class="daw-top-btn prim" onclick="dawExportWAV()">Export WAV</button>
-      <button class="daw-top-btn" onclick="dawToggleMiniPanel()">📱 Mini</button>
-    </header>
-    <div id="daw-transport">
-      <select id="dawAddTrackType" class="daw-select">
+      <div class="proj" id="dawProjectName" contenteditable spellcheck="false" oninput="dawProject.name=dawProjectName.textContent">Untitled Project</div>
+      <div class="spacer"></div>
+      <button class="btn" onclick="toast('Real-time collaboration needs a signaling server this build doesn\'t have yet.')">👥 Invite</button>
+      <button class="btn primary" onclick="dawExportWAV()">↑ Export</button>
+    </div>
+
+    <!-- transport -->
+    <div class="transport">
+      <select id="dawAddTrackType" class="tinput" style="width:auto">
         <option value="drums">🥁 Drums</option>
         <option value="bass">🎵 Bass</option>
         <option value="guitar">🎸 Guitar</option>
@@ -1658,64 +1947,113 @@ button:active,.nbtn:active,.ibtn:active,.qbtn:active,.ngrid-btn:active{transform
         <option value="vocals">🎤 Vocals</option>
         <option value="sample">🔊 Sample</option>
       </select>
-      <button class="daw-top-btn" onclick="dawAddTrack()">+ Add track</button>
-      <label class="daw-field">BPM <input id="dawBpm" type="number" min="40" max="240" value="120" onchange="dawSetBpm(this.value)"></label>
-      <label class="daw-field">Key
-        <select id="dawKey" onchange="dawSetKey(this.value)">
-          <option>C</option><option>G</option><option>D</option><option>A</option><option>E</option><option>F</option><option>Bb</option>
-          <option>Am</option><option>Em</option><option>Dm</option><option>Gm</option>
-        </select>
-      </label>
-      <span id="dawTimeDisplay" class="daw-time">00:00.0</span>
-      <button class="daw-transport-btn" onclick="dawSeekToStart()">⏮</button>
-      <button class="daw-transport-btn" onclick="dawStop()">⏹</button>
-      <button class="daw-transport-btn" id="dawPlayBtn" onclick="dawTogglePlay()">▶</button>
-      <button class="daw-transport-btn" id="dawRecordBtn" onclick="dawToggleRecordArmGlobal()">⏺</button>
-      <label class="daw-field"><input type="checkbox" id="dawLoopToggle" onchange="dawProject.loopEnabled=this.checked"> 🔁 Loop</label>
-      <span class="daw-field">Zoom</span><input type="range" id="dawZoom" min="8" max="96" value="24" oninput="dawSetZoom(this.value)">
+      <button class="btn" style="padding:4px 9px" onclick="dawAddTrack()">+ Add track</button>
+      <span class="lbl">BPM</span><input id="dawBpm" class="tinput" type="number" min="40" max="240" value="120" onchange="dawSetBpm(this.value)">
+      <span class="lbl">KEY</span>
+      <select id="dawKey" class="tinput" style="width:auto" onchange="dawSetKey(this.value)">
+        <option>C</option><option>G</option><option>D</option><option>A</option><option>E</option><option>F</option><option>Bb</option>
+        <option>Am</option><option>Em</option><option>Dm</option><option>Gm</option>
+      </select>
+      <span class="lbl">SIG</span><input id="dawSig" class="tinput" value="4/4" readonly>
+      <label class="lbl" style="cursor:pointer;display:flex;align-items:center;gap:4px"><input type="checkbox" id="dawRecArmVisible" style="display:none">⏺ REC</label>
+      <div class="spacer"></div>
+      <span class="lbl">ZOOM</span><input type="range" id="dawZoom" class="zoom" min="8" max="96" value="24" oninput="dawSetZoom(this.value)">
     </div>
-    <div id="daw-body">
-      <div id="daw-tracklist"></div>
-      <div id="daw-timeline-wrap">
-        <div id="daw-ruler"></div>
-        <div id="daw-canvas-scroll">
-          <canvas id="daw-canvas"></canvas>
+
+    <!-- body -->
+    <div class="body">
+
+      <!-- track list -->
+      <div class="tracklist" id="daw-tracklist"></div>
+
+      <!-- timeline -->
+      <div class="tlwrap" id="daw-timeline-wrap">
+        <div class="ruler" id="daw-ruler"></div>
+        <div class="grid" id="daw-grid"></div>
+      </div>
+
+      <!-- loop browser -->
+      <div class="side" id="daw-sidebar">
+        <div class="sh">
+          <input type="text" class="search" id="dawLoopSearch" placeholder="Search loops…" oninput="renderDawLoopBrowser()">
+          <span class="hrt" id="dawLoopFavBtn" onclick="dawToggleLoopFavOnly()" title="Favorites only">♡</span>
+        </div>
+        <div class="pills" id="dawLoopCategoryPills"></div>
+        <div class="pills" style="border-bottom:1px solid var(--line)">
+          <button class="pill" id="dawLoopKeyOnlyPill" onclick="dawToggleLoopKeyOnly()">Any scale ▾</button>
+        </div>
+        <div class="loops" id="dawLoopList"></div>
+      </div>
+
+      <!-- phone mini -->
+      <div class="phone" id="daw-mini-panel">
+        <div class="ph">
+          <span class="arw" onclick="dawMiniStepTrack(-1)">◀</span>
+          <div class="pht"><b id="dawMiniProjName">Untitled Project</b><span id="dawMiniBpmKey">120 bpm in C</span></div>
+          <span class="arw" onclick="dawAddTrack()">+</span>
+          <div class="pav">C</div>
+          <span class="arw" onclick="dawToggleMiniPanel()">⋯</span>
+        </div>
+        <div class="pruler" id="dawMiniRuler"></div>
+        <div class="pgrid" id="dawMiniGrid"><div class="pplay" id="dawMiniPlayhead"></div></div>
+        <div class="ptr">
+          <button class="ptb" onclick="dawSeekToStart()">⏮</button>
+          <button class="ptb" id="dawMiniPlayBtn" onclick="dawTogglePlay()">▶</button>
+          <button class="ptb" onclick="dawStop()">↺</button>
+          <button class="ptb" id="dawMiniRecBtn" onclick="dawToggleRecordArmGlobal()">⏺</button>
+          <button class="ptb" id="dawMiniLoopBtn" onclick="document.getElementById('dawLoopToggle').click()">🔁</button>
+        </div>
+        <div class="pico">
+          <div class="pi" onclick="dawOpenBrowseLoops()"><i>♫</i>Loops</div>
+          <div class="pi" onclick="dawOpenBeatmaker()"><i>▦</i>Drums</div>
+          <div class="pi" onclick="dawAddTrackOfType('vocals')"><i>🎤</i>Voice</div>
+          <div class="pi" onclick="dawAddTrackOfType('bass')"><i>🎵</i>Bass</div>
+          <div class="pi" onclick="dawOpenSynthPads()"><i>🎹</i>Synth</div>
+          <div class="pi" onclick="toast('Import audio is available from a track\'s sampler panel.')"><i>↓</i>Import</div>
         </div>
       </div>
-      <div id="daw-sidebar">
-        <div class="daw-sidebar-title">🔁 Loop Browser</div>
-        <div class="studio-loop-controls">
-          <input type="text" id="dawLoopSearch" class="daw-select" placeholder="🔎 Search loops…" oninput="renderDawLoopBrowser()" style="flex:1">
-          <button class="studio-loop-add-btn" id="dawLoopFavBtn" onclick="dawToggleLoopFavOnly()" title="Favorites only">☆</button>
-        </div>
-        <div class="studio-loop-controls">
-          <div class="daw-pill-row" id="dawLoopCategoryPills"></div>
-        </div>
-        <label class="daw-field"><input type="checkbox" id="dawLoopKeyOnly" onchange="renderDawLoopBrowser()"> In key only</label>
-        <div class="studio-loop-list" id="dawLoopList"></div>
+    </div>
+
+    <!-- bottom bar -->
+    <div class="bottom">
+      <button class="bbtn" onclick="dawOpenBrowseLoops()">♫ Browse loops</button>
+      <button class="bbtn" onclick="dawOpenBeatmaker()">▦ Patterns Beatmaker</button>
+      <button class="bbtn" onclick="dawOpenSynthPads()">🎹 Play the synth</button>
+      <div class="spacer"></div>
+      <button class="rec" id="dawRecordBtn" onclick="dawToggleRecordArmGlobal()"></button>
+      <button class="pbig" id="dawPlayBtn" onclick="dawTogglePlay()">▶</button>
+      <button class="pbig" onclick="dawSeekToStart()">⏮</button>
+      <button class="pbig" onclick="dawNudgeSeek(-1)">⏪</button>
+      <button class="pbig" onclick="dawNudgeSeek(1)">⏩</button>
+      <button class="pbig" id="dawLoopBtn" onclick="document.getElementById('dawLoopToggle').click()">🔁</button>
+      <input type="checkbox" id="dawLoopToggle" style="display:none" onchange="dawProject.loopEnabled=this.checked;dawSyncLoopButtons()">
+      <div class="spacer"></div>
+      <div class="meta">
+        <span id="dawTimeDisplay">00:00.0</span>
+        <span id="dawKeyDisplay">C</span>
+        <span><span id="dawBpmDisplay">120</span> <em style="font-style:normal;color:var(--tx-3)">bpm</em></span>
+        <span id="dawSigDisplay">4/4</span>
       </div>
     </div>
-    <div id="daw-bottombar">
-      <button class="daw-top-btn" onclick="dawOpenBrowseLoops()">♫ Browse loops</button>
-      <button class="daw-top-btn" onclick="dawOpenBeatmaker()">▦ Patterns Beatmaker</button>
-      <button class="daw-top-btn" onclick="dawOpenSynthPads()">🎹 Play the synth</button>
-    </div>
-    <div id="daw-panel" class="closed">
-      <div id="daw-panel-header">
-        <button id="daw-panel-close" onclick="dawClosePanel()">✕</button>
-        <div id="daw-panel-tabs">
-          <button class="daw-ptab on" data-tab="instrument" onclick="dawSwitchPanelTab('instrument')">Instrument</button>
-          <button class="daw-ptab" data-tab="chords" onclick="dawSwitchPanelTab('chords')">Chords</button>
-          <button class="daw-ptab" data-tab="pianoroll" onclick="dawSwitchPanelTab('pianoroll')">Piano Roll</button>
-          <button class="daw-ptab" data-tab="effects" onclick="dawSwitchPanelTab('effects')">Effects</button>
+
+    <!-- panel -->
+    <div class="panel" id="daw-panel">
+      <div class="ph2">
+        <button class="tab" id="daw-panel-close" onclick="dawClosePanel()">✕</button>
+        <div id="daw-panel-tabs" style="display:flex;gap:2px">
+          <button class="tab on" data-tab="instrument" onclick="dawSwitchPanelTab('instrument')">Instrument</button>
+          <button class="tab" data-tab="chords" onclick="dawSwitchPanelTab('chords')">Chords</button>
+          <button class="tab" data-tab="pianoroll" onclick="dawSwitchPanelTab('pianoroll')">Piano Roll</button>
+          <button class="tab" data-tab="effects" onclick="dawSwitchPanelTab('effects')">Effects</button>
         </div>
-        <button class="daw-top-btn" onclick="dawSavePresetFromPanel()">Save Preset</button>
-        <button id="daw-panel-expand" onclick="dawTogglePanelExpand()">⤢</button>
+        <div class="spacer"></div>
+        <button class="btn" style="padding:4px 9px" onclick="dawSavePresetFromPanel()">Save Preset</button>
+        <button class="tab" id="daw-panel-expand" onclick="dawTogglePanelExpand()">⤢</button>
       </div>
-      <div id="daw-panel-body"></div>
+      <div class="pb" id="daw-panel-body"></div>
     </div>
+
     <div id="daw-context-menu" class="daw-context-menu" style="display:none"></div>
-    <div id="daw-mini-panel" class="daw-mini-panel"></div>
   </div>
 </div>
 
@@ -12830,7 +13168,7 @@ class DawTrack{
   }
 }
 let dawProject={name:'Untitled Project',bpm:120,key:'C',timeSig:[4,4],tracks:[],loopStart:0,loopEnd:16,loopEnabled:false};
-let dawView={pxPerBeat:24,scrollBeats:0,playheadBeat:0,selectedClipId:null,selectedTrackId:null,dragState:null};
+let dawView={pxPerBeat:24,scrollBeats:0,scrollTop:0,playheadBeat:0,selectedClipId:null,selectedTrackId:null,dragState:null};
 let dawTrackDragSrc=null;
 let dawClipClipboard=null;
 
@@ -12838,7 +13176,7 @@ let dawClipClipboard=null;
 function beatFromX(x){ return dawView.scrollBeats + x/dawView.pxPerBeat; }
 function xFromBeat(b){ return (b-dawView.scrollBeats)*dawView.pxPerBeat; }
 function dawTotalHeight(){ return dawProject.tracks.reduce((s,t)=>s+t.height,0)||300; }
-function dawTrackIndexFromY(y){ let acc=0; for(let i=0;i<dawProject.tracks.length;i++){ acc+=dawProject.tracks[i].height; if(y<acc) return i; } return -1; }
+function dawTrackIndexFromY(y){ const ay=y+dawView.scrollTop; let acc=0; for(let i=0;i<dawProject.tracks.length;i++){ acc+=dawProject.tracks[i].height; if(ay<acc) return i; } return -1; }
 function dawHitTestClip(beat,trackIndex){
   const track=dawProject.tracks[trackIndex]; if(!track) return null;
   return track.clips.find(c=>beat>=c.startBeat&&beat<=c.startBeat+c.lengthBeats)||null;
@@ -12848,124 +13186,129 @@ function hexWithAlpha(hex,alpha){
   const r=parseInt(h.substring(0,2),16)||128,g=parseInt(h.substring(2,4),16)||128,b=parseInt(h.substring(4,6),16)||128;
   return `rgba(${r},${g},${b},${alpha})`;
 }
-function roundRectPath(ctx,x,y,w,h,r){
-  ctx.beginPath();
-  if(ctx.roundRect){ ctx.roundRect(x,y,w,h,r); return; }
-  ctx.moveTo(x+r,y);ctx.arcTo(x+w,y,x+w,y+h,r);ctx.arcTo(x+w,y+h,x,y+h,r);ctx.arcTo(x,y+h,x,y,r);ctx.arcTo(x,y,x+w,y,r);ctx.closePath();
-}
 
-// ── canvas rendering ──
-function renderDawCanvas(){
-  const c=document.getElementById('daw-canvas'); if(!c) return;
-  const wrap=document.getElementById('daw-canvas-scroll'); if(!wrap) return;
-  const dpr=window.devicePixelRatio||1;
-  const w=Math.max(200,wrap.clientWidth);
-  const h=Math.max(200,dawTotalHeight());
-  c.width=Math.round(w*dpr); c.height=Math.round(h*dpr);
-  c.style.width=w+'px'; c.style.height=h+'px';
-  const ctx=c.getContext('2d');
-  ctx.setTransform(dpr,0,0,dpr,0,0);
-  ctx.clearRect(0,0,w,h);
-  drawDawLanes(ctx,w,h);
-  drawDawGrid(ctx,w,h);
-  drawDawClips(ctx);
-  if(dawProject.loopEnabled) drawDawLoopRegion(ctx,h);
-  drawDawPlayhead(ctx,h);
-  renderDawRuler(w);
+// ── timeline rendering — real positioned DOM (.gline/.lane/.clip), matching
+// the visual reference exactly, instead of a <canvas>. Split the same way the
+// mini panel already is: renderDawTimeline() does the full structural rebuild
+// (call on track/clip/zoom/scroll changes), updateDawPlayhead() is the cheap
+// per-frame update called from the RAF tick during playback. ──
+function dawFurthestBeat(){
+  let max=32;
+  dawProject.tracks.forEach(t=>t.clips.forEach(c=>{ max=Math.max(max,c.startBeat+c.lengthBeats*(c.loopCount||1)); }));
+  return max;
 }
-function drawDawLanes(ctx,w,h){
-  let y=0;
-  dawProject.tracks.forEach((t,i)=>{
-    ctx.fillStyle=i%2===0?'rgba(255,255,255,.015)':'rgba(255,255,255,.03)';
-    ctx.fillRect(0,y,w,t.height);
-    if(t.id===dawView.selectedTrackId){ ctx.fillStyle='rgba(255,123,84,.06)'; ctx.fillRect(0,y,w,t.height); }
-    ctx.strokeStyle='rgba(255,255,255,.06)';ctx.beginPath();ctx.moveTo(0,y+t.height-.5);ctx.lineTo(w,y+t.height-.5);ctx.stroke();
-    y+=t.height;
-  });
-}
-function drawDawGrid(ctx,w,h){
-  const beatsVisible=w/dawView.pxPerBeat;
-  const firstBeat=Math.max(0,Math.floor(dawView.scrollBeats));
-  for(let b=firstBeat;b<=dawView.scrollBeats+beatsVisible+1;b++){
+function renderDawTimeline(){
+  const grid=document.getElementById('daw-grid'); if(!grid) return;
+  const barLen=dawProject.timeSig[0];
+  const totalBeats=Math.ceil((dawFurthestBeat()+barLen*8)/barLen)*barLen;
+  const totalH=dawTotalHeight();
+  grid.innerHTML='';
+  const gridW=grid.clientWidth||800, gridH=grid.clientHeight||300;
+  // grid lines
+  for(let b=0;b<=totalBeats;b++){
     const x=xFromBeat(b);
-    const isBar=b%(dawProject.timeSig[0])===0;
-    ctx.strokeStyle=isBar?'rgba(255,255,255,.12)':'rgba(255,255,255,.04)';
-    ctx.lineWidth=1;
-    ctx.beginPath();ctx.moveTo(x+.5,0);ctx.lineTo(x+.5,h);ctx.stroke();
+    if(x<-20||x>gridW+20) continue;
+    const g=document.createElement('div');
+    g.className='gline'+(b%barLen===0?' b':'');
+    g.style.left=x+'px';
+    grid.appendChild(g);
   }
-}
-function drawDawClips(ctx){
+  // loop region
+  if(dawProject.loopEnabled){
+    const x1=xFromBeat(dawProject.loopStart),x2=xFromBeat(dawProject.loopEnd);
+    const lr=document.createElement('div'); lr.className='loopregion';
+    lr.style.left=x1+'px'; lr.style.width=Math.max(0,x2-x1)+'px';
+    grid.appendChild(lr);
+  }
+  // lanes + clips
   let y=0;
   dawProject.tracks.forEach(track=>{
-    track.clips.forEach(clip=>{
-      const x=xFromBeat(clip.startBeat);
-      const w=Math.max(clip.lengthBeats*dawView.pxPerBeat,4);
-      const clipH=track.height-8, clipY=y+4;
-      ctx.save();
-      ctx.globalAlpha=clip.muted?0.35:1;
-      ctx.fillStyle=hexWithAlpha(clip.colorOverride||track.color,0.85);
-      roundRectPath(ctx,x,clipY,w,clipH,4);ctx.fill();
-      ctx.strokeStyle='rgba(255,255,255,.25)';ctx.lineWidth=1;ctx.stroke();
-      if(clip.id===dawView.selectedClipId){ ctx.strokeStyle='#fff';ctx.lineWidth=2;roundRectPath(ctx,x,clipY,w,clipH,4);ctx.stroke(); }
-      ctx.fillStyle='rgba(0,0,0,.6)';ctx.font='10px sans-serif';ctx.textAlign='left';ctx.textBaseline='top';
-      ctx.fillText(clip.name||track.name,x+4,clipY+3);
-      drawDawClipContent(ctx,clip,x,clipY,w,clipH);
-      ctx.restore();
-    });
+    const laneTop=y-dawView.scrollTop;
     y+=track.height;
+    if(laneTop+track.height<0||laneTop>gridH) return; // vertically offscreen
+    const lane=document.createElement('div');
+    lane.className='lane'+(track.id===dawView.selectedTrackId?' sel':'');
+    lane.style.top=laneTop+'px'; lane.style.height=track.height+'px';
+    lane.dataset.trackId=track.id;
+    track.clips.forEach(clip=>{
+      const cx=xFromBeat(clip.startBeat);
+      const cw=Math.max(clip.lengthBeats*dawView.pxPerBeat,4);
+      if(cx+cw<-20||cx>gridW+20) return;
+      const div=document.createElement('div');
+      div.className='clip'+(clip.id===dawView.selectedClipId?' sel':'')+(clip.muted?' muted':'');
+      div.style.left=cx+'px'; div.style.width=cw+'px'; div.style.top='5px'; div.style.height=(track.height-10)+'px';
+      div.style.background=hexWithAlpha(clip.colorOverride||track.color,0.85);
+      div.dataset.clipId=clip.id; div.dataset.trackId=track.id;
+      const nm=document.createElement('div'); nm.className='cname'; nm.textContent=clip.name||track.name;
+      div.appendChild(nm);
+      div.appendChild(dawBuildClipContent(clip,cw,track.height-10));
+      const rs=document.createElement('div'); rs.className='clip-resize';
+      div.appendChild(rs);
+      div.addEventListener('mousedown',e=>dawClipMouseDown(e,track,clip,rs.contains(e.target)||e.offsetX>cw-8));
+      div.addEventListener('dblclick',e=>{ e.stopPropagation(); dawOpenInstrumentPanelForClip(track.id,clip.id); });
+      div.addEventListener('contextmenu',e=>{ e.preventDefault();e.stopPropagation(); dawView.selectedClipId=clip.id;dawView.selectedTrackId=track.id; renderDawTimeline(); dawShowClipContextMenu(e.clientX,e.clientY,track,clip); });
+      lane.appendChild(div);
+    });
+    grid.appendChild(lane);
   });
+  const play=document.createElement('div'); play.className='play'; play.id='dawPlayheadEl';
+  grid.appendChild(play);
+  updateDawPlayhead();
+  renderDawRuler(gridW);
 }
-function drawDawClipContent(ctx,clip,x,y,w,h){
-  const contentY=y+14,contentH=h-16;
-  if(contentH<=2) return;
+function dawBuildClipContent(clip,w,h){
+  const contentH=Math.max(h-13,4);
   if(clip.kind==='pattern'){
-    const drums=Object.keys(clip.payload||{});
-    const steps=16,rowH=contentH/Math.max(drums.length,1);
+    const wrap=document.createElement('div'); wrap.className='step';
+    const drums=Object.keys(clip.payload||{}); const steps=16;
     drums.forEach((d,ri)=>{
       (clip.payload[d]||[]).forEach((on,si)=>{
         if(!on) return;
-        const dx=x+(si/steps)*w;
-        ctx.fillStyle='rgba(255,255,255,.85)';
-        ctx.beginPath();ctx.arc(dx+2,contentY+ri*rowH+rowH/2,1.5,0,Math.PI*2);ctx.fill();
+        const dot=document.createElement('div'); dot.className='sdot';
+        dot.style.left=(3+(si/steps)*94)+'%';
+        dot.style.top=(3+(ri/Math.max(drums.length,1))*(contentH-6))+'px';
+        wrap.appendChild(dot);
       });
     });
-  } else if(clip.kind==='midi'){
-    const notes=clip.payload||[];
-    if(!notes.length) return;
-    const pitches=notes.map(n=>n.pitch);
-    const minP=Math.min(...pitches),maxP=Math.max(...pitches),range=Math.max(maxP-minP,1);
-    notes.forEach(n=>{
-      const nx=x+(n.start/clip.lengthBeats)*w;
-      const nw=Math.max((n.dur/clip.lengthBeats)*w,2);
-      const ny=contentY+contentH-((n.pitch-minP)/range)*contentH;
-      ctx.fillStyle='rgba(255,255,255,.8)';
-      ctx.fillRect(nx,ny-2,nw,3);
-    });
-  } else if(clip.kind==='audio'){
-    const buf=clip.payload;
-    if(!buf||!buf.getChannelData) return;
-    const data=buf.getChannelData(0);
-    const mid=contentY+contentH/2;
-    ctx.strokeStyle='rgba(255,255,255,.8)';ctx.lineWidth=1;ctx.beginPath();
-    const cols=Math.max(1,Math.floor(w));
-    for(let px=0;px<cols;px++){
-      const start=Math.floor((px/cols)*data.length),end=Math.floor(((px+1)/cols)*data.length);
-      let mn=1,mx=-1;
-      for(let i=start;i<end;i++){ const v=data[i]; if(v<mn)mn=v; if(v>mx)mx=v; }
-      if(mn>mx){mn=0;mx=0;}
-      ctx.moveTo(x+px,mid+mn*(contentH/2));ctx.lineTo(x+px,mid+mx*(contentH/2));
-    }
-    ctx.stroke();
+    return wrap;
   }
+  if(clip.kind==='midi'){
+    const wrap=document.createElement('div'); wrap.className='midi';
+    const notes=clip.payload||[];
+    if(notes.length){
+      const pitches=notes.map(n=>n.pitch);
+      const minP=Math.min(...pitches),maxP=Math.max(...pitches),range=Math.max(maxP-minP,1);
+      notes.forEach(n=>{
+        const nt=document.createElement('div'); nt.className='mnote';
+        nt.style.left=((n.start/clip.lengthBeats)*100)+'%';
+        nt.style.width=Math.max((n.dur/clip.lengthBeats)*100,1)+'%';
+        nt.style.top=(contentH-((n.pitch-minP)/range)*contentH)+'px';
+        wrap.appendChild(nt);
+      });
+    }
+    return wrap;
+  }
+  // audio
+  const wrap=document.createElement('div'); wrap.className='wave';
+  const buf=clip.payload;
+  const n=Math.max(6,Math.min(80,Math.floor(w/2.4)));
+  const data=(buf&&buf.getChannelData)?buf.getChannelData(0):null;
+  for(let j=0;j<n;j++){
+    const b=document.createElement('div'); b.className='wbar';
+    let pct=20;
+    if(data){
+      const start=Math.floor((j/n)*data.length),end=Math.floor(((j+1)/n)*data.length);
+      let peak=0; for(let i=start;i<end;i++) peak=Math.max(peak,Math.abs(data[i]));
+      pct=10+peak*88;
+    } else pct=14+Math.abs(Math.sin(j*.9))*74;
+    b.style.height=pct+'%';
+    wrap.appendChild(b);
+  }
+  return wrap;
 }
-function drawDawPlayhead(ctx,h){
-  const x=xFromBeat(dawView.playheadBeat||0);
-  ctx.strokeStyle='#ef4444';ctx.lineWidth=2;
-  ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,h);ctx.stroke();
-}
-function drawDawLoopRegion(ctx,h){
-  const x1=xFromBeat(dawProject.loopStart),x2=xFromBeat(dawProject.loopEnd);
-  ctx.fillStyle='rgba(255,209,102,.08)';ctx.fillRect(x1,0,x2-x1,h);
+function updateDawPlayhead(){
+  const play=document.getElementById('dawPlayheadEl'); if(!play) return;
+  play.style.left=xFromBeat(dawView.playheadBeat||0)+'px';
 }
 function renderDawRuler(width){
   const ruler=document.getElementById('daw-ruler'); if(!ruler) return;
@@ -12977,36 +13320,50 @@ function renderDawRuler(width){
   for(let bar=firstBar;bar<=lastBar;bar++){
     const beat=bar*barLen,x=xFromBeat(beat);
     if(x<-40||x>width+40) continue;
-    const label=document.createElement('span');
-    label.style.cssText='position:absolute;left:'+x+'px;top:4px;font-size:9px;color:var(--mu);font-family:var(--mono)';
-    label.textContent=bar+1;
+    const label=document.createElement('div');
+    label.className='bar'; label.style.left=x+'px'; label.textContent=bar+1;
     ruler.appendChild(label);
   }
 }
+// backward-compat alias — every existing call site (engine tick, mouse
+// handlers, transport controls) calls renderDawCanvas(); it now drives the
+// real DOM timeline instead of a canvas.
+function renderDawCanvas(){ renderDawTimeline(); }
 
-// ── track list (left panel) ──
+// ── track list (left panel) — real .trow markup from the visual reference ──
 function renderDawTrackList(){
   const wrap=document.getElementById('daw-tracklist'); if(!wrap) return;
   if(typeof renderDawMiniPanel==='function') renderDawMiniPanel(); // rebuild the mini panel too if it's open — track count/rows changed
   wrap.innerHTML='';
   dawProject.tracks.forEach(track=>{
+    const meta=DAW_TRACK_TYPES[track.type]||DAW_TRACK_TYPES.keys;
     const row=document.createElement('div');
-    row.className='daw-track-row'+(track.id===dawView.selectedTrackId?' selected':'');
+    row.className='trow'+(track.id===dawView.selectedTrackId?' sel':'');
     row.style.height=track.height+'px';
     row.draggable=true;
     row.dataset.trackId=track.id;
-    row.onclick=e=>{ if(e.target.closest('.tbtn')||e.target.closest('input')||e.target.closest('.track-icon')||e.target.closest('.track-name')) return; dawView.selectedTrackId=track.id; renderDawTrackList(); renderDawCanvas(); };
-    row.innerHTML=`<span class="drag-handle">⋮⋮</span><span class="track-icon" title="Open instrument">${(DAW_TRACK_TYPES[track.type]||DAW_TRACK_TYPES.keys).icon}</span><div class="track-meta"><div class="track-name" contenteditable spellcheck="false">${escapeHtml(track.name)}</div><div class="track-btns"><button class="tbtn m${track.muted?' on':''}">M</button><button class="tbtn s${track.soloed?' on':''}">S</button><button class="tbtn r${track.armed?' on':''}">R</button></div></div><div class="track-mix"><input type="range" class="vol" min="0" max="200" value="${Math.round(track.volume*100)}" title="Volume"><input type="range" class="pan" min="-100" max="100" value="${Math.round(track.pan*100)}" title="Pan"></div><canvas class="track-meter" width="4" height="${Math.max(track.height-16,20)}"></canvas>`;
-    row.querySelector('.track-icon').onclick=e=>{ e.stopPropagation(); dawOpenInstrumentPanelForTrack(track.id); };
-    row.querySelector('.tbtn.m').onclick=e=>{ e.stopPropagation(); track.muted=!track.muted; dawUpdateTrackAudioState(track); renderDawTrackList(); renderDawCanvas(); };
-    row.querySelector('.tbtn.s').onclick=e=>{ e.stopPropagation(); track.soloed=!track.soloed; dawProject.tracks.forEach(dawUpdateTrackAudioState); renderDawTrackList(); renderDawCanvas(); };
-    row.querySelector('.tbtn.r').onclick=e=>{ e.stopPropagation(); dawProject.tracks.forEach(t=>{ if(t!==track) t.armed=false; }); track.armed=!track.armed; renderDawTrackList(); };
+    row.onclick=e=>{ if(e.target.closest('.tico')||e.target.closest('.tname')||e.target.closest('.msr')||e.target.closest('.vol')) return; dawView.selectedTrackId=track.id; renderDawTrackList(); renderDawTimeline(); };
+    row.innerHTML=`<span class="dots" draggable="true">⋮⋮</span>
+      <div class="tico" style="background:${meta.color}" title="Open instrument">${meta.icon}</div>
+      <div class="tbody">
+        <div class="tname" contenteditable spellcheck="false">${escapeHtml(track.name)}</div>
+        <div class="tctl">
+          <button class="msr${track.muted?' on-m':''}">M</button>
+          <button class="msr${track.soloed?' on-s':''}">S</button>
+          <button class="msr${track.armed?' on-r':''}">R</button>
+          <input type="range" class="vol" min="0" max="200" value="${Math.round(track.volume*100)}" title="Volume">
+        </div>
+      </div>`;
+    row.querySelector('.tico').onclick=e=>{ e.stopPropagation(); dawOpenInstrumentPanelForTrack(track.id); };
+    const msrBtns=row.querySelectorAll('.msr');
+    msrBtns[0].onclick=e=>{ e.stopPropagation(); track.muted=!track.muted; dawUpdateTrackAudioState(track); renderDawTrackList(); renderDawTimeline(); };
+    msrBtns[1].onclick=e=>{ e.stopPropagation(); track.soloed=!track.soloed; dawProject.tracks.forEach(dawUpdateTrackAudioState); renderDawTrackList(); renderDawTimeline(); };
+    msrBtns[2].onclick=e=>{ e.stopPropagation(); dawProject.tracks.forEach(t=>{ if(t!==track) t.armed=false; }); track.armed=!track.armed; renderDawTrackList(); dawSyncLoopButtons(); };
     row.querySelector('.vol').oninput=e=>{ track.volume=Number(e.target.value)/100; dawUpdateTrackAudioState(track); };
-    row.querySelector('.pan').oninput=e=>{ track.pan=Number(e.target.value)/100; dawUpdateTrackAudioState(track); };
-    const nameEl=row.querySelector('.track-name');
+    const nameEl=row.querySelector('.tname');
     nameEl.addEventListener('click',e=>e.stopPropagation());
-    nameEl.addEventListener('blur',()=>{ track.name=nameEl.textContent.trim()||(DAW_TRACK_TYPES[track.type]||DAW_TRACK_TYPES.keys).label; renderDawCanvas(); });
-    row.addEventListener('dragstart',()=>{ dawTrackDragSrc=track.id; });
+    nameEl.addEventListener('blur',()=>{ track.name=nameEl.textContent.trim()||meta.label; renderDawTimeline(); });
+    row.addEventListener('dragstart',e=>{ dawTrackDragSrc=track.id; });
     row.addEventListener('dragover',e=>e.preventDefault());
     row.addEventListener('drop',()=>{
       if(!dawTrackDragSrc||dawTrackDragSrc===track.id) return;
@@ -13015,10 +13372,15 @@ function renderDawTrackList(){
       const[moved]=dawProject.tracks.splice(srcIdx,1);
       dawProject.tracks.splice(dstIdx,0,moved);
       dawTrackDragSrc=null;
-      renderDawTrackList();renderDawCanvas();
+      renderDawTrackList();renderDawTimeline();
     });
     wrap.appendChild(row);
   });
+  const add=document.createElement('div'); add.className='addtrack'; add.textContent='+ Add track';
+  add.onclick=dawAddTrack;
+  wrap.appendChild(add);
+  const grid=document.getElementById('daw-grid');
+  if(grid) grid.style.height=Math.max(grid.parentElement?grid.parentElement.clientHeight-22:300,300)+'px';
 }
 
 // ── real per-track audio graph: gain (vol/mute/solo) → panner → analyser → master ──
@@ -13109,7 +13471,7 @@ const dawEngine={
     });
     this.scheduledUntilBeat=Math.max(this.scheduledUntilBeat,windowEnd);
     updateDawTimeDisplay();
-    renderDawCanvas();
+    updateDawPlayhead();
     if(typeof dawRedrawMiniCanvas==='function') dawRedrawMiniCanvas();
     this.schedulerId=requestAnimationFrame(()=>this.tick());
   },
@@ -13153,30 +13515,40 @@ function dawScheduleClipEvents(track,clip,fromBeat,toBeat){
   }
 }
 
-// ── mouse interaction on the canvas ──
-function dawCanvasMouseDown(e){
-  const rect=e.currentTarget.getBoundingClientRect();
-  const x=e.clientX-rect.left,y=e.clientY-rect.top;
+// ── mouse interaction on the real DOM timeline (#daw-grid) ──
+function dawGridPoint(e){
+  const grid=document.getElementById('daw-grid');
+  const rect=grid.getBoundingClientRect();
+  return {x:e.clientX-rect.left,y:e.clientY-rect.top};
+}
+// Selecting a clip/track on plain mousedown must NOT rebuild the grid's DOM —
+// doing so replaces the very element the browser is tracking for double-click
+// detection, so a real dblclick on that spot would silently stop firing (the
+// same class of bug the mini panel hit earlier: full-rebuild-on-every-
+// interaction). A full renderDawTimeline() only happens once real geometry
+// changes (drag in progress, or a structural edit).
+function dawUpdateGridSelectionClasses(){
+  document.querySelectorAll('#daw-grid .lane').forEach(l=>l.classList.toggle('sel',l.dataset.trackId===dawView.selectedTrackId));
+  document.querySelectorAll('#daw-grid .clip').forEach(c=>c.classList.toggle('sel',c.dataset.clipId===dawView.selectedClipId));
+}
+function dawClipMouseDown(e,track,clip,resizing){
+  e.stopPropagation();
+  const {x}=dawGridPoint(e);
+  dawView.selectedClipId=clip.id;dawView.selectedTrackId=track.id;
+  dawView.dragState={type:resizing?'resize':'move',clipId:clip.id,trackId:track.id,startX:x,origStartBeat:clip.startBeat,origLength:clip.lengthBeats,origTrackIdx:dawProject.tracks.indexOf(track)};
+  renderDawTrackList();dawUpdateGridSelectionClasses();
+}
+function dawGridMouseDown(e){
+  if(e.target.closest('.clip')) return; // handled by dawClipMouseDown
+  const {y}=dawGridPoint(e);
   const trackIdx=dawTrackIndexFromY(y);
   if(trackIdx<0) return;
-  const track=dawProject.tracks[trackIdx];
-  const beat=beatFromX(x);
-  const clip=dawHitTestClip(beat,trackIdx);
-  if(clip){
-    dawView.selectedClipId=clip.id;dawView.selectedTrackId=track.id;
-    const clipRightX=xFromBeat(clip.startBeat+clip.lengthBeats);
-    const nearRightEdge=Math.abs(x-clipRightX)<6;
-    dawView.dragState={type:nearRightEdge?'resize':'move',clipId:clip.id,trackId:track.id,startX:x,origStartBeat:clip.startBeat,origLength:clip.lengthBeats,origTrackIdx:trackIdx};
-  } else {
-    dawView.selectedTrackId=track.id;dawView.selectedClipId=null;
-  }
-  renderDawTrackList();renderDawCanvas();
+  dawView.selectedTrackId=dawProject.tracks[trackIdx].id;dawView.selectedClipId=null;
+  renderDawTrackList();dawUpdateGridSelectionClasses();
 }
 function dawCanvasMouseMove(e){
   if(!dawView.dragState) return;
-  const canvas=document.getElementById('daw-canvas'); if(!canvas) return;
-  const rect=canvas.getBoundingClientRect();
-  const x=e.clientX-rect.left,y=e.clientY-rect.top;
+  const {x,y}=dawGridPoint(e);
   const ds=dawView.dragState;
   const track=dawProject.tracks.find(t=>t.id===ds.trackId);
   const clip=track&&track.clips.find(c=>c.id===ds.clipId);
@@ -13196,34 +13568,22 @@ function dawCanvasMouseMove(e){
     const dBeat=beatFromX(x)-beatFromX(ds.startX);
     clip.lengthBeats=Math.max(0.25,Math.round((ds.origLength+dBeat)*4)/4);
   }
-  renderDawCanvas();
+  renderDawTimeline();
 }
 function dawCanvasMouseUp(){ dawView.dragState=null; }
-function dawCanvasDblClick(e){
-  const rect=e.currentTarget.getBoundingClientRect();
-  const x=e.clientX-rect.left,y=e.clientY-rect.top;
+function dawGridDblClick(e){
+  if(e.target.closest('.clip')) return; // clip's own dblclick handler opens its panel
+  const {x,y}=dawGridPoint(e);
   const trackIdx=dawTrackIndexFromY(y);
   if(trackIdx<0) return;
   const track=dawProject.tracks[trackIdx];
   const beat=Math.max(0,Math.round(beatFromX(x)));
-  const existing=dawHitTestClip(beat,trackIdx);
-  if(existing){ dawOpenInstrumentPanelForClip(track.id,existing.id); return; }
   const clip=new DawClip(beat,4,track.type==='drums'?'pattern':'midi',track.type==='drums'?{kick:new Array(16).fill(0),snare:new Array(16).fill(0),hat:new Array(16).fill(0)}:[]);
   clip.name=track.name;
   track.clips.push(clip);
   dawView.selectedClipId=clip.id;dawView.selectedTrackId=track.id;
-  renderDawCanvas();
+  renderDawTimeline();
   dawOpenInstrumentPanelForClip(track.id,clip.id);
-}
-function dawCanvasContextMenu(e){
-  e.preventDefault();
-  const rect=e.currentTarget.getBoundingClientRect();
-  const x=e.clientX-rect.left,y=e.clientY-rect.top;
-  const trackIdx=dawTrackIndexFromY(y);
-  if(trackIdx<0) return;
-  const clip=dawHitTestClip(beatFromX(x),trackIdx);
-  if(!clip) return;
-  dawShowClipContextMenu(e.clientX,e.clientY,dawProject.tracks[trackIdx],clip);
 }
 function dawShowClipContextMenu(x,y,track,clip){
   const menu=document.getElementById('daw-context-menu'); if(!menu) return;
@@ -13259,41 +13619,86 @@ function dawQuantizeClip(clip){ clip.startBeat=Math.round(clip.startBeat*4)/4; i
 function dawReverseClip(clip){ if(clip.kind!=='midi') return; (clip.payload||[]).forEach(n=>{ n.start=clip.lengthBeats-n.start-n.dur; }); }
 function dawCanvasWheel(e){
   if(e.ctrlKey||e.metaKey){ e.preventDefault(); dawSetZoom(Math.max(8,Math.min(96,dawView.pxPerBeat+(e.deltaY<0?4:-4)))); return; }
-  if(e.shiftKey){ e.preventDefault(); dawView.scrollBeats=Math.max(0,dawView.scrollBeats+e.deltaY/dawView.pxPerBeat); renderDawCanvas(); }
+  if(e.shiftKey){ e.preventDefault(); dawView.scrollBeats=Math.max(0,dawView.scrollBeats+e.deltaY/dawView.pxPerBeat); renderDawTimeline(); return; }
+  if(Math.abs(e.deltaX)>Math.abs(e.deltaY)){ e.preventDefault(); dawView.scrollBeats=Math.max(0,dawView.scrollBeats+e.deltaX/dawView.pxPerBeat); renderDawTimeline(); return; }
+  e.preventDefault();
+  const maxScroll=Math.max(0,dawTotalHeight()-(document.getElementById('daw-grid')?.clientHeight||0));
+  dawView.scrollTop=Math.max(0,Math.min(maxScroll,dawView.scrollTop+e.deltaY));
+  const tl=document.getElementById('daw-tracklist'); if(tl) tl.scrollTop=dawView.scrollTop;
+  renderDawTimeline();
 }
-function dawRulerClick(e){
+let dawRulerDrag=null;
+function dawRulerMouseDown(e){
   const rect=e.currentTarget.getBoundingClientRect();
-  dawView.playheadBeat=Math.max(0,beatFromX(e.clientX-rect.left));
-  renderDawCanvas();
+  dawRulerDrag={startBeat:Math.max(0,beatFromX(e.clientX-rect.left)),moved:false};
 }
+function dawRulerMouseMoveGlobal(e){
+  if(!dawRulerDrag) return;
+  const ruler=document.getElementById('daw-ruler'); if(!ruler) return;
+  const rect=ruler.getBoundingClientRect();
+  const beat=Math.max(0,beatFromX(e.clientX-rect.left));
+  if(Math.abs(beat-dawRulerDrag.startBeat)>0.1){
+    dawRulerDrag.moved=true;
+    dawProject.loopStart=Math.min(dawRulerDrag.startBeat,beat);
+    dawProject.loopEnd=Math.max(dawRulerDrag.startBeat,beat);
+    dawProject.loopEnabled=true;
+    dawSyncLoopButtons();
+    renderDawTimeline();
+  }
+}
+function dawRulerMouseUpGlobal(){
+  if(dawRulerDrag&&!dawRulerDrag.moved){ dawView.playheadBeat=dawRulerDrag.startBeat; renderDawTimeline(); updateDawTimeDisplay(); }
+  dawRulerDrag=null;
+}
+function dawRulerClick(e){ /* click-vs-drag is resolved in dawRulerMouseUpGlobal */ }
 
 // ── transport / project controls ──
-function dawSetZoom(v){ dawView.pxPerBeat=Number(v); const el=document.getElementById('dawZoom'); if(el) el.value=v; renderDawCanvas(); }
+function dawSetZoom(v){ dawView.pxPerBeat=Number(v); const el=document.getElementById('dawZoom'); if(el) el.value=v; renderDawTimeline(); }
 function dawSetBpm(v){ dawProject.bpm=Math.max(40,Math.min(240,Number(v)||120)); updateDawKeyBpmLabel(); }
 function dawSetKey(v){ dawProject.key=v; updateDawKeyBpmLabel(); }
 function updateDawKeyBpmLabel(){
-  const el=document.getElementById('dawKeyBpmLabel'); if(el) el.textContent=dawProject.bpm+' BPM · '+dawProject.key;
   const bpmInput=document.getElementById('dawBpm'); if(bpmInput) bpmInput.value=dawProject.bpm;
   const keySel=document.getElementById('dawKey'); if(keySel) keySel.value=dawProject.key;
+  const sigEl=document.getElementById('dawSig'); if(sigEl) sigEl.value=dawProject.timeSig.join('/');
+  const bd=document.getElementById('dawBpmDisplay'); if(bd) bd.textContent=dawProject.bpm;
+  const kd=document.getElementById('dawKeyDisplay'); if(kd) kd.textContent=dawProject.key;
+  const sd=document.getElementById('dawSigDisplay'); if(sd) sd.textContent=dawProject.timeSig.join('/');
+  const mb=document.getElementById('dawMiniBpmKey'); if(mb) mb.textContent=dawProject.bpm+' bpm in '+dawProject.key;
+  const mp=document.getElementById('dawMiniProjName'); if(mp) mp.textContent=dawProject.name;
 }
 function dawAddTrack(){
   const type=document.getElementById('dawAddTrackType')?.value||'keys';
+  return dawAddTrackOfType(type);
+}
+function dawAddTrackOfType(type){
   const track=new DawTrack(type);
   dawProject.tracks.push(track);
   dawBuildTrackGraph(track);
   dawView.selectedTrackId=track.id;
-  renderDawTrackList();renderDawCanvas();
+  renderDawTrackList();renderDawTimeline();
+  return track;
 }
 function dawTogglePlay(){
   if(dawEngine.isPlaying){ dawStop(); return; }
   dawEngine.play();
-  const btn=document.getElementById('dawPlayBtn'); if(btn){ btn.textContent='⏸';btn.classList.add('playing'); }
+  [document.getElementById('dawPlayBtn'),document.getElementById('dawMiniPlayBtn')].forEach(btn=>{ if(btn){ btn.textContent='⏸';btn.classList.add('on'); } });
 }
 function dawStop(){
   dawEngine.stop();
-  const btn=document.getElementById('dawPlayBtn'); if(btn){ btn.textContent='▶';btn.classList.remove('playing'); }
+  [document.getElementById('dawPlayBtn'),document.getElementById('dawMiniPlayBtn')].forEach(btn=>{ if(btn){ btn.textContent='▶';btn.classList.remove('on'); } });
 }
-function dawSeekToStart(){ dawView.playheadBeat=0; renderDawCanvas(); updateDawTimeDisplay(); }
+function dawSeekToStart(){ dawView.playheadBeat=0; renderDawTimeline(); updateDawTimeDisplay(); }
+function dawNudgeSeek(dirBars){
+  const barLen=dawProject.timeSig[0];
+  dawView.playheadBeat=Math.max(0,(dawView.playheadBeat||0)+dirBars*barLen);
+  if(dawEngine.isPlaying) dawEngine.play(); else { renderDawTimeline(); updateDawTimeDisplay(); }
+}
+function dawSyncLoopButtons(){
+  const on=!!dawProject.loopEnabled;
+  const lt=document.getElementById('dawLoopToggle'); if(lt) lt.checked=on;
+  [document.getElementById('dawLoopBtn'),document.getElementById('dawMiniLoopBtn')].forEach(b=>{ if(b) b.classList.toggle('on',on); });
+  const rec=document.getElementById('dawRecordBtn'); if(rec) rec.classList.toggle('armed',dawProject.tracks.some(t=>t.armed));
+}
 function updateDawTimeDisplay(){
   const el=document.getElementById('dawTimeDisplay'); if(!el) return;
   const sec=(dawView.playheadBeat||0)*60/dawProject.bpm;
@@ -13302,41 +13707,60 @@ function updateDawTimeDisplay(){
 }
 function dawToggleRecordArmGlobal(){
   const armed=dawProject.tracks.find(t=>t.armed);
+  dawSyncLoopButtons();
   if(!armed){ toast('Arm a track first (its R button), then press Record'); return; }
   toast('Recording to '+armed.name+' — mic capture into a real audio clip is a later tier');
+}
+function dawToggleMenu(name,event){
+  event.stopPropagation();
+  ['file','edit','settings'].forEach(n=>{
+    const el=document.getElementById('dawMenu'+n[0].toUpperCase()+n.slice(1));
+    if(el) el.classList.toggle('on',n===name?!el.classList.contains('on'):false);
+  });
+}
+function dawRollUndoFromMenu(){ if(typeof dawRollUndo==='function') dawRollUndo(); else toast('Nothing to undo'); }
+function dawMiniStepTrack(dir){
+  if(typeof dawMiniFocusStep==='function'){ dawMiniFocusStep(dir); return; }
 }
 let dawInitialized=false;
 function dawInit(){
   if(dawInitialized) return;
   dawInitialized=true;
   dawEnsureMaster();
-  const canvas=document.getElementById('daw-canvas');
-  canvas.addEventListener('mousedown',dawCanvasMouseDown);
+  const grid=document.getElementById('daw-grid');
+  grid.addEventListener('mousedown',dawGridMouseDown);
   window.addEventListener('mousemove',dawCanvasMouseMove);
   window.addEventListener('mouseup',dawCanvasMouseUp);
-  canvas.addEventListener('dblclick',dawCanvasDblClick);
-  canvas.addEventListener('contextmenu',dawCanvasContextMenu);
-  canvas.addEventListener('wheel',dawCanvasWheel,{passive:false});
-  canvas.addEventListener('dragover',e=>e.preventDefault());
-  canvas.addEventListener('drop',e=>{
+  grid.addEventListener('dblclick',dawGridDblClick);
+  grid.addEventListener('wheel',dawCanvasWheel,{passive:false});
+  grid.addEventListener('dragover',e=>e.preventDefault());
+  grid.addEventListener('drop',e=>{
     e.preventDefault();
     const loopId=e.dataTransfer.getData('text/daw-loop-id'); if(!loopId) return;
-    const rect=canvas.getBoundingClientRect();
-    const x=e.clientX-rect.left,y=e.clientY-rect.top;
+    const {x,y}=dawGridPoint(e);
     const trackIdx=dawTrackIndexFromY(y);
     const track=trackIdx>=0?dawProject.tracks[trackIdx]:null;
     dawAddLoopToTimeline(loopId,track?track.id:null,beatFromX(x));
   });
-  document.getElementById('daw-ruler').addEventListener('click',dawRulerClick);
-  window.addEventListener('click',e=>{ if(!e.target.closest('#daw-context-menu')) dawHideContextMenu(); });
-  window.addEventListener('resize',()=>{ const p=document.getElementById('page-daw'); if(p&&p.classList.contains('on')) renderDawCanvas(); });
+  const ruler=document.getElementById('daw-ruler');
+  ruler.addEventListener('mousedown',dawRulerMouseDown);
+  window.addEventListener('mousemove',dawRulerMouseMoveGlobal);
+  window.addEventListener('mouseup',dawRulerMouseUpGlobal);
+  window.addEventListener('click',e=>{
+    if(!e.target.closest('#daw-context-menu')) dawHideContextMenu();
+    if(!e.target.closest('.mi')) document.querySelectorAll('#page-daw .midd.on').forEach(m=>m.classList.remove('on'));
+  });
+  const tracklist=document.getElementById('daw-tracklist');
+  tracklist.addEventListener('scroll',()=>{ dawView.scrollTop=tracklist.scrollTop; renderDawTimeline(); });
+  window.addEventListener('resize',()=>{ const p=document.getElementById('page-daw'); if(p&&p.classList.contains('on')) renderDawTimeline(); });
   window.addEventListener('keydown',dawHandleKeyDown);
   window.addEventListener('keyup',dawHandleKeyUp);
   window.addEventListener('mousemove',dawRollMouseMove);
   window.addEventListener('mouseup',dawRollMouseUp);
   renderDawTrackList();
-  renderDawCanvas();
+  renderDawTimeline();
   updateDawKeyBpmLabel();
+  dawSyncLoopButtons();
   if(typeof dawStartFxMeterLoop==='function') dawStartFxMeterLoop();
   if(typeof renderDawLoopBrowser==='function') renderDawLoopBrowser();
 }
@@ -13354,12 +13778,12 @@ function dawOpenInstrumentPanelForClip(trackId,clipId){
   dawView.selectedTrackId=trackId;dawView.selectedClipId=clipId;
   dawOpenPanel();dawSwitchPanelTab(dawCurrentPanelTab);
 }
-function dawOpenPanel(){ const panel=document.getElementById('daw-panel'); if(panel){ panel.classList.remove('closed');panel.classList.add('open'); } }
-function dawClosePanel(){ const panel=document.getElementById('daw-panel'); if(panel){ panel.classList.remove('open','expanded');panel.classList.add('closed'); } }
+function dawOpenPanel(){ const panel=document.getElementById('daw-panel'); if(panel) panel.classList.add('open'); }
+function dawClosePanel(){ const panel=document.getElementById('daw-panel'); if(panel) panel.classList.remove('open','expanded'); }
 function dawTogglePanelExpand(){ const panel=document.getElementById('daw-panel'); if(panel) panel.classList.toggle('expanded'); }
 function dawSwitchPanelTab(tab){
   dawCurrentPanelTab=tab;
-  document.querySelectorAll('.daw-ptab').forEach(t=>t.classList.toggle('on',t.dataset.tab===tab));
+  document.querySelectorAll('#daw-panel-tabs .tab[data-tab]').forEach(t=>t.classList.toggle('on',t.dataset.tab===tab));
   if(tab==='instrument') renderDawInstrumentTab();
   else if(tab==='chords') renderDawChordsTab();
   else if(tab==='pianoroll') renderDawPianoRollTab();
@@ -13379,79 +13803,73 @@ function dawOpenBrowseLoops(){ document.getElementById('daw-sidebar')?.scrollInt
 // browser — the data and the sound generation don't change, only how loops
 // get previewed/added here.
 // ══════════════════════════════════════════════════════════════════════════
-let dawLoopPreviewId=null,dawLoopPreviewTimers=[],dawLoopCategoryFilter='All',dawLoopFavOnlyOn=false;
+let dawLoopPreviewId=null,dawLoopPreviewTimers=[],dawLoopCategoryFilter='All',dawLoopFavOnlyOn=false,dawLoopKeyOnlyOn=false;
 function dawLoopFavorites(){ try{ return new Set(JSON.parse(localStorage.getItem('studioLoopFavorites')||'[]')); }catch(e){ return new Set(); } }
 function dawKeyMatches(loopKey,projectKey){
   if(!loopKey) return true; // drum loops have no key — always "in key"
   const norm=k=>String(k).replace(/m$/,'');
   return norm(loopKey)===norm(projectKey);
 }
-function dawDrawLoopThumb(canvas,loop){
-  const ctx=canvas.getContext('2d');const w=canvas.width,h=canvas.height;
-  ctx.clearRect(0,0,w,h);
-  ctx.fillStyle='rgba(255,123,84,.7)';
+function dawLoopThumbBars(loop){
+  // returns an array of 0..1 peak values used to build .lwb bars, matching
+  // the reference's .lw/.lwb waveform-thumbnail markup
+  const n=9;
   if(loop.pattern){
-    const voices=Object.values(loop.pattern);
-    const steps=16;
-    for(let i=0;i<steps;i++){
-      const hit=voices.some(v=>v[i]);
-      if(!hit) continue;
-      const x=(i/steps)*w;
-      ctx.fillRect(x,h*0.15,Math.max(w/steps-1,1),h*0.7);
-    }
+    const voices=Object.values(loop.pattern),steps=16,out=[];
+    for(let i=0;i<n;i++){ const si=Math.floor((i/n)*steps); out.push(voices.some(v=>v[si])?0.85:0.2); }
+    return out;
   } else if(loop.notes){
-    const maxEnd=Math.max(...loop.notes.map(n=>n.start+n.dur),1);
-    loop.notes.forEach(n=>{
-      const x=(n.start/maxEnd)*w,nw=Math.max((n.dur/maxEnd)*w,1);
-      const pitchRow=parseNoteOct(n.pitch).oct;
-      const y=h-((pitchRow%5)/5)*h;
-      ctx.fillRect(x,Math.max(0,y-2),nw,4);
-    });
+    const maxEnd=Math.max(...loop.notes.map(nn=>nn.start+nn.dur),1),out=new Array(n).fill(0.15);
+    loop.notes.forEach(nn=>{ const i=Math.min(n-1,Math.floor((nn.start/maxEnd)*n)); out[i]=Math.max(out[i],0.9); });
+    return out;
   }
+  return [...Array(n)].map((_,j)=>0.2+Math.abs(Math.sin(j+1))*0.78);
+}
+function dawToggleLoopKeyOnly(){
+  dawLoopKeyOnlyOn=!dawLoopKeyOnlyOn;
+  const pill=document.getElementById('dawLoopKeyOnlyPill'); if(pill){ pill.classList.toggle('on',dawLoopKeyOnlyOn); pill.textContent=dawLoopKeyOnlyOn?('In '+dawProject.key+' ▾'):'Any scale ▾'; }
+  renderDawLoopBrowser();
 }
 function renderDawLoopBrowser(){
   const catWrap=document.getElementById('dawLoopCategoryPills');
   if(catWrap){
     catWrap.innerHTML='';
     ['All','Drums','Chords','Bass','Melody','Synth Leads','Arpeggios'].forEach(cat=>{
-      const pill=document.createElement('button');pill.className='daw-pill'+(dawLoopCategoryFilter===cat?' on':'');pill.textContent=cat;
+      const pill=document.createElement('button');pill.className='pill'+(dawLoopCategoryFilter===cat?' on':'');pill.textContent=cat;
       pill.onclick=()=>{ dawLoopCategoryFilter=cat;renderDawLoopBrowser(); };
       catWrap.appendChild(pill);
     });
   }
-  const favBtn=document.getElementById('dawLoopFavBtn'); if(favBtn){ favBtn.textContent=dawLoopFavOnlyOn?'★':'☆'; favBtn.classList.toggle('added',dawLoopFavOnlyOn); }
+  const favBtn=document.getElementById('dawLoopFavBtn'); if(favBtn){ favBtn.textContent=dawLoopFavOnlyOn?'♥':'♡'; favBtn.classList.toggle('on',dawLoopFavOnlyOn); }
   const list=document.getElementById('dawLoopList'); if(!list) return;
   const search=(document.getElementById('dawLoopSearch')?.value||'').toLowerCase();
-  const keyOnly=document.getElementById('dawLoopKeyOnly')?.checked;
   const favorites=dawLoopFavorites();
   let filtered=LOOP_LIBRARY.filter(loop=>{
     if(dawLoopCategoryFilter!=='All'&&loop.category!==dawLoopCategoryFilter) return false;
     if(dawLoopFavOnlyOn&&!favorites.has(loop.id)) return false;
-    if(keyOnly&&!dawKeyMatches(loop.key,dawProject.key)) return false;
+    if(dawLoopKeyOnlyOn&&!dawKeyMatches(loop.key,dawProject.key)) return false;
     if(search&&!(loop.name.toLowerCase().includes(search)||loop.tags.some(t=>t.toLowerCase().includes(search)))) return false;
     return true;
   });
   filtered=filtered.slice().sort((a,b)=>(dawKeyMatches(b.key,dawProject.key)?1:0)-(dawKeyMatches(a.key,dawProject.key)?1:0));
   list.innerHTML='';
-  if(!filtered.length){ list.innerHTML='<div class="studio-empty">No loops match these filters.</div>'; return; }
+  if(!filtered.length){ list.innerHTML='<div style="padding:14px 9px;color:var(--tx-3);font-size:10.5px">No loops match these filters.</div>'; return; }
   filtered.forEach(loop=>{
     const item=document.createElement('div');
-    item.className='studio-loop-item'+(dawLoopPreviewId===loop.id?' playing':'');
+    item.className='loop'+(dawLoopPreviewId===loop.id?' playing':'');
     item.draggable=true;
     item.ondragstart=e=>{ e.dataTransfer.setData('text/daw-loop-id',loop.id); };
-    const playBtn=document.createElement('button');playBtn.className='studio-loop-play-btn';playBtn.textContent=dawLoopPreviewId===loop.id?'■':'▶';playBtn.title='Preview';
-    playBtn.onclick=()=>dawPreviewLoop(loop.id);
-    const thumb=document.createElement('canvas');thumb.width=40;thumb.height=16;thumb.style.cssText='width:40px;height:16px;border-radius:2px;background:#0a0a0a';
-    dawDrawLoopThumb(thumb,loop);
-    const info=document.createElement('div');
-    info.innerHTML=`<div class="studio-loop-name">${dawLoopPreviewId===loop.id?'<span style="color:var(--acc)">♫</span> ':''}${escapeHtml(loop.name)}</div><div class="studio-loop-meta">${escapeHtml(loop.category)} • ${loop.bpm} BPM${loop.key?' • '+escapeHtml(loop.key):''}</div>`;
-    const favBtnEl=document.createElement('button');favBtnEl.className='studio-loop-fav'+(favorites.has(loop.id)?' on':'');favBtnEl.textContent=favorites.has(loop.id)?'★':'☆';
-    favBtnEl.onclick=()=>{ const favs=dawLoopFavorites(); if(favs.has(loop.id)) favs.delete(loop.id); else favs.add(loop.id); localStorage.setItem('studioLoopFavorites',JSON.stringify([...favs])); renderDawLoopBrowser(); };
-    const addBtn=document.createElement('button');addBtn.className='studio-loop-add-btn';addBtn.textContent='+';addBtn.title='Add to timeline at the playhead';
-    addBtn.onclick=()=>dawAddLoopToTimeline(loop.id);
-    const wrap=document.createElement('div');wrap.style.cssText='display:flex;gap:4px;align-items:center';
-    wrap.append(playBtn,thumb);
-    item.append(wrap,info,favBtnEl,addBtn);
+    const bars=dawLoopThumbBars(loop).map(p=>`<div class="lwb" style="height:${Math.round(p*100)}%"></div>`).join('');
+    const isFav=favorites.has(loop.id);
+    item.innerHTML=`<button class="pbtn">${dawLoopPreviewId===loop.id?'■':'▶'}</button>
+      <div class="lw">${bars}</div>
+      <span class="ln" title="${escapeHtml(loop.name)}">${dawLoopPreviewId===loop.id?'♫ ':''}${escapeHtml(loop.name)}</span>
+      <span class="hrt${isFav?' on':''}">${isFav?'♥':'♡'}</span>
+      <span class="plus">+</span>`;
+    item.querySelector('.pbtn').onclick=e=>{ e.stopPropagation(); dawPreviewLoop(loop.id); };
+    item.querySelector('.hrt').onclick=e=>{ e.stopPropagation(); const favs=dawLoopFavorites(); if(favs.has(loop.id)) favs.delete(loop.id); else favs.add(loop.id); localStorage.setItem('studioLoopFavorites',JSON.stringify([...favs])); renderDawLoopBrowser(); };
+    item.querySelector('.plus').onclick=e=>{ e.stopPropagation(); dawAddLoopToTimeline(loop.id); };
+    item.title=loop.category+' • '+loop.bpm+' BPM'+(loop.key?' • '+loop.key:'');
     list.appendChild(item);
   });
 }
@@ -13628,17 +14046,26 @@ function renderDawInstrumentTab(){
   if(track&&!STUDIO_INSTRUMENTS.some(i=>i.name===track.instrument)) track.instrument='Grand Piano';
   const instName=track?track.instrument:'Grand Piano';
   dawCurrentInstrumentIndex=Math.max(0,STUDIO_INSTRUMENTS.findIndex(i=>i.name===instName));
-  body.innerHTML=`<div class="daw-inst-toolbar">
-    <button class="daw-top-btn" onclick="dawCycleInstrument(-1)">◀</button>
-    <strong id="dawInstName">${escapeHtml(instName)}</strong>
-    <button class="daw-top-btn" onclick="dawCycleInstrument(1)">▶</button>
-    <span style="flex:1"></span>
-    <button class="daw-top-btn${dawSustainOn?' prim':''}" id="dawSustainBtn" onclick="dawToggleSustain()">Sustain</button>
-    <button class="daw-top-btn" onclick="dawShiftOctave(-1)">◀ Oct</button>
-    <span id="dawOctaveLabel" class="daw-field">${dawKeyboardOctaveShift}</span>
-    <button class="daw-top-btn" onclick="dawShiftOctave(1)">Oct ▶</button>
-    <button class="daw-top-btn${dawAutoChordsOn?' prim':''}" id="dawAutoChordsBtn" onclick="dawToggleAutoChords()">Auto-chords</button>
-  </div><div class="daw-keyboard-wrap" id="dawKeyboardWrap"></div>`;
+  body.innerHTML=`<div class="krow">
+    <div class="instsel">
+      <button class="arw" onclick="dawCycleInstrument(-1)">◀</button>
+      <span id="dawInstName">${escapeHtml(instName)}</span>
+      <button class="arw" onclick="dawCycleInstrument(1)">▶</button>
+    </div>
+    <div class="spacer"></div>
+    <button class="tog on">Keyboard</button>
+    <button class="tog" onclick="toast('Instrument controls panel coming soon')">Controls</button>
+  </div>
+  <div class="krow">
+    <button class="tog${dawSustainOn?' on':''}" id="dawSustainBtn" onclick="dawToggleSustain()">Sustain</button>
+    <div class="instsel" style="padding:3px 7px">
+      <button class="arw" onclick="dawShiftOctave(-1)">◀</button>
+      <span style="font-size:10.5px" id="dawOctaveLabel">Octave ${4+dawKeyboardOctaveShift}</span>
+      <button class="arw" onclick="dawShiftOctave(1)">▶</button>
+    </div>
+    <button class="tog${dawAutoChordsOn?' on':''}" id="dawAutoChordsBtn" onclick="dawToggleAutoChords()">Auto-chords</button>
+  </div>
+  <div class="kb" id="dawKeyboardWrap"></div>`;
   dawBuildKeyboardDOM();
 }
 function dawCycleInstrument(dir){
@@ -13648,9 +14075,9 @@ function dawCycleInstrument(dir){
   if(track) track.instrument=name;
   const label=document.getElementById('dawInstName'); if(label) label.textContent=name;
 }
-function dawToggleSustain(){ dawSustainOn=!dawSustainOn; const b=document.getElementById('dawSustainBtn'); if(b) b.classList.toggle('prim',dawSustainOn); if(!dawSustainOn) dawReleaseAllSustained(); }
-function dawShiftOctave(delta){ dawKeyboardOctaveShift=Math.max(-2,Math.min(2,dawKeyboardOctaveShift+delta)); const l=document.getElementById('dawOctaveLabel'); if(l) l.textContent=dawKeyboardOctaveShift; dawBuildKeyboardDOM(); }
-function dawToggleAutoChords(){ dawAutoChordsOn=!dawAutoChordsOn; const b=document.getElementById('dawAutoChordsBtn'); if(b) b.classList.toggle('prim',dawAutoChordsOn); }
+function dawToggleSustain(){ dawSustainOn=!dawSustainOn; const b=document.getElementById('dawSustainBtn'); if(b) b.classList.toggle('on',dawSustainOn); if(!dawSustainOn) dawReleaseAllSustained(); }
+function dawShiftOctave(delta){ dawKeyboardOctaveShift=Math.max(-2,Math.min(2,dawKeyboardOctaveShift+delta)); const l=document.getElementById('dawOctaveLabel'); if(l) l.textContent='Octave '+(4+dawKeyboardOctaveShift); dawBuildKeyboardDOM(); }
+function dawToggleAutoChords(){ dawAutoChordsOn=!dawAutoChordsOn; const b=document.getElementById('dawAutoChordsBtn'); if(b) b.classList.toggle('on',dawAutoChordsOn); }
 function dawBuildKeyboardDOM(){
   const wrap=document.getElementById('dawKeyboardWrap'); if(!wrap) return;
   wrap.innerHTML='';
@@ -13663,15 +14090,16 @@ function dawBuildKeyboardDOM(){
   const whiteNotes=['C','D','E','F','G','A','B'];
   const blackAfter={C:'C#',D:'D#',F:'F#',G:'G#',A:'A#'};
   const octaves=[3+dawKeyboardOctaveShift,4+dawKeyboardOctaveShift,5+dawKeyboardOctaveShift];
-  let whiteIndex=0;
+  let whiteIndex=0,whiteTotal=0;
+  octaves.forEach((oct,oi)=>whiteNotes.forEach(note=>{ if(!(oi===2&&note!=='C')) whiteTotal++; }));
   const keyEls={};
   octaves.forEach((oct,oi)=>{
     whiteNotes.forEach(note=>{
       if(oi===2&&note!=='C') return;
       const id=note+oct;
-      const wk=document.createElement('div');wk.className='daw-white-key';wk.dataset.note=id;
+      const wk=document.createElement('div');wk.className='wk';wk.dataset.note=id;
       const letters=(noteToKeys[id]||[]).join('/');
-      wk.innerHTML=(letters?`<span class="daw-key-letter">${letters.toUpperCase()}</span>`:'')+(note==='C'?`<span class="daw-key-octlabel">${id}</span>`:'');
+      wk.innerHTML=(letters?`<span class="kl">${letters.toUpperCase()}</span>`:'')+`<span class="nn">${id}</span>`;
       wk.addEventListener('mousedown',()=>dawKeyboardNoteOn(id));
       wk.addEventListener('mouseup',()=>dawKeyboardNoteOff(id));
       wk.addEventListener('mouseleave',()=>dawKeyboardNoteOff(id));
@@ -13680,10 +14108,10 @@ function dawBuildKeyboardDOM(){
       wrap.appendChild(wk);keyEls[id]=wk;
       if(blackAfter[note]&&oi!==2){
         const bNote=blackAfter[note]+oct;
-        const bk=document.createElement('div');bk.className='daw-black-key';bk.dataset.note=bNote;
-        bk.style.left=((whiteIndex+0.68)*38)+'px';
+        const bk=document.createElement('div');bk.className='bk';bk.dataset.note=bNote;
+        bk.style.left=`calc(${((whiteIndex+1)/whiteTotal)*100}% - 11px)`;
         const bLetters=(noteToKeys[bNote]||[]).join('/');
-        bk.innerHTML=bLetters?`<span class="daw-key-letter">${bLetters.toUpperCase()}</span>`:'';
+        bk.innerHTML=bLetters?`<span class="kl">${bLetters.toUpperCase()}</span>`:'';
         bk.addEventListener('mousedown',e=>{e.stopPropagation();dawKeyboardNoteOn(bNote);});
         bk.addEventListener('mouseup',e=>{e.stopPropagation();dawKeyboardNoteOff(bNote);});
         bk.addEventListener('mouseleave',()=>dawKeyboardNoteOff(bNote));
@@ -13726,7 +14154,7 @@ function dawKeyboardNoteOn(noteId){
     voices.push(dawStartVoice(instName,pitch,destNode,100));
   }
   dawActiveVoices.set(noteId,voices);
-  const el=dawKeyboardKeyEls[noteId]; if(el) el.classList.add('pressed');
+  const el=dawKeyboardKeyEls[noteId]; if(el) el.classList.add('dn');
 }
 function dawKeyboardNoteOff(noteId){ if(dawSustainOn) return; dawReleaseVoice(noteId); }
 function dawReleaseVoice(noteId){
@@ -13734,7 +14162,7 @@ function dawReleaseVoice(noteId){
   const ctx=getCtx();
   voices.forEach(v=>v.stop(ctx.currentTime));
   dawActiveVoices.delete(noteId);
-  const el=dawKeyboardKeyEls[noteId]; if(el) el.classList.remove('pressed');
+  const el=dawKeyboardKeyEls[noteId]; if(el) el.classList.remove('dn');
 }
 function dawReleaseAllSustained(){ [...dawActiveVoices.keys()].forEach(dawReleaseVoice); }
 function dawIsPanelUsable(){
@@ -13797,14 +14225,15 @@ function renderDawChordsTab(){
   const{rootIdx,intervals,isMinor}=dawScaleForKey(dawProject.key);
   const scale=intervals.map(iv=>(rootIdx+iv)%12);
   const roman=isMinor?['i','ii°','III','iv','v','VI','VII']:['I','ii','iii','IV','V','vi','vii°'];
-  let html='<div class="daw-pad-grid" style="grid-template-columns:repeat(7,1fr);max-width:760px">';
+  let html='<div class="chordgrid" style="grid-template-columns:repeat(7,1fr)">';
   scale.forEach((pc,i)=>{
-    html+=`<button class="daw-pad" style="aspect-ratio:1.3" onclick="dawPlayChordPad(${i})"><div><div>${escapeHtml(NOTES[pc])}</div><div style="font-size:9px;opacity:.6">${roman[i]}</div></div></button>`;
+    html+=`<button class="chordpad" onclick="dawPlayChordPad(${i},this)">${escapeHtml(NOTES[pc])}<small>${roman[i]}</small></button>`;
   });
-  html+='</div><div style="font-size:9px;color:var(--mu);margin-top:8px">Click a chord to play it — if an Instrument-tab clip is open, it\'s also written into that clip at the playhead.</div>';
+  html+='</div><div style="font-size:9px;color:var(--tx-3);margin-top:10px">Click a chord to play it — if an Instrument-tab clip is open, it\'s also written into that clip at the playhead.</div>';
   body.innerHTML=html;
 }
-function dawPlayChordPad(scaleDegreeIndex){
+function dawPlayChordPad(scaleDegreeIndex,btnEl){
+  if(btnEl){ btnEl.classList.add('active'); setTimeout(()=>btnEl.classList.remove('active'),250); }
   const{rootIdx,intervals}=dawScaleForKey(dawProject.key);
   const scale=intervals.map(iv=>(rootIdx+iv)%12);
   const stack=[0,2,4].map(off=>{ const idx=(scaleDegreeIndex+off)%7; const octBump=Math.floor((scaleDegreeIndex+off)/7); return scale[idx]+12*octBump; });
@@ -13829,23 +14258,26 @@ function renderDawBeatmakerPanel(){
   const body=document.getElementById('daw-panel-body'); if(!body) return;
   const pattern=dawBeatPatterns[dawBeatPatternIndex];
   const voices=Object.keys(pattern.steps);
-  let grid=`<div class="daw-beatmaker-grid" style="grid-template-columns:70px repeat(${pattern.length},1fr)">`;
+  let grid='<div class="bm" id="dawBmGrid">';
   voices.forEach(voice=>{
-    grid+=`<div class="daw-bm-label">${voice}</div>`;
-    for(let i=0;i<pattern.length;i++) grid+=`<button class="daw-bm-step${pattern.steps[voice][i]?' on':''}${i%4===0?' beat-start':''}" data-voice="${voice}" data-step="${i}"></button>`;
+    grid+='<div class="bmr"><div class="bmn">'+voice+'</div><div class="bmsteps">';
+    for(let i=0;i<pattern.length;i++) grid+=`<button class="st${pattern.steps[voice][i]?' on'+(i%4===0?' acc':''):(i%4===0?' beat':'')}" data-voice="${voice}" data-step="${i}"></button>`;
+    grid+='</div></div>';
   });
-  grid+='</div>';
-  body.innerHTML=`<div class="daw-roll-toolbar">
-    <strong>PATTERNS BEATMAKER</strong>
-    <select id="dawBeatPatternSelect" class="daw-select">${dawBeatPatterns.map((p,i)=>`<option value="${i}" ${i===dawBeatPatternIndex?'selected':''}>${escapeHtml(p.name)}</option>`).join('')}</select>
-    <button class="daw-top-btn" onclick="dawAddBeatPattern()">+</button>
-    <span class="daw-field">Swing</span><input type="range" id="dawBeatSwing" min="0" max="100" value="${pattern.swing}" style="width:70px">
-    <select id="dawBeatLength" class="daw-select"><option value="8" ${pattern.length===8?'selected':''}>8 steps</option><option value="16" ${pattern.length===16?'selected':''}>16 steps</option><option value="32" ${pattern.length===32?'selected':''}>32 steps</option></select>
-    <button class="daw-top-btn" id="dawBeatPlayBtn" onclick="dawToggleBeatPreview()">${dawBeatPlaying?'⏹':'▶'}</button>
-    <button class="daw-top-btn prim" onclick="dawAddBeatPatternToTimeline()">Add to timeline</button>
+  grid+='<div class="bmnums"><div class="bmn"></div><div class="bmsteps">';
+  for(let i=1;i<=pattern.length;i++) grid+=`<span>${i}</span>`;
+  grid+='</div></div></div>';
+  body.innerHTML=`<div class="krow">
+    <select id="dawBeatPatternSelect" class="tinput" style="width:auto">${dawBeatPatterns.map((p,i)=>`<option value="${i}" ${i===dawBeatPatternIndex?'selected':''}>${escapeHtml(p.name)}</option>`).join('')}</select>
+    <button class="arw" style="font-size:14px" onclick="dawAddBeatPattern()">+</button>
+    <span class="lbl">SWING</span><input type="range" id="dawBeatSwing" class="zoom" min="0" max="100" value="${pattern.swing}">
+    <select id="dawBeatLength" class="tinput" style="width:auto"><option value="8" ${pattern.length===8?'selected':''}>8 steps</option><option value="16" ${pattern.length===16?'selected':''}>16 steps</option><option value="32" ${pattern.length===32?'selected':''}>32 steps</option></select>
+    <button class="pbig" style="width:24px;height:24px;font-size:9px" id="dawBeatPlayBtn" onclick="dawToggleBeatPreview()">${dawBeatPlaying?'⏹':'▶'}</button>
+    <div class="spacer"></div>
+    <button class="btn" style="padding:4px 9px" onclick="dawAddBeatPatternToTimeline()">Add to timeline</button>
   </div>${grid}`;
-  document.querySelectorAll('.daw-bm-step').forEach(btn=>{
-    btn.onclick=()=>{ const v=btn.dataset.voice,i=Number(btn.dataset.step); pattern.steps[v][i]=pattern.steps[v][i]?0:1; btn.classList.toggle('on'); };
+  document.querySelectorAll('#dawBmGrid .st').forEach(btn=>{
+    btn.onclick=()=>{ const v=btn.dataset.voice,i=Number(btn.dataset.step); pattern.steps[v][i]=pattern.steps[v][i]?0:1; renderDawBeatmakerPanel(); };
   });
   document.getElementById('dawBeatPatternSelect').onchange=e=>{ dawBeatPatternIndex=Number(e.target.value); renderDawBeatmakerPanel(); };
   document.getElementById('dawBeatSwing').oninput=e=>{ pattern.swing=Number(e.target.value); };
@@ -13865,8 +14297,8 @@ function dawToggleBeatPreview(){
     const pattern=dawBeatPatterns[dawBeatPatternIndex];
     const i=dawBeatStepIndex%pattern.length;
     Object.entries(pattern.steps).forEach(([voice,hits])=>{ if(hits[i]) dawDrumHit(voice,getCtx().currentTime,dawEnsureMaster()); });
-    document.querySelectorAll('.daw-bm-step').forEach(el=>el.classList.remove('current'));
-    document.querySelectorAll(`.daw-bm-step[data-step="${i}"]`).forEach(el=>el.classList.add('current'));
+    document.querySelectorAll('#dawBmGrid .st').forEach(el=>el.classList.remove('current'));
+    document.querySelectorAll(`#dawBmGrid .st[data-step="${i}"]`).forEach(el=>el.classList.add('current'));
     dawBeatStepIndex++;
     const stepSec=(60/dawProject.bpm)/4;
     const swingOffset=(i%2===1)?stepSec*(pattern.swing/100)*0.5:0;
@@ -13896,28 +14328,45 @@ function dawAddBeatPatternToTimeline(){
 // sample-and-hold — both would need an AudioWorklet this pass doesn't add;
 // everything else in each effect is fully real and audible.
 // ══════════════════════════════════════════════════════════════════════════
+// SVG arc knob — ported from the visual reference's own knob() demo function,
+// wired to a real value/onChange instead of a static display.
+function dawKnobArcPath(a1,a2){
+  const R=13,CX=16,CY=16;
+  const p=a=>[CX+R*Math.cos((a-90)*Math.PI/180),CY+R*Math.sin((a-90)*Math.PI/180)];
+  const[a,b]=[p(a1),p(a2)];
+  return `M${a[0].toFixed(1)} ${a[1].toFixed(1)} A${R} ${R} 0 ${a2-a1>180?1:0} 1 ${b[0].toFixed(1)} ${b[1].toFixed(1)}`;
+}
 function dawMakeKnob(spec,value,onChange){
-  const wrap=document.createElement('div');wrap.className='daw-knob-wrap';
-  const knob=document.createElement('div');knob.className='daw-knob dj-knob';knob.tabIndex=0;
-  const ind=document.createElement('div');ind.className='dj-knob-indicator';knob.appendChild(ind);
-  const valEl=document.createElement('div');valEl.className='daw-knob-val';
-  const labelEl=document.createElement('div');labelEl.className='daw-knob-label';labelEl.textContent=spec.label;
-  wrap.append(knob,valEl,labelEl);
+  const wrap=document.createElement('div');wrap.className='kn';
+  const knd=document.createElement('div');knd.className='knd';knd.tabIndex=0;
+  const valEl=document.createElement('div');valEl.className='knv';
+  const labelEl=document.createElement('div');labelEl.className='knl';labelEl.textContent=spec.label;
+  wrap.append(knd,valEl,labelEl);
   let val=value??spec.def;
   function fmt(v){ const decimals=(spec.max-spec.min)>10?0:2; return (Math.round(v*Math.pow(10,decimals))/Math.pow(10,decimals))+(spec.unit||''); }
-  function render(){ const pct=(val-spec.min)/(spec.max-spec.min); ind.style.transform='rotate('+(pct*270-135)+'deg)'; valEl.textContent=fmt(val); }
+  function render(){
+    const pct=(val-spec.min)/(spec.max-spec.min), ang=-135+pct*270;
+    const ix=16+9*Math.cos((ang-90)*Math.PI/180), iy=16+9*Math.sin((ang-90)*Math.PI/180);
+    knd.innerHTML=`<svg width="32" height="32">
+      <path d="${dawKnobArcPath(-135,135)}" fill="none" stroke="#3a3a46" stroke-width="3" stroke-linecap="round"/>
+      <path d="${dawKnobArcPath(-135,ang)}" fill="none" stroke="var(--purple-lt)" stroke-width="3" stroke-linecap="round"/>
+      <line x1="16" y1="16" x2="${ix.toFixed(1)}" y2="${iy.toFixed(1)}" stroke="var(--tx)" stroke-width="1.5" stroke-linecap="round"/>
+      <circle cx="16" cy="16" r="2" fill="var(--tx)"/>
+    </svg>`;
+    valEl.textContent=fmt(val);
+  }
   function setVal(v,fromUser){ val=Math.max(spec.min,Math.min(spec.max,v)); render(); if(fromUser) onChange(val); }
   render();
-  knob.addEventListener('mousedown',e=>{
+  knd.addEventListener('mousedown',e=>{
     e.preventDefault();
     const startY=e.clientY,startVal=val;
     function onMove(ev){ const sens=ev.shiftKey?0.25:1; const dy=(startY-ev.clientY)*sens; setVal(startVal+(dy/150)*(spec.max-spec.min),true); }
     function onUp(){ window.removeEventListener('mousemove',onMove);window.removeEventListener('mouseup',onUp); }
     window.addEventListener('mousemove',onMove);window.addEventListener('mouseup',onUp);
   });
-  knob.addEventListener('dblclick',()=>setVal(spec.def,true));
-  knob.addEventListener('wheel',e=>{ e.preventDefault(); setVal(val+(e.deltaY<0?1:-1)*(spec.max-spec.min)/50,true); },{passive:false});
-  knob.addEventListener('keydown',e=>{
+  knd.addEventListener('dblclick',()=>setVal(spec.def,true));
+  knd.addEventListener('wheel',e=>{ e.preventDefault(); setVal(val+(e.deltaY<0?1:-1)*(spec.max-spec.min)/50,true); },{passive:false});
+  knd.addEventListener('keydown',e=>{
     if(e.key==='ArrowUp'){ setVal(val+(spec.max-spec.min)/50,true);e.preventDefault(); }
     else if(e.key==='ArrowDown'){ setVal(val-(spec.max-spec.min)/50,true);e.preventDefault(); }
     else if(e.key==='Home'){ setVal(spec.min,true); } else if(e.key==='End'){ setVal(spec.max,true); }
@@ -14088,23 +14537,32 @@ function dawRebuildTrackFxChain(track){
 }
 let dawFxDragIndex=null,dawFxLibCatFilter=null,dawFxMeterRAF=null;
 function dawAllFxCategories(){ const set=new Set();Object.values(STUDIO_FX).forEach(fx=>fx.cats.forEach(c=>set.add(c)));return[...set]; }
+// Header colors follow the reference's own examples exactly where it shows
+// one (Visual EQ/Compressor=amber, Reverb=violet, Vocal Doubler=magenta,
+// De-Esser/Noise Gate=green); the remaining effects are placed in the same
+// four buckets by the same logic (clean-up/dynamics/tone=amber, ambience &
+// movement=violet, level-detection=green, vocal-specific=magenta).
+function dawFxColor(key){
+  if(['gate','deesser'].includes(key)) return 'var(--green)';
+  if(['reverb','delay','chorus','phaser'].includes(key)) return 'var(--violet)';
+  if(['doubler'].includes(key)) return 'var(--magenta)';
+  return 'var(--amber)';
+}
 function renderDawEffectsTab(){
   const body=document.getElementById('daw-panel-body'); if(!body) return;
   const track=dawCurrentTrackForPanel();
-  if(!track){ body.innerHTML='<div style="color:var(--mu);font-size:11px;padding:20px;text-align:center">Select a track first.</div>'; return; }
+  if(!track){ body.innerHTML='<div style="color:var(--tx-3);font-size:11px;padding:20px;text-align:center">Select a track first.</div>'; return; }
   track.effects=Array.isArray(track.effects)?track.effects:[];
   dawBuildTrackGraph(track);
-  body.innerHTML=`<div class="daw-fx-columns">
-    <div class="daw-fx-chain-col">
-      <div class="daw-sidebar-title">Active chain — drag to reorder</div>
-      <div id="dawFxChainList"></div>
-      <select id="dawPresetSelect" class="daw-select" style="width:100%;margin-top:8px"></select>
-      <button class="daw-top-btn" style="width:100%;margin-top:4px" onclick="dawLoadSelectedPreset()">Load preset</button>
-    </div>
-    <div class="daw-fx-lib-col">
-      <div class="daw-sidebar-title">Effects library</div>
-      <div class="daw-fx-lib-cats" id="dawFxLibCats"></div>
-      <div id="dawFxLibCards"></div>
+  body.innerHTML=`<div class="fxwrap">
+    <div class="fxchain" id="dawFxChainList"></div>
+    <div class="fxlib">
+      <div class="fxcats" id="dawFxLibCats"></div>
+      <div class="fxgrid" id="dawFxLibCards"></div>
+      <div class="krow" style="margin-top:8px">
+        <select id="dawPresetSelect" class="tinput" style="width:100%"></select>
+      </div>
+      <button class="btn" style="width:100%;justify-content:center" onclick="dawLoadSelectedPreset()">Load preset</button>
     </div>
   </div>`;
   dawRenderFxChainList(track);
@@ -14114,34 +14572,38 @@ function renderDawEffectsTab(){
 function dawRenderFxChainList(track){
   const wrap=document.getElementById('dawFxChainList'); if(!wrap) return;
   wrap.innerHTML='';
-  if(!track.effects.length){ wrap.innerHTML='<div class="studio-empty">No inserts — click a card on the right to add one.</div>'; return; }
   track.effects.forEach((effect,index)=>{
     const def=STUDIO_FX[effect.type]; if(!def) return;
     effect.params=effect.params||Object.fromEntries(def.params.map(p=>[p.id,p.def]));
-    const card=document.createElement('div');card.className='daw-fx-card'+(effect.bypassed?' bypassed':'');card.draggable=true;
-    const head=document.createElement('div');head.className='daw-fx-card-head';
-    head.innerHTML=`<button title="Remove">✕</button><button title="Bypass">⏻</button><strong>${escapeHtml(def.name)}</strong>`;
+    const card=document.createElement('div');card.className='fxc'+(effect.bypassed?' bypassed':'');card.draggable=true;
+    const head=document.createElement('div');head.className='fxh';head.style.background=dawFxColor(effect.type);
+    head.innerHTML=`<button class="fxx" title="Remove">✕</button><button class="fxx" title="Bypass">⏻</button><span>${escapeHtml(def.name)}</span>`;
     head.querySelector('button[title="Remove"]').onclick=()=>{ track.effects.splice(index,1);dawRebuildTrackFxChain(track);dawRenderFxChainList(track); };
     head.querySelector('button[title="Bypass"]').onclick=()=>{ effect.bypassed=!effect.bypassed;dawRebuildTrackFxChain(track);dawRenderFxChainList(track); };
     card.appendChild(head);
+    const body=document.createElement('div');body.className='fxb';
     let redrawCurve=null;
-    if(def.hasGRMeter){ const gr=document.createElement('div');gr.className='daw-knob-label';gr.id='dawFxGR_'+track.id+'_'+index;gr.textContent='GR: 0.0 dB';card.appendChild(gr); }
+    if(def.hasGRMeter){
+      const grm=document.createElement('div');grm.className='grm';grm.id='dawFxGR_'+track.id+'_'+index;
+      for(let i=0;i<10;i++){ const b=document.createElement('div');b.className='grb';b.style.height='4%';grm.appendChild(b); }
+      body.appendChild(grm);
+    }
     if(def.hasCurveDisplay){
-      const curveCanvas=document.createElement('canvas');curveCanvas.width=260;curveCanvas.height=44;curveCanvas.style.cssText='width:100%;height:44px;margin-bottom:4px;background:#0a0a0a;border-radius:4px';
-      card.appendChild(curveCanvas);
+      const curveCanvas=document.createElement('canvas');curveCanvas.className='eqc';curveCanvas.width=240;curveCanvas.height=68;
+      body.appendChild(curveCanvas);
       redrawCurve=()=>{
         const inst=track._fxChain&&track._fxChain[index]; if(!inst||!inst.filters) return;
-        const ctx2=curveCanvas.getContext('2d'),w=260,h=44;ctx2.clearRect(0,0,w,h);
+        const ctx2=curveCanvas.getContext('2d'),w=240,h=34;ctx2.clearRect(0,0,w,h);
         const freqs=new Float32Array(64);for(let i=0;i<64;i++) freqs[i]=20*Math.pow(1000,i/63);
         const mag=new Float32Array(64),phase=new Float32Array(64),total=new Float32Array(64).fill(1);
         inst.filters.forEach(f=>{ f.getFrequencyResponse(freqs,mag,phase); for(let i=0;i<64;i++) total[i]*=mag[i]; });
-        ctx2.strokeStyle='#ff7b54';ctx2.lineWidth=1.5;ctx2.beginPath();
+        ctx2.strokeStyle='#9b7ce8';ctx2.lineWidth=1.5;ctx2.beginPath();
         for(let i=0;i<64;i++){ const db=20*Math.log10(total[i]||0.0001);const y=h/2-(db/24)*(h/2);const x=(i/63)*w; if(i===0) ctx2.moveTo(x,y); else ctx2.lineTo(x,y); }
         ctx2.stroke();
       };
       redrawCurve();
     }
-    const knobRow=document.createElement('div');knobRow.className='daw-fx-card-knobs';
+    const knobRow=document.createElement('div');knobRow.className='knobs';
     def.params.forEach(paramSpec=>{
       const knob=dawMakeKnob(paramSpec,effect.params[paramSpec.id],v=>{
         effect.params[paramSpec.id]=v;
@@ -14151,25 +14613,32 @@ function dawRenderFxChainList(track){
       });
       knobRow.appendChild(knob);
     });
-    card.appendChild(knobRow);
+    body.appendChild(knobRow);
+    card.appendChild(body);
     card.ondragstart=()=>{ dawFxDragIndex=index; };
     card.ondragover=e=>e.preventDefault();
     card.ondrop=()=>{ if(dawFxDragIndex===null||dawFxDragIndex===index) return; const[moved]=track.effects.splice(dawFxDragIndex,1);track.effects.splice(index,0,moved);dawFxDragIndex=null;dawRebuildTrackFxChain(track);dawRenderFxChainList(track); };
     wrap.appendChild(card);
   });
+  const sel=document.createElement('div');sel.className='fxsel';
+  sel.innerHTML='+<br>Select from the<br>effects library';
+  wrap.appendChild(sel);
 }
 function dawRenderFxLibrary(track){
   const catsWrap=document.getElementById('dawFxLibCats'); catsWrap.innerHTML='';
   dawAllFxCategories().forEach(cat=>{
-    const pill=document.createElement('button');pill.className='daw-pill'+(dawFxLibCatFilter===cat?' on':'');pill.textContent=cat+(dawFxLibCatFilter===cat?' ✕':'');
+    const pill=document.createElement('button');pill.className='fxcat'+(dawFxLibCatFilter===cat?' on':'');pill.textContent=cat+(dawFxLibCatFilter===cat?' ✕':'');
     pill.onclick=()=>{ dawFxLibCatFilter=dawFxLibCatFilter===cat?null:cat;dawRenderFxLibrary(track); };
     catsWrap.appendChild(pill);
   });
   const cardsWrap=document.getElementById('dawFxLibCards'); cardsWrap.innerHTML='';
   Object.entries(STUDIO_FX).forEach(([key,def])=>{
     if(dawFxLibCatFilter&&!def.cats.includes(dawFxLibCatFilter)) return;
-    const card=document.createElement('div');card.className='daw-fx-lib-card';
-    card.innerHTML=`<strong>${escapeHtml(def.name)}</strong><div style="font-size:9px;color:var(--mu)">${def.cats.map(escapeHtml).join(', ')}</div>`;
+    const card=document.createElement('div');card.className='fxcard';
+    card.innerHTML=`<div class="fxch" style="background:${dawFxColor(key)}">${escapeHtml(def.name)}</div>
+      <div class="fxcb">${def.hasCurveDisplay?'<svg width="52" height="24"><path d="M0 16 Q13 6 26 14 T52 9" fill="none" stroke="'+dawFxColor(key)+'" stroke-width="2"/></svg>':def.hasGRMeter?'<svg width="46" height="24">'+[4,12,20,28,36].map((x,i)=>`<rect x="${x}" y="${22-(6+i*3.4)}" width="5" height="${6+i*3.4}" rx="1" fill="${dawFxColor(key)}"/>`).join('')+'</svg>':'<svg width="46" height="26">'+[8,23,38].map(x=>`<circle cx="${x}" cy="13" r="7" fill="none" stroke="#3a3a46" stroke-width="2"/><line x1="${x}" y1="13" x2="${x+4}" y2="8" stroke="${dawFxColor(key)}" stroke-width="1.5"/>`).join('')+'</svg>'}</div>
+      <div class="fxcp">▶</div>`;
+    card.title=def.cats.join(', ');
     card.onclick=()=>{ track.effects.push({type:key,params:Object.fromEntries(def.params.map(p=>[p.id,p.def])),bypassed:false});dawRebuildTrackFxChain(track);dawRenderFxChainList(track); };
     cardsWrap.appendChild(card);
   });
@@ -14222,7 +14691,17 @@ function dawStartFxMeterLoop(){
     const track=dawCurrentTrackForPanel(); if(!track||!track._fxChain) return;
     track.effects.forEach((effect,i)=>{
       const inst=track._fxChain[i];
-      if(inst&&inst.getGR){ const el=document.getElementById('dawFxGR_'+track.id+'_'+i); if(el) el.textContent='GR: '+(inst.getGR()||0).toFixed(1)+' dB'; }
+      if(inst&&inst.getGR){
+        const grm=document.getElementById('dawFxGR_'+track.id+'_'+i); if(!grm) return;
+        const gr=Math.abs(inst.getGR()||0);
+        const pct=Math.max(4,Math.min(100,gr*6));
+        const bars=grm.querySelectorAll('.grb');
+        bars.forEach((b,bi)=>{
+          const on=bi>=bars.length-Math.round((pct/100)*bars.length);
+          b.style.height=(on?Math.max(15,pct):4)+'%';
+          b.style.background=pct>70?'var(--amber)':'var(--green)';
+        });
+      }
     });
   })();
 }
@@ -14234,7 +14713,7 @@ function dawStartFxMeterLoop(){
 // reads the same clip.payload the Tier 1 scheduler already understands, so
 // nothing in the engine needed to change for notes drawn here to be audible.
 // ══════════════════════════════════════════════════════════════════════════
-let dawRoll={mode:'draw',snap:0.25,pxPerBeat:60,noteHeight:14,minPitch:48,maxPitch:84,gutterWidth:40,selection:new Set(),dragState:null,undoStack:[],defaultNoteLen:1,snapToKeyOn:false,arpPattern:'Up',arpSpeed:0.25,humanizeAmt:30};
+let dawRoll={mode:'draw',snap:0.25,pxPerBeat:60,noteHeight:14,minPitch:48,maxPitch:84,selection:new Set(),dragState:null,undoStack:[],defaultNoteLen:1,snapToKeyOn:false,arpPattern:'Up',arpSpeed:0.25,humanizeAmt:30};
 function dawRollActiveClip(){
   const track=dawCurrentTrackForPanel();
   if(!track) return null;
@@ -14242,131 +14721,175 @@ function dawRollActiveClip(){
 }
 function dawRollPitchFromY(y){ return dawRoll.maxPitch-Math.floor(y/dawRoll.noteHeight); }
 function dawRollYFromPitch(p){ return (dawRoll.maxPitch-p)*dawRoll.noteHeight; }
-function dawRollBeatFromX(x){ return Math.max(0,(x-dawRoll.gutterWidth)/dawRoll.pxPerBeat); }
-function dawRollXFromBeat(b){ return dawRoll.gutterWidth+b*dawRoll.pxPerBeat; }
+function dawRollBeatFromX(x){ return Math.max(0,x/dawRoll.pxPerBeat); }
+function dawRollXFromBeat(b){ return b*dawRoll.pxPerBeat; }
+const DAW_ROLL_NOTE_LENS=[0.25,0.5,1,2,4],DAW_ROLL_NOTE_LEN_LABELS={0.25:'1/16',0.5:'1/8',1:'1/4',2:'1/2',4:'1/1'};
 function renderDawPianoRollTab(){
   const body=document.getElementById('daw-panel-body'); if(!body) return;
   const clip=dawRollActiveClip();
   if(!clip||clip.kind!=='midi'){
-    body.innerHTML='<div style="color:var(--mu);font-size:11px;padding:20px;text-align:center">Open a MIDI clip — double-click an empty lane on a non-drum track — to edit it here.</div>';
+    body.innerHTML='<div style="color:var(--tx-3);font-size:11px;padding:20px;text-align:center">Open a MIDI clip — double-click an empty lane on a non-drum track — to edit it here.</div>';
     return;
   }
-  body.innerHTML=`<div class="daw-roll-wrap">
-    <div class="daw-roll-tools">
-      <div class="daw-sidebar-title" style="margin-bottom:2px">MIDI tools</div>
-      <label class="daw-field">Note len<select id="dawRollNoteLen" class="daw-select"><option value="0.25">1/16</option><option value="0.5">1/8</option><option value="1" selected>1/4</option><option value="2">1/2</option><option value="4">1/1</option></select></label>
-      <button class="daw-top-btn" onclick="dawRollQuantizeSelected()">Quantize</button>
-      <button class="daw-top-btn" onclick="dawRollGlueSelected()">Glue notes</button>
-      <div style="display:flex;gap:4px"><button class="daw-top-btn" onclick="dawRollTranspose(-1)">▼</button><button class="daw-top-btn" onclick="dawRollTranspose(1)">▲</button></div>
-      <label class="daw-field"><input type="checkbox" id="dawRollSnapToKey" onchange="dawRoll.snapToKeyOn=this.checked"> Snap to key</label>
-      <div class="daw-sidebar-title" style="margin:6px 0 2px">Arpeggiator</div>
-      <select id="dawRollArpPattern" class="daw-select"><option>Up</option><option>Down</option><option>Up-Down</option><option>Down-Up</option><option>Random</option><option>Chord</option></select>
-      <select id="dawRollArpSpeed" class="daw-select"><option value="0.25" selected>1/4</option><option value="0.125">1/8</option><option value="0.0625">1/16</option><option value="0.03125">1/32</option></select>
-      <button class="daw-top-btn" onclick="dawRollApplyArpeggio()">Apply</button>
-      <div class="daw-sidebar-title" style="margin:6px 0 2px">Humanize</div>
-      <input type="range" id="dawRollHumanize" min="0" max="100" value="${dawRoll.humanizeAmt}">
-      <button class="daw-top-btn" onclick="dawRollApplyHumanize()">Apply</button>
-      <button class="daw-top-btn" onclick="dawRollReverse()" style="margin-top:6px">Reverse</button>
-    </div>
-    <div class="daw-roll-main">
-      <div class="daw-roll-toolbar">
-        <button class="daw-roll-mode-btn${dawRoll.mode==='select'?' on':''}" data-mode="select" onclick="dawRollSetMode('select')">▹ Select</button>
-        <button class="daw-roll-mode-btn${dawRoll.mode==='draw'?' on':''}" data-mode="draw" onclick="dawRollSetMode('draw')">✎ Draw</button>
-        <button class="daw-roll-mode-btn${dawRoll.mode==='erase'?' on':''}" data-mode="erase" onclick="dawRollSetMode('erase')">⌫ Erase</button>
-        <span class="daw-field">Snap</span>
-        <select id="dawRollSnap" class="daw-select"><option value="1">1/1</option><option value="0.5">1/2</option><option value="0.25" selected>1/4</option><option value="0.125">1/8</option><option value="0.0625">1/16</option><option value="0.03125">1/32</option><option value="0">Off</option></select>
+  body.innerHTML=`<div class="krow">
+    <button class="tog${dawRoll.mode==='select'?' on':''}" data-mode="select" onclick="dawRollSetMode('select')">▹ Select</button>
+    <button class="tog${dawRoll.mode==='draw'?' on':''}" data-mode="draw" onclick="dawRollSetMode('draw')">✎ Draw</button>
+    <button class="tog${dawRoll.mode==='erase'?' on':''}" data-mode="erase" onclick="dawRollSetMode('erase')">⌫ Erase</button>
+    <span class="lbl">SNAP</span>
+    <select id="dawRollSnap" class="tinput" style="width:auto"><option value="1">1/1</option><option value="0.5">1/2</option><option value="0.25" selected>1/4</option><option value="0.125">1/8</option><option value="0.0625">1/16</option><option value="0.03125">1/32</option><option value="0">Off</option></select>
+    <span class="lbl">QUANTIZE</span>
+    <button class="btn" style="padding:4px 9px" onclick="dawRollQuantizeSelected()">Quantize</button>
+    <button class="tog" onclick="dawRollGlueSelected()">Glue notes</button>
+  </div>
+  <div class="pr">
+    <div class="prtool">
+      <div class="lbl">VELOCITY</div>
+      <input type="range" class="vol" style="width:100%" id="dawRollVelSlider" value="100">
+      <div class="lbl">PITCH</div>
+      <div style="display:flex;gap:3px">
+        <button class="tog" style="flex:1;text-align:center" onclick="dawRollTranspose(1)">▲</button>
+        <button class="tog" style="flex:1;text-align:center" onclick="dawRollTranspose(-1)">▼</button>
       </div>
-      <div class="daw-roll-grid-wrap"><canvas id="daw-roll-canvas"></canvas></div>
-      <div class="daw-roll-velocity-wrap"><canvas id="daw-roll-velocity-canvas"></canvas></div>
-      <div class="daw-roll-infobar" id="dawRollInfoBar">—</div>
+      <button class="tog${dawRoll.snapToKeyOn?' on':''}" id="dawRollSnapToKeyBtn" onclick="dawRollToggleSnapToKey()">Snap to key</button>
+      <div class="lbl">MIDI TOOLS</div>
+      <button class="tog" id="dawRollNoteLenBtn" onclick="dawRollCycleNoteLen()">Note: ${DAW_ROLL_NOTE_LEN_LABELS[dawRoll.defaultNoteLen]}</button>
+      <button class="tog" onclick="dawRollApplyArpeggio()">Arpeggiator</button>
+      <select id="dawRollArpPattern" class="tinput" style="width:100%;font-size:9px"><option>Up</option><option>Down</option><option>Up-Down</option><option>Down-Up</option><option>Random</option><option>Chord</option></select>
+      <select id="dawRollArpSpeed" class="tinput" style="width:100%;font-size:9px"><option value="0.25" selected>1/4</option><option value="0.125">1/8</option><option value="0.0625">1/16</option><option value="0.03125">1/32</option></select>
+      <button class="tog" onclick="dawRollApplyHumanize()">Humanize</button>
+      <input type="range" id="dawRollHumanize" min="0" max="100" value="${dawRoll.humanizeAmt}">
+      <button class="tog" onclick="dawRollReverse()">Reverse</button>
     </div>
-  </div>`;
-  document.getElementById('dawRollNoteLen').onchange=e=>{ dawRoll.defaultNoteLen=Number(e.target.value); };
+    <div class="prkeys" id="daw-prkeys"></div>
+    <div class="prgrid" id="daw-prgrid"></div>
+  </div>
+  <div class="vellane" id="daw-vellane"></div>
+  <div style="margin-top:7px;font-size:10px;color:var(--tx-3)" id="dawRollInfoBar">—</div>`;
   document.getElementById('dawRollSnap').onchange=e=>{ dawRoll.snap=Number(e.target.value); drawDawRoll(); };
   document.getElementById('dawRollArpPattern').onchange=e=>{ dawRoll.arpPattern=e.target.value; };
   document.getElementById('dawRollArpSpeed').onchange=e=>{ dawRoll.arpSpeed=Number(e.target.value); };
   document.getElementById('dawRollHumanize').oninput=e=>{ dawRoll.humanizeAmt=Number(e.target.value); };
-  const canvas=document.getElementById('daw-roll-canvas'); canvas.onmousedown=dawRollMouseDown;
-  const velCanvas=document.getElementById('daw-roll-velocity-canvas'); velCanvas.onmousedown=dawRollVelocityMouseDown;
+  document.getElementById('dawRollVelSlider').oninput=e=>{
+    const v=Number(e.target.value);
+    dawRoll.selection.forEach(i=>{ if(clip.payload[i]) clip.payload[i].velocity=v; });
+    if(dawRoll.selection.size) drawDawRoll();
+  };
+  const keys=document.getElementById('daw-prkeys'),grid=document.getElementById('daw-prgrid');
+  grid.onmousedown=dawRollMouseDown;
+  grid.addEventListener('scroll',()=>{ keys.scrollTop=grid.scrollTop; });
+  keys.addEventListener('scroll',()=>{ grid.scrollTop=keys.scrollTop; });
   drawDawRoll();
 }
-function dawRollSetMode(m){ dawRoll.mode=m; document.querySelectorAll('.daw-roll-mode-btn').forEach(b=>b.classList.toggle('on',b.dataset.mode===m)); }
+function dawRollSetMode(m){ dawRoll.mode=m; document.querySelectorAll('#daw-panel-body [data-mode]').forEach(b=>b.classList.toggle('on',b.dataset.mode===m)); }
+function dawRollToggleSnapToKey(){ dawRoll.snapToKeyOn=!dawRoll.snapToKeyOn; const b=document.getElementById('dawRollSnapToKeyBtn'); if(b) b.classList.toggle('on',dawRoll.snapToKeyOn); }
+function dawRollCycleNoteLen(){
+  const idx=DAW_ROLL_NOTE_LENS.indexOf(dawRoll.defaultNoteLen);
+  dawRoll.defaultNoteLen=DAW_ROLL_NOTE_LENS[(idx+1)%DAW_ROLL_NOTE_LENS.length];
+  const b=document.getElementById('dawRollNoteLenBtn'); if(b) b.textContent='Note: '+DAW_ROLL_NOTE_LEN_LABELS[dawRoll.defaultNoteLen];
+}
+// snap a pitch to the project's current scale (used when Snap to key is on)
+function dawRollSnapPitchToKey(pitch){
+  if(!dawRoll.snapToKeyOn) return pitch;
+  const{rootIdx,intervals}=dawScaleForKey(dawProject.key);
+  const scale=intervals.map(iv=>(rootIdx+iv)%12);
+  const pc=((pitch%12)+12)%12;
+  if(scale.includes(pc)) return pitch;
+  let best=scale[0],bestDist=12;
+  scale.forEach(s=>{ const d=Math.min(Math.abs(s-pc),12-Math.abs(s-pc)); if(d<bestDist){ bestDist=d;best=s; } });
+  return pitch-pc+best;
+}
 function drawDawRoll(){
   const clip=dawRollActiveClip(); if(!clip) return;
-  const canvas=document.getElementById('daw-roll-canvas'); if(!canvas) return;
-  const wrap=canvas.parentElement;
-  const dpr=window.devicePixelRatio||1;
-  const w=Math.max(wrap.clientWidth,dawRoll.gutterWidth+clip.lengthBeats*dawRoll.pxPerBeat);
-  const h=(dawRoll.maxPitch-dawRoll.minPitch+1)*dawRoll.noteHeight;
-  canvas.width=Math.round(w*dpr);canvas.height=Math.round(h*dpr);canvas.style.width=w+'px';canvas.style.height=h+'px';
-  const ctx=canvas.getContext('2d');ctx.setTransform(dpr,0,0,dpr,0,0);ctx.clearRect(0,0,w,h);
-  for(let p=dawRoll.minPitch;p<=dawRoll.maxPitch;p++){
-    const y=dawRollYFromPitch(p),isBlack=[1,3,6,8,10].includes(((p%12)+12)%12);
-    ctx.fillStyle=isBlack?'rgba(255,255,255,.035)':'rgba(255,255,255,.01)';
-    ctx.fillRect(dawRoll.gutterWidth,y,w-dawRoll.gutterWidth,dawRoll.noteHeight);
-    ctx.strokeStyle='rgba(255,255,255,.05)';ctx.beginPath();ctx.moveTo(0,y+.5);ctx.lineTo(w,y+.5);ctx.stroke();
+  const keys=document.getElementById('daw-prkeys'),grid=document.getElementById('daw-prgrid');
+  if(!keys||!grid) return;
+  keys.innerHTML='';grid.innerHTML='';
+  for(let p=dawRoll.maxPitch;p>=dawRoll.minPitch;p--){
+    const isBlack=[1,3,6,8,10].includes(((p%12)+12)%12);
+    const k=document.createElement('div');k.className='prk'+(isBlack?' blk':'');
+    k.textContent=NOTES[((p%12)+12)%12]+Math.floor(p/12-1);
+    k.title='Click to preview';
+    k.onclick=()=>{ const track=dawCurrentTrackForPanel(); const v=dawStartVoice(track?track.instrument:'Grand Piano',p,track?dawTrackOutputNode(track):dawEnsureMaster(),100); setTimeout(()=>v.stop(),400); };
+    keys.appendChild(k);
+    const r=document.createElement('div');r.className='prrow'+(isBlack?' blk':'');
+    grid.appendChild(r);
   }
-  for(let p=dawRoll.minPitch;p<=dawRoll.maxPitch;p++){
-    const y=dawRollYFromPitch(p),isBlack=[1,3,6,8,10].includes(((p%12)+12)%12);
-    ctx.fillStyle=isBlack?'#1a1a1a':'#e8e8e8';
-    ctx.fillRect(0,y,dawRoll.gutterWidth-2,dawRoll.noteHeight-1);
-    if(p%12===0){ ctx.fillStyle='#333';ctx.font='8px sans-serif';ctx.fillText('C'+Math.floor(p/12-1),2,y+dawRoll.noteHeight-3); }
-  }
-  if(dawRoll.snap>0) for(let b=0;b<=clip.lengthBeats;b+=dawRoll.snap){
-    const x=dawRollXFromBeat(b);
-    ctx.strokeStyle=(Math.round(b/dawProject.timeSig[0])===b/dawProject.timeSig[0])?'rgba(255,255,255,.15)':'rgba(255,255,255,.05)';
-    ctx.beginPath();ctx.moveTo(x+.5,0);ctx.lineTo(x+.5,h);ctx.stroke();
+  const gw=Math.max(grid.clientWidth,clip.lengthBeats*dawRoll.pxPerBeat);
+  grid.style.minWidth=gw+'px';
+  if(dawRoll.snap>0){
+    for(let b=0;b<=clip.lengthBeats;b+=dawRoll.snap){
+      const g=document.createElement('div');
+      const isBar=Math.round(b/dawProject.timeSig[0])===b/dawProject.timeSig[0];
+      g.style.cssText=`position:absolute;top:0;bottom:0;width:1px;left:${dawRollXFromBeat(b)}px;background:${isBar?'rgba(255,255,255,.15)':'rgba(255,255,255,.05)'}`;
+      grid.appendChild(g);
+    }
   }
   (clip.payload||[]).forEach((n,idx)=>{
-    const x=dawRollXFromBeat(n.start),nw=Math.max(n.dur*dawRoll.pxPerBeat,3),y=dawRollYFromPitch(n.pitch);
+    const el=document.createElement('div');el.className='prn2'+(dawRoll.selection.has(idx)?' sel':'');
     const vel=(n.velocity??100)/127;
-    ctx.fillStyle=`rgba(255,123,84,${0.4+vel*0.6})`;
-    roundRectPath(ctx,x,y+1,nw,dawRoll.noteHeight-2,2);ctx.fill();
-    if(dawRoll.selection.has(idx)){ ctx.strokeStyle='#fff';ctx.lineWidth=1.5;roundRectPath(ctx,x,y+1,nw,dawRoll.noteHeight-2,2);ctx.stroke(); }
+    el.style.left=dawRollXFromBeat(n.start)+'px';
+    el.style.width=Math.max(n.dur*dawRoll.pxPerBeat,3)+'px';
+    el.style.top=(dawRollYFromPitch(n.pitch)+1.5)+'px';
+    el.style.opacity=(0.5+vel*0.5).toFixed(2);
+    grid.appendChild(el);
   });
   if(dawRoll.dragState&&dawRoll.dragState.type==='marquee'){
     const ds=dawRoll.dragState;
     const x1=Math.min(ds.startX,ds.curX),x2=Math.max(ds.startX,ds.curX),y1=Math.min(ds.startY,ds.curY),y2=Math.max(ds.startY,ds.curY);
-    ctx.strokeStyle='rgba(255,255,255,.6)';ctx.fillStyle='rgba(255,255,255,.08)';
-    ctx.fillRect(x1,y1,x2-x1,y2-y1);ctx.strokeRect(x1,y1,x2-x1,y2-y1);
+    const box=document.createElement('div');
+    box.style.cssText=`position:absolute;left:${x1}px;top:${y1}px;width:${x2-x1}px;height:${y2-y1}px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.6);pointer-events:none`;
+    grid.appendChild(box);
   }
-  drawDawRollVelocity(clip,w);
+  drawDawRollVelocity(clip);
   updateDawRollInfoBar();
 }
-function drawDawRollVelocity(clip,w){
-  const canvas=document.getElementById('daw-roll-velocity-canvas'); if(!canvas) return;
-  const dpr=window.devicePixelRatio||1,h=60;
-  canvas.width=Math.round(w*dpr);canvas.height=Math.round(h*dpr);canvas.style.width=w+'px';canvas.style.height=h+'px';
-  const ctx=canvas.getContext('2d');ctx.setTransform(dpr,0,0,dpr,0,0);ctx.clearRect(0,0,w,h);
-  ctx.fillStyle='#0a0a0a';ctx.fillRect(0,0,w,h);
+function drawDawRollVelocity(clip){
+  const lane=document.getElementById('daw-vellane'); if(!lane) return;
+  lane.innerHTML='';
   (clip.payload||[]).forEach((n,idx)=>{
-    const x=dawRollXFromBeat(n.start),nw=Math.max(n.dur*dawRoll.pxPerBeat,3),vel=(n.velocity??100)/127,barH=vel*(h-4);
-    ctx.fillStyle=dawRoll.selection.has(idx)?'#fff':`rgba(255,123,84,${0.5+vel*0.5})`;
-    ctx.fillRect(x,h-barH,Math.max(nw-2,2),barH);
+    const vel=(n.velocity??100)/127;
+    const b=document.createElement('div');b.className='velb';
+    b.style.height=Math.max(4,vel*100)+'%';
+    b.style.width=Math.max(4,Math.min(14,(n.dur*dawRoll.pxPerBeat)-2))+'px';
+    if(dawRoll.selection.has(idx)) b.style.background='#fff';
+    b.title='Velocity '+(n.velocity??100);
+    b.onmousedown=e=>{ e.stopPropagation(); dawRollVelocityDragStart(e,idx); };
+    lane.appendChild(b);
   });
+}
+function dawRollVelocityDragStart(e,idx){
+  const clip=dawRollActiveClip(); if(!clip) return;
+  dawRollPushUndo();
+  const laneH=38;
+  function setVel(clientY){
+    const lane=document.getElementById('daw-vellane'); if(!lane) return;
+    const r=lane.getBoundingClientRect();
+    const vel=Math.max(1,Math.min(127,Math.round((1-(clientY-r.top)/laneH)*127)));
+    clip.payload[idx].velocity=vel;drawDawRoll();
+  }
+  setVel(e.clientY);
+  function onMove(ev){ setVel(ev.clientY); }
+  function onUp(){ window.removeEventListener('mousemove',onMove);window.removeEventListener('mouseup',onUp); }
+  window.addEventListener('mousemove',onMove);window.addEventListener('mouseup',onUp);
 }
 function dawRollPushUndo(){ const clip=dawRollActiveClip(); if(!clip) return; dawRoll.undoStack.push(JSON.stringify(clip.payload)); if(dawRoll.undoStack.length>30) dawRoll.undoStack.shift(); }
 function dawRollUndo(){ const clip=dawRollActiveClip(); if(!clip||!dawRoll.undoStack.length) return; clip.payload=JSON.parse(dawRoll.undoStack.pop()); dawRoll.selection.clear(); drawDawRoll();renderDawCanvas(); }
 function dawRollSnapBeat(b){ if(!dawRoll.snap) return b; return Math.round(b/dawRoll.snap)*dawRoll.snap; }
 function dawRollHitTestNote(clip,beat,pitch){ return clip.payload.findIndex(n=>n.pitch===pitch&&beat>=n.start&&beat<=n.start+n.dur); }
+function dawRollGridPoint(e){
+  const grid=document.getElementById('daw-prgrid');
+  const rect=grid.getBoundingClientRect();
+  return {x:e.clientX-rect.left+grid.scrollLeft,y:e.clientY-rect.top+grid.scrollTop};
+}
 function dawRollMouseDown(e){
   const clip=dawRollActiveClip(); if(!clip) return;
-  const rect=e.target.getBoundingClientRect();
-  const x=e.clientX-rect.left,y=e.clientY-rect.top;
-  if(x<dawRoll.gutterWidth){
-    const pitch=dawRollPitchFromY(y);
-    const track=dawCurrentTrackForPanel();
-    const v=dawStartVoice(track?track.instrument:'Grand Piano',pitch,track?dawTrackOutputNode(track):dawEnsureMaster(),100);
-    setTimeout(()=>v.stop(),400);
-    return;
-  }
+  const {x,y}=dawRollGridPoint(e);
   const beat=dawRollSnapBeat(dawRollBeatFromX(x)),pitch=dawRollPitchFromY(y);
   const hitIdx=dawRollHitTestNote(clip,dawRollBeatFromX(x),pitch);
   if(dawRoll.mode==='draw'){
     dawRollPushUndo();
     if(hitIdx>=0) dawRoll.dragState={type:'resize',idx:hitIdx,startX:x,origDur:clip.payload[hitIdx].dur};
     else{
-      const note={pitch,start:beat,dur:dawRoll.defaultNoteLen||1,velocity:100};
+      const note={pitch:dawRollSnapPitchToKey(pitch),start:beat,dur:dawRoll.defaultNoteLen||1,velocity:100};
       clip.payload.push(note);
       dawRoll.selection=new Set([clip.payload.length-1]);
       dawRoll.dragState={type:'resize',idx:clip.payload.length-1,startX:x,origDur:note.dur};
@@ -14392,9 +14915,8 @@ function dawRollMouseDown(e){
 function dawRollMouseMove(e){
   const ds=dawRoll.dragState; if(!ds) return;
   const clip=dawRollActiveClip(); if(!clip) return;
-  const canvas=document.getElementById('daw-roll-canvas'); if(!canvas) return;
-  const rect=canvas.getBoundingClientRect();
-  const x=e.clientX-rect.left,y=e.clientY-rect.top;
+  const grid=document.getElementById('daw-prgrid'); if(!grid) return;
+  const {x,y}=dawRollGridPoint(e);
   if(ds.type==='resize'){
     const beat=dawRollBeatFromX(x),note=clip.payload[ds.idx];
     note.dur=Math.max(0.125,dawRollSnapBeat(beat-note.start)||0.125);
@@ -14404,7 +14926,7 @@ function dawRollMouseMove(e){
     ds.selectedSnapshot.forEach(s=>{
       const n=clip.payload[s.i]; if(!n) return;
       n.start=Math.max(0,dawRollSnapBeat(s.start+dBeat));
-      n.pitch=Math.max(dawRoll.minPitch,Math.min(dawRoll.maxPitch,s.pitch+dPitch));
+      n.pitch=dawRollSnapPitchToKey(Math.max(dawRoll.minPitch,Math.min(dawRoll.maxPitch,s.pitch+dPitch)));
     });
   } else if(ds.type==='marquee'){
     ds.curX=x;ds.curY=y;
@@ -14422,26 +14944,6 @@ function dawRollMouseMove(e){
   drawDawRoll();
 }
 function dawRollMouseUp(){ dawRoll.dragState=null; }
-function dawRollVelocityMouseDown(e){
-  const clip=dawRollActiveClip(); if(!clip) return;
-  const targetEl=e.target;
-  const rect=targetEl.getBoundingClientRect();
-  const beat=dawRollBeatFromX(e.clientX-rect.left);
-  let idx=-1;
-  clip.payload.forEach((n,i)=>{ if(beat>=n.start&&beat<=n.start+n.dur) idx=i; });
-  if(idx<0) return;
-  dawRollPushUndo();
-  const h=60;
-  function setVel(clientY){
-    const r=targetEl.getBoundingClientRect();
-    const vel=Math.max(1,Math.min(127,Math.round((1-(clientY-r.top)/h)*127)));
-    clip.payload[idx].velocity=vel;drawDawRoll();
-  }
-  setVel(e.clientY);
-  function onMove(ev){ setVel(ev.clientY); }
-  function onUp(){ window.removeEventListener('mousemove',onMove);window.removeEventListener('mouseup',onUp); }
-  window.addEventListener('mousemove',onMove);window.addEventListener('mouseup',onUp);
-}
 function updateDawRollInfoBar(){
   const clip=dawRollActiveClip(); const bar=document.getElementById('dawRollInfoBar'); if(!bar) return;
   const idx=[...dawRoll.selection][0];
@@ -14526,12 +15028,12 @@ function renderDawSynthPads(){
   const body=document.getElementById('daw-panel-body'); if(!body) return;
   const{rootIdx,intervals}=dawScaleForKey(dawProject.key);
   const scale=intervals.map(iv=>(rootIdx+iv)%12);
-  let html='<div class="daw-pad-grid">';
+  let html='<div class="chordgrid" style="grid-template-columns:repeat(3,1fr);max-width:280px">';
   for(let i=0;i<9;i++){
     const deg=i%7;
-    html+=`<button class="daw-pad" data-idx="${i}" onclick="dawPlaySynthPad(${i})"><div>${i+1}<br>${escapeHtml(NOTES[scale[deg]])}</div></button>`;
+    html+=`<button class="chordpad" data-idx="${i}" onclick="dawPlaySynthPad(${i})">${i+1}<small>${escapeHtml(NOTES[scale[deg]])}</small></button>`;
   }
-  html+='</div><div style="font-size:9px;color:var(--mu);margin-top:8px">Play with mouse, touch, or number keys 1–9</div>';
+  html+='</div><div style="font-size:9px;color:var(--tx-3);margin-top:10px">Play with mouse, touch, or number keys 1–9</div>';
   body.innerHTML=html;
 }
 function dawPlaySynthPad(i){
@@ -14543,7 +15045,7 @@ function dawPlaySynthPad(i){
   const destNode=track?dawTrackOutputNode(track):dawEnsureMaster();
   const instName=track?track.instrument:'Grand Piano';
   stack.forEach(s=>{ const v=dawStartVoice(instName,60+s,destNode,100); setTimeout(()=>v.stop(),900); });
-  const pad=document.querySelector(`.daw-pad[data-idx="${i}"]`);
+  const pad=document.querySelector(`.chordpad[data-idx="${i}"]`);
   if(pad){ pad.classList.add('active'); setTimeout(()=>pad.classList.remove('active'),200); }
 }
 function dawExportChordSheet(){ if(typeof exportToPDF==='function') exportToPDF(); }
@@ -14726,7 +15228,7 @@ function dawLoadProjectFile(inputEl){
         dawProject.tracks.push(track);
         dawBuildTrackGraph(track);
       }
-      const nameInput=document.getElementById('dawProjectName'); if(nameInput) nameInput.value=dawProject.name;
+      const nameInput=document.getElementById('dawProjectName'); if(nameInput) nameInput.textContent=dawProject.name;
       updateDawKeyBpmLabel();
       renderDawTrackList();renderDawCanvas();
       if(typeof renderDawLoopBrowser==='function') renderDawLoopBrowser();
@@ -14742,58 +15244,51 @@ function dawToggleMiniPanel(){
   panel.classList.toggle('on');
   if(panel.classList.contains('on')) renderDawMiniPanel();
 }
-// Rebuilds the mini panel's DOM structure — called only when it's opened or the project
-// data it shows (name/bpm/key/track count) actually changes, never every animation frame.
+function dawMiniSpanBeats(){ return Math.max(32,Math.ceil(dawFurthestBeat()/16)*16); }
+// Rebuilds the mini (phone) panel's row structure — called only when it's opened or the
+// project data it shows (track list/clips) actually changes, never every animation frame.
 function renderDawMiniPanel(){
   const panel=document.getElementById('daw-mini-panel'); if(!panel||!panel.classList.contains('on')) return;
-  panel.innerHTML=`<div style="display:flex;align-items:center;gap:6px;margin-bottom:6px">
-    <button class="daw-top-btn" onclick="dawToggleMiniPanel()">◀</button>
-    <strong style="font-size:11px;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${escapeHtml(dawProject.name)}</strong>
-  </div>
-  <div style="font-size:9px;color:var(--mu);margin-bottom:4px">${dawProject.bpm} bpm in ${escapeHtml(dawProject.key)}</div>
-  <canvas id="daw-mini-canvas" width="240" height="${Math.max(60,dawProject.tracks.length*14)}" style="width:100%;background:#0a0a0a;border-radius:4px;cursor:pointer;display:block"></canvas>
-  <div style="display:flex;gap:4px;margin-top:6px;justify-content:center">
-    <button class="daw-transport-btn" onclick="dawSeekToStart()">⏮</button>
-    <button class="daw-transport-btn" id="dawMiniPlayBtn" onclick="dawTogglePlay();dawUpdateMiniTransportUI();">${dawEngine.isPlaying?'⏸':'▶'}</button>
-    <button class="daw-transport-btn" onclick="dawStop();dawUpdateMiniTransportUI();">⏹</button>
-    <button class="daw-transport-btn${dawProject.loopEnabled?' playing':''}" id="dawMiniLoopBtn" onclick="dawProject.loopEnabled=!dawProject.loopEnabled;dawUpdateMiniTransportUI();const cb=document.getElementById('dawLoopToggle');if(cb)cb.checked=dawProject.loopEnabled;">🔁</button>
-  </div>
-  <div style="display:flex;justify-content:space-between;margin-top:8px;font-size:14px">
-    <button class="daw-top-btn" onclick="dawOpenBrowseLoops()" title="Loops">♫</button>
-    <button class="daw-top-btn" onclick="dawOpenBeatmaker()" title="Drums">▦</button>
-    <button class="daw-top-btn" onclick="dawOpenSynthPads()" title="Synth">🎹</button>
-    <button class="daw-top-btn" onclick="toast('Import ships with a later pass')" title="Import">⬇</button>
-  </div>`;
-  const canvas=document.getElementById('daw-mini-canvas');
-  if(canvas) canvas.onclick=e=>{
-    const rect=canvas.getBoundingClientRect();
-    const localY=(e.clientY-rect.top)*(canvas.height/rect.height);
-    const rowIdx=Math.floor(localY/14);
-    if(dawProject.tracks[rowIdx]){ dawView.selectedTrackId=dawProject.tracks[rowIdx].id;renderDawTrackList();renderDawCanvas(); }
-  };
+  const nameEl=document.getElementById('dawMiniProjName'); if(nameEl) nameEl.textContent=dawProject.name;
+  const bkEl=document.getElementById('dawMiniBpmKey'); if(bkEl) bkEl.textContent=dawProject.bpm+' bpm in '+dawProject.key;
+  const span=dawMiniSpanBeats();
+  const ruler=document.getElementById('dawMiniRuler');
+  if(ruler){
+    ruler.innerHTML='';
+    const marks=6,barLen=dawProject.timeSig[0];
+    for(let i=0;i<marks;i++){ const s=document.createElement('span'); s.textContent=Math.floor((i/marks)*span/barLen)+1; ruler.appendChild(s); }
+  }
+  const grid=document.getElementById('dawMiniGrid'); if(!grid) return;
+  grid.querySelectorAll('.prow').forEach(r=>r.remove());
+  dawProject.tracks.forEach(track=>{
+    const row=document.createElement('div');row.className='prow';row.dataset.trackId=track.id;
+    const nm=document.createElement('span');nm.className='prn';nm.textContent='⟩ '+track.name;
+    nm.onclick=()=>{ dawView.selectedTrackId=track.id;renderDawTrackList();renderDawTimeline(); };
+    const box=document.createElement('div');box.className='pclips';
+    track.clips.forEach(clip=>{
+      const pc=document.createElement('div');pc.className='pc';
+      pc.style.left=Math.min(96,(clip.startBeat/span)*100)+'%';
+      pc.style.width=Math.max(1.5,(clip.lengthBeats/span)*100)+'%';
+      pc.style.background=track.color;
+      box.appendChild(pc);
+    });
+    row.append(nm,box);
+    grid.insertBefore(row,document.getElementById('dawMiniPlayhead'));
+  });
   dawRedrawMiniCanvas();
 }
-function dawUpdateMiniTransportUI(){
-  const playBtn=document.getElementById('dawMiniPlayBtn'); if(playBtn) playBtn.textContent=dawEngine.isPlaying?'⏸':'▶';
-  const loopBtn=document.getElementById('dawMiniLoopBtn'); if(loopBtn) loopBtn.classList.toggle('playing',dawProject.loopEnabled);
+function dawMiniFocusStep(dir){
+  const grid=document.getElementById('dawMiniGrid'); if(!grid) return;
+  grid.scrollBy({top:dir*19,behavior:'smooth'});
 }
-// Cheap per-frame update — only touches the canvas pixels, never rebuilds the surrounding
-// buttons, so a real (or scripted) click during playback never lands on a just-replaced node.
+// Cheap per-frame update — only moves the playhead marker, never rebuilds the
+// surrounding rows, so a real (or scripted) click during playback never lands
+// on a just-replaced node.
 function dawRedrawMiniCanvas(){
   const panel=document.getElementById('daw-mini-panel'); if(!panel||!panel.classList.contains('on')) return;
-  const canvas=document.getElementById('daw-mini-canvas'); if(!canvas) return;
-  const miniPxPerBeat=4;
-  const ctx=canvas.getContext('2d');
-  ctx.clearRect(0,0,canvas.width,canvas.height);
-  let y=0;
-  dawProject.tracks.forEach(track=>{
-    ctx.fillStyle=hexWithAlpha(track.color,0.8);
-    track.clips.forEach(clip=>{ ctx.fillRect(clip.startBeat*miniPxPerBeat,y+1,Math.max(clip.lengthBeats*miniPxPerBeat,2),12); });
-    y+=14;
-  });
-  ctx.strokeStyle='#ef4444';ctx.lineWidth=1;
-  const px=(dawView.playheadBeat||0)*miniPxPerBeat;
-  ctx.beginPath();ctx.moveTo(px,0);ctx.lineTo(px,canvas.height);ctx.stroke();
+  const play=document.getElementById('dawMiniPlayhead'); if(!play) return;
+  const span=dawMiniSpanBeats();
+  play.style.left=Math.min(100,((dawView.playheadBeat||0)/span)*100)+'%';
 }
 
 function init(){
