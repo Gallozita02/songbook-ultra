@@ -947,7 +947,22 @@ button:active,.nbtn:active,.ibtn:active,.qbtn:active,.ngrid-btn:active{transform
 .dj-browser-load-btn{padding:2px 6px;border-radius:4px;border:1px solid;font-size:9px;font-weight:700;cursor:pointer;transition:all .12s;font-family:var(--mono)}
 .dj-browser-load-btn.load-a{border-color:rgba(255,123,84,.4);color:var(--acc);background:rgba(255,123,84,.08)}
 .dj-browser-load-btn.load-b{border-color:rgba(192,132,252,.4);color:var(--blu);background:rgba(140,80,220,.08)}
+.dj-browser-load-btn.load-set{border-color:rgba(74,222,128,.4);color:#4ade80;background:rgba(74,222,128,.08)}
 .dj-browser-load-btn:hover{filter:brightness(1.35);box-shadow:0 0 8px currentColor}
+.dj-setlist{display:flex;flex-direction:column;height:100%;padding:8px;gap:6px;width:100%;min-height:0;box-sizing:border-box}
+.dj-set-toolbar{display:flex;gap:6px;align-items:center;flex-shrink:0;flex-wrap:wrap}
+.dj-set-count{font-size:10px;color:var(--mu2);font-family:var(--mono);white-space:nowrap;margin-left:auto}
+.dj-setlist-scroll{flex:1;overflow-y:auto;min-height:0;scrollbar-width:thin;scrollbar-color:rgba(255,123,84,.3) transparent}
+.dj-setlist-row{display:flex;align-items:center;gap:8px;padding:5px 8px;border-radius:6px;cursor:default;transition:background .12s;border-bottom:1px solid rgba(255,123,84,.05)}
+.dj-setlist-row:hover{background:rgba(255,123,84,.08)}
+.dj-setlist-row.next{border-left:2px solid #4ade80;background:rgba(74,222,128,.05)}
+.dj-setlist-idx{font-size:10px;color:var(--mu2);font-family:var(--mono);min-width:20px;text-align:right}
+.dj-setlist-title{font-size:11px;color:var(--tx);flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.dj-setlist-meta{font-size:10px;color:var(--chord);font-family:var(--mono);min-width:82px;white-space:nowrap}
+.dj-setlist-btns{display:flex;gap:3px;flex-shrink:0}
+.dj-setlist-btn{padding:2px 6px;border-radius:4px;border:1px solid rgba(255,123,84,.3);color:var(--mu2);background:rgba(255,123,84,.06);font-size:9px;font-weight:700;cursor:pointer;transition:all .12s;font-family:var(--mono)}
+.dj-setlist-btn:hover{filter:brightness(1.35);color:var(--tx);box-shadow:0 0 8px rgba(255,123,84,.3)}
+.dj-setlist-empty{font-size:11px;color:var(--mu2);text-align:center;padding:24px 12px;line-height:1.5}
 .dj-fx-rack{display:flex;gap:10px;padding:10px;height:100%;overflow-x:auto;overflow-y:hidden;scrollbar-width:thin;box-sizing:border-box;min-height:0}
 .dj-fx-slot{min-width:160px;background:linear-gradient(160deg,rgba(24,10,16,.9),rgba(14,6,10,.9));border:1px solid rgba(255,123,84,.15);border-radius:12px;padding:11px;display:flex;flex-direction:column;gap:8px;transition:border-color .2s,box-shadow .2s}
 .dj-fx-slot:has(.dj-fx-on-btn.on){border-color:rgba(255,123,84,.5);box-shadow:0 0 16px rgba(255,123,84,.18)}
@@ -2209,6 +2224,7 @@ button:active,.nbtn:active,.ibtn:active,.qbtn:active,.ngrid-btn:active{transform
         <button class="dj-bottom-tab on" onclick="switchDJTab('browser',this)">📂 Browser</button>
         <button class="dj-bottom-tab" onclick="switchDJTab('sampler',this)">🎹 Sampler</button>
         <button class="dj-bottom-tab" onclick="switchDJTab('fx',this)">🌀 Effects</button>
+        <button class="dj-bottom-tab" onclick="switchDJTab('set',this)">📋 Set</button>
       </div>
       <div class="dj-bottom-content">
         <div class="dj-bottom-panel on" id="djPanelBrowser"><div class="dj-browser" id="djBrowser"></div></div>
@@ -2219,6 +2235,7 @@ button:active,.nbtn:active,.ibtn:active,.qbtn:active,.ngrid-btn:active{transform
           </div>
         </div>
         <div class="dj-bottom-panel" id="djPanelFx"><div class="dj-fx-rack" id="djFxRack"></div></div>
+        <div class="dj-bottom-panel" id="djPanelSet"><div class="dj-setlist" id="djSetlistWrap"></div></div>
       </div>
     </div>
   </div>
@@ -4706,6 +4723,111 @@ function drumSound(type){
     g.gain.setValueAtTime(vol*.4,t);g.gain.exponentialRampToValueAtTime(.001,t+.1);
     o.start(t);o.stop(t+.12);
   }
+}
+
+// ── DJ FX SAMPLE BANK — classic hype/one-shot drops for the DJ Studio
+//    Sampler "FX" pad mode. Synthesized (no external audio files), routed
+//    straight to the shared master analyser like drumSound() above so they
+//    sit in the mix and register on the master VU meter. ──
+function djFxSample(type){
+  const ctx=getCtx();const t=ctx.currentTime;
+  if(type==='airhorn'){
+    [349.2,523.3].forEach((f,i)=>{ // stacked classic air-horn interval
+      const o=ctx.createOscillator(),g=ctx.createGain();
+      o.type='sawtooth';o.frequency.value=f;
+      o.connect(g);g.connect(analyser);
+      g.gain.setValueAtTime(0,t);
+      g.gain.linearRampToValueAtTime(.5,t+.03);
+      g.gain.setValueAtTime(.5,t+.55);
+      g.gain.exponentialRampToValueAtTime(.001,t+.75);
+      o.start(t+i*.01);o.stop(t+.78);
+    });
+  } else if(type==='siren'){
+    const o=ctx.createOscillator(),g=ctx.createGain();
+    o.type='sine';o.connect(g);g.connect(analyser);
+    o.frequency.setValueAtTime(600,t);
+    o.frequency.linearRampToValueAtTime(1200,t+.5);
+    o.frequency.linearRampToValueAtTime(600,t+1.0);
+    o.frequency.linearRampToValueAtTime(1200,t+1.5);
+    g.gain.setValueAtTime(.45,t);g.gain.setValueAtTime(.45,t+1.4);
+    g.gain.exponentialRampToValueAtTime(.001,t+1.6);
+    o.start(t);o.stop(t+1.6);
+  } else if(type==='boom'){
+    const o=ctx.createOscillator(),g=ctx.createGain();
+    o.type='sine';o.connect(g);g.connect(analyser);
+    o.frequency.setValueAtTime(120,t);o.frequency.exponentialRampToValueAtTime(28,t+.9);
+    g.gain.setValueAtTime(.8,t);g.gain.exponentialRampToValueAtTime(.001,t+.9);
+    o.start(t);o.stop(t+.9);
+    const buf=ctx.createBuffer(1,ctx.sampleRate*.15,ctx.sampleRate),d=buf.getChannelData(0);
+    for(let i=0;i<d.length;i++)d[i]=(Math.random()*2-1)*Math.exp(-i/2000);
+    const src=ctx.createBufferSource(),ng=ctx.createGain();
+    src.buffer=buf;src.connect(ng);ng.connect(analyser);
+    ng.gain.setValueAtTime(.5,t);src.start(t);
+  } else if(type==='laser'){
+    const o=ctx.createOscillator(),g=ctx.createGain();
+    o.type='sawtooth';o.connect(g);g.connect(analyser);
+    o.frequency.setValueAtTime(2200,t);o.frequency.exponentialRampToValueAtTime(80,t+.3);
+    g.gain.setValueAtTime(.4,t);g.gain.exponentialRampToValueAtTime(.001,t+.3);
+    o.start(t);o.stop(t+.3);
+  } else if(type==='riser'){
+    const o=ctx.createOscillator(),g=ctx.createGain(),f=ctx.createBiquadFilter();
+    o.type='sawtooth';f.type='lowpass';f.frequency.setValueAtTime(300,t);
+    o.connect(f);f.connect(g);g.connect(analyser);
+    o.frequency.setValueAtTime(80,t);o.frequency.exponentialRampToValueAtTime(1200,t+1.6);
+    f.frequency.exponentialRampToValueAtTime(9000,t+1.6);
+    g.gain.setValueAtTime(.001,t);g.gain.exponentialRampToValueAtTime(.5,t+1.5);
+    g.gain.exponentialRampToValueAtTime(.001,t+1.65);
+    o.start(t);o.stop(t+1.7);
+  } else if(type==='scratch'){
+    const buf=ctx.createBuffer(1,ctx.sampleRate*.4,ctx.sampleRate),d=buf.getChannelData(0);
+    for(let i=0;i<d.length;i++)d[i]=(Math.random()*2-1);
+    const src=ctx.createBufferSource(),g=ctx.createGain(),f=ctx.createBiquadFilter();
+    src.buffer=buf;f.type='bandpass';f.Q.value=6;
+    f.frequency.setValueAtTime(2500,t);
+    f.frequency.linearRampToValueAtTime(500,t+.12);
+    f.frequency.linearRampToValueAtTime(3000,t+.22);
+    f.frequency.linearRampToValueAtTime(400,t+.38);
+    src.connect(f);f.connect(g);g.connect(analyser);
+    g.gain.setValueAtTime(.5,t);g.gain.setValueAtTime(.5,t+.36);g.gain.exponentialRampToValueAtTime(.001,t+.4);
+    src.loop=true;src.start(t);src.stop(t+.4);
+  } else if(type==='rewind'){
+    const buf=ctx.createBuffer(1,ctx.sampleRate*.4,ctx.sampleRate),d=buf.getChannelData(0);
+    for(let i=0;i<d.length;i++)d[i]=(Math.random()*2-1);
+    const src=ctx.createBufferSource(),g=ctx.createGain(),f=ctx.createBiquadFilter();
+    src.buffer=buf;f.type='bandpass';f.Q.value=4;
+    f.frequency.setValueAtTime(300,t);f.frequency.exponentialRampToValueAtTime(6000,t+.4);
+    src.connect(f);f.connect(g);g.connect(analyser);
+    g.gain.setValueAtTime(.001,t);g.gain.exponentialRampToValueAtTime(.5,t+.35);
+    g.gain.exponentialRampToValueAtTime(.001,t+.4);
+    src.start(t);
+  } else if(type==='alarm'){
+    for(let i=0;i<4;i++){
+      const o=ctx.createOscillator(),g=ctx.createGain();
+      o.type='square';o.connect(g);g.connect(analyser);
+      o.frequency.value=i%2?880:660;
+      const st=t+i*.14;
+      g.gain.setValueAtTime(.35,st);g.gain.exponentialRampToValueAtTime(.001,st+.12);
+      o.start(st);o.stop(st+.13);
+    }
+  }
+}
+
+// ── DJ VOICE TAGS — Web Speech API hype-man / announcer drops for the
+//    Sampler "Voices" pad mode. Uses the browser's built-in speechSynthesis
+//    (no audio files, works fully offline over file://), so output goes to
+//    the system audio output directly rather than through the Web Audio
+//    graph — it will not register on the VU meters, same as a live mic. ──
+function djVoiceSay(text){
+  if(!('speechSynthesis' in window)){ toast('Voice not supported in this browser'); return; }
+  try{
+    speechSynthesis.cancel();
+    const u=new SpeechSynthesisUtterance(text);
+    u.pitch=0.7;u.rate=1.05;u.volume=1;
+    const voices=speechSynthesis.getVoices();
+    const preferred=voices.find(v=>/male|david|mark|daniel|fred/i.test(v.name))||voices.find(v=>v.lang&&v.lang.startsWith('en'))||voices[0];
+    if(preferred) u.voice=preferred;
+    speechSynthesis.speak(u);
+  }catch(e){}
 }
 
 // ── METRONOME SOUND ────────────────────────────────────────────────
@@ -13122,12 +13244,92 @@ function renderDJBrowserList(all){
         '<span class="dj-browser-bpm">'+(s.bpm||'—')+'</span>'+
         '<span class="dj-browser-key">'+s.keyLabel+'</span>'+
         '<div class="dj-browser-load-btns">'+
-        '<button class="dj-browser-load-btn load-a" onclick="loadSongToDJDeck(\''+s.key+'\',\'a\')">A</button>'+
-        '<button class="dj-browser-load-btn load-b" onclick="loadSongToDJDeck(\''+s.key+'\',\'b\')">B</button></div>';
+        '<button class="dj-browser-load-btn load-a" onclick="loadSongToDJDeck(\''+s.key+'\',\'a\')" title="Load to Deck A">A</button>'+
+        '<button class="dj-browser-load-btn load-b" onclick="loadSongToDJDeck(\''+s.key+'\',\'b\')" title="Load to Deck B">B</button>'+
+        '<button class="dj-browser-load-btn load-set" onclick="djAddToSet(\''+s.key+'\')" title="Add to Set">+</button></div>';
       list.appendChild(row);
     });
 }
 function buildDJBrowser(){ renderDJBrowser(); }
+
+// ── full DJ set builder — queue any/all of the song library in play order
+//    to plan and run a complete set beyond the two live decks. ──
+let djSetQueue=[],djSetPointer=0;
+function djAddToSet(songKey){
+  const song=FULL_SONGS[songKey]||SONGS[songKey];
+  if(!song) return;
+  djSetQueue.push(songKey);
+  renderDJSetList();
+  toast('Added "'+song.title+'" to set ('+djSetQueue.length+' queued)');
+}
+function djAddAllToSet(){
+  djSetQueue=djAllSongsMeta().map(s=>s.key);
+  djSetPointer=0;
+  renderDJSetList();
+  toast('Full set built: all '+djSetQueue.length+' songs queued');
+}
+function djClearSet(){
+  djSetQueue=[];djSetPointer=0;
+  renderDJSetList();
+}
+function djRemoveFromSet(idx){
+  djSetQueue.splice(idx,1);
+  if(djSetPointer>djSetQueue.length-1) djSetPointer=Math.max(0,djSetQueue.length-1);
+  renderDJSetList();
+}
+function djMoveSetItem(idx,dir){
+  const j=idx+dir;
+  if(j<0||j>=djSetQueue.length) return;
+  const tmp=djSetQueue[idx];djSetQueue[idx]=djSetQueue[j];djSetQueue[j]=tmp;
+  renderDJSetList();
+}
+function djSetLoadItem(idx,deck){
+  const key=djSetQueue[idx];
+  if(!key) return;
+  djSetPointer=idx;
+  loadSongToDJDeck(key,deck);
+}
+function djNextInSet(deck){
+  if(!djSetQueue.length){ toast('Set is empty — add songs from Browser first'); return; }
+  const key=djSetQueue[djSetPointer%djSetQueue.length];
+  djSetPointer=(djSetPointer+1)%djSetQueue.length;
+  loadSongToDJDeck(key,deck);
+}
+function renderDJSetList(){
+  const wrap=document.getElementById('djSetlistWrap');
+  if(!wrap) return;
+  const meta={};
+  djAllSongsMeta().forEach(s=>meta[s.key]=s);
+  const total=Object.keys(meta).length;
+  wrap.innerHTML='<div class="dj-set-toolbar">'+
+    '<button class="dj-loop-btn" onclick="djAddAllToSet()">+ Add All '+total+' Songs</button>'+
+    '<button class="dj-loop-btn" onclick="djNextInSet(\'a\')">▶ Next → A</button>'+
+    '<button class="dj-loop-btn" onclick="djNextInSet(\'b\')">▶ Next → B</button>'+
+    '<button class="dj-loop-btn" onclick="djClearSet()">✕ Clear</button>'+
+    '<span class="dj-set-count">'+djSetQueue.length+' queued'+(djSetQueue.length?' · next #'+((djSetPointer%djSetQueue.length)+1):'')+'</span>'+
+    '</div><div class="dj-setlist-scroll" id="djSetlistScroll"></div>';
+  const scroll=document.getElementById('djSetlistScroll');
+  if(!djSetQueue.length){
+    scroll.innerHTML='<div class="dj-setlist-empty">No songs queued yet.<br>Click <b>+</b> on any track in Browser, or "Add All" above to queue the whole library and build a full DJ set.</div>';
+    return;
+  }
+  djSetQueue.forEach((key,i)=>{
+    const s=meta[key]||{title:key,bpm:null,keyLabel:'—'};
+    const row=document.createElement('div');
+    row.className='dj-setlist-row'+(i===djSetPointer%djSetQueue.length?' next':'');
+    row.innerHTML='<span class="dj-setlist-idx">'+(i+1)+'</span>'+
+      '<span class="dj-setlist-title">'+s.title+'</span>'+
+      '<span class="dj-setlist-meta">'+(s.bpm||'—')+' BPM · '+s.keyLabel+'</span>'+
+      '<div class="dj-setlist-btns">'+
+      '<button class="dj-setlist-btn" onclick="djMoveSetItem('+i+',-1)" title="Move up">↑</button>'+
+      '<button class="dj-setlist-btn" onclick="djMoveSetItem('+i+',1)" title="Move down">↓</button>'+
+      '<button class="dj-setlist-btn" onclick="djSetLoadItem('+i+',\'a\')" title="Load to Deck A">A</button>'+
+      '<button class="dj-setlist-btn" onclick="djSetLoadItem('+i+',\'b\')" title="Load to Deck B">B</button>'+
+      '<button class="dj-setlist-btn" onclick="djRemoveFromSet('+i+')" title="Remove">✕</button>'+
+      '</div>';
+    scroll.appendChild(row);
+  });
+}
 function loadSongToDJDeck(songKey,deck){
   const song=FULL_SONGS[songKey]||SONGS[songKey];
   if(!song) return;
@@ -13145,7 +13347,8 @@ function loadSongToDJDeck(songKey,deck){
   document.querySelectorAll('#djHotcues'+D+' .dj-hotcue-btn').forEach(b=>b.classList.remove('set'));
   drawDJWaveform(deck);
   renderDJBrowser();
-  if(djPadMode==='chords') buildDJSamplerGrid();
+  if(typeof renderDJSetList==='function') renderDJSetList();
+  if(djPadMode==='chords'||djPadMode==='voices') buildDJSamplerGrid();
   toast('Loaded "'+song.title+'" to deck '+D);
 }
 
@@ -13156,12 +13359,12 @@ function setDJPadMode(mode,btn){
   document.querySelectorAll('#djPadModeRow .dj-loop-btn').forEach(b=>b.classList.toggle('active',b===btn));
   buildDJSamplerGrid();
 }
-const DJ_PAD_MODE_ICONS={chords:'🎵',drumkit:'🥁'};
+const DJ_PAD_MODE_ICONS={chords:'🎵',drumkit:'🥁',fx:'💥',voices:'🎤'};
 function buildDJPadModeRow(){
   const row=document.getElementById('djPadModeRow');
   if(!row) return;
   row.innerHTML='<span style="font-size:10px;color:var(--mu2);letter-spacing:.08em">PAD MODE</span>';
-  ['chords','drumkit'].forEach(m=>{
+  ['chords','drumkit','fx','voices'].forEach(m=>{
     const b=document.createElement('button');
     b.className='dj-loop-btn'+(m===djPadMode?' active':'');
     b.textContent=DJ_PAD_MODE_ICONS[m]+' '+m.toUpperCase();
@@ -13169,6 +13372,7 @@ function buildDJPadModeRow(){
     row.appendChild(b);
   });
 }
+const DJ_VOICE_PHRASES=['Let\'s go!','Turn it up!','Make some noise!','Here we go!','Hands up!','Feel the beat!','Drop it!','Coming up next!'];
 function buildDJSamplerGrid(){
   const grid=document.getElementById('djSamplerGrid');
   if(!grid) return;
@@ -13176,6 +13380,19 @@ function buildDJSamplerGrid(){
   if(djPadMode==='drumkit'){
     const kit=['kick','snare','hat','clap','tom','perc'];
     for(let i=0;i<16;i++){ const type=kit[i%kit.length]; grid.appendChild(buildDJPad(i,type.toUpperCase(),DJ_PAD_COLORS[i%4],()=>drumSound(type))); }
+    return;
+  }
+  if(djPadMode==='fx'){
+    const kit=['airhorn','siren','boom','laser','riser','scratch','rewind','alarm'];
+    for(let i=0;i<16;i++){ const type=kit[i%kit.length]; grid.appendChild(buildDJPad(i,type.toUpperCase(),DJ_PAD_COLORS[i%4],()=>djFxSample(type))); }
+    return;
+  }
+  if(djPadMode==='voices'){
+    for(let i=0;i<14;i++){ const phrase=DJ_VOICE_PHRASES[i%DJ_VOICE_PHRASES.length]; grid.appendChild(buildDJPad(i,phrase,DJ_PAD_COLORS[i%4],()=>djVoiceSay(phrase))); }
+    const songA=djDecks.a.songKey?(FULL_SONGS[djDecks.a.songKey]||SONGS[djDecks.a.songKey]):null;
+    const songB=djDecks.b.songKey?(FULL_SONGS[djDecks.b.songKey]||SONGS[djDecks.b.songKey]):null;
+    grid.appendChild(buildDJPad(14,'🅰 Announce',DJ_PAD_COLORS[2],songA?()=>djVoiceSay('Now playing '+songA.title):null));
+    grid.appendChild(buildDJPad(15,'🅱 Announce',DJ_PAD_COLORS[3],songB?()=>djVoiceSay('Now playing '+songB.title):null));
     return;
   }
   const songKey=djDecks.a.songKey||djDecks.b.songKey;
@@ -13302,6 +13519,7 @@ function buildDJPage(){
   buildDJSamplerGrid();
   buildDJBrowser();
   buildDJFxRack();
+  renderDJSetList();
   drawDJWaveform('a');drawDJWaveform('b');
   if(!djVuRAF) animateDJVU();
 }
