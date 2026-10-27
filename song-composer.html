@@ -19,7 +19,7 @@
 <!-- Optional: richer chord detection via Tonal.js. Loaded with `defer` so it never blocks
      page paint, and every call site below feature-detects it and falls back to our own
      manual detector if it fails to load (offline, CDN blocked, etc). -->
-<script defer src="https://cdn.jsdelivr.net/npm/tonal/browser/tonal.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/tonal@6.5.1/browser/tonal.min.js"></script>
 <!-- Optional: PDF text extraction for Import → .pdf chord sheets. Same defer + feature-detect
      fallback pattern as Tonal.js above — parsePDFFile() checks `typeof pdfjsLib` before use and
      tells the user to retry (or use .txt) if the CDN didn't load. -->
