@@ -624,6 +624,40 @@ button:active,.nbtn:active,.ibtn:active,.qbtn:active,.ngrid-btn:active{transform
 #page-daw .rec{width:26px;height:26px;border-radius:50%;background:var(--red);
   border:none;cursor:pointer;display:grid;place-items:center}
 #page-daw .rec.armed{box-shadow:0 0 0 3px rgba(239,68,68,.35);animation:pulseDot 1s infinite}
+/* ── Tier 7: Vocal Studio + Mixer ── */
+#page-daw .rec.recording{box-shadow:0 0 0 4px rgba(239,68,68,.55),0 0 18px rgba(239,68,68,.7);animation:pulseDot .6s infinite}
+#page-daw .dawx-tg.on{background:var(--brand);color:#fff;border-color:transparent}
+#page-daw .vx{display:flex;flex-direction:column;gap:10px;padding:4px 2px;color:var(--tx-2);font-size:11px}
+#page-daw .vx-row{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+#page-daw .vx-h{font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--tx-3);margin-top:2px}
+#page-daw .vx-rec{display:flex;align-items:center;gap:8px;background:var(--bg-3);border:1px solid var(--line);color:var(--tx);border-radius:999px;padding:7px 16px 7px 10px;font-size:12px;font-weight:600;cursor:pointer}
+#page-daw .vx-rec i{width:14px;height:14px;border-radius:50%;background:var(--red);display:inline-block}
+#page-daw .vx-rec.on i{border-radius:3px;animation:pulseDot .6s infinite}
+#page-daw .vx-meter{flex:1;min-width:120px;height:8px;border-radius:4px;background:var(--bg-4);overflow:hidden}
+#page-daw .vx-meter b{display:block;height:100%;width:0;background:linear-gradient(90deg,#4ade80,#fbbf24 70%,#ef4444);transition:width .05s}
+#page-daw .vx-chip{background:var(--bg-3);border:1px solid var(--line);color:var(--tx-2);border-radius:999px;padding:4px 10px;font-size:11px;cursor:pointer;font-family:inherit}
+#page-daw .vx-chip:hover{color:var(--tx);background:var(--bg-4)}
+#page-daw .vx-chip.on{background:var(--magenta);color:#fff;border-color:transparent}
+#page-daw .vx-note{color:var(--tx-3);font-size:10.5px;line-height:1.45}
+#page-daw .mx{display:flex;gap:8px;overflow-x:auto;padding:4px 2px 8px;align-items:stretch}
+#page-daw .mx-s{flex:0 0 78px;background:var(--bg-3);border:1px solid var(--line);border-radius:var(--r);display:flex;flex-direction:column;align-items:center;gap:6px;padding:6px 5px;position:relative}
+#page-daw .mx-s.master{flex-basis:90px;border-color:var(--brand)}
+#page-daw .mx-top{width:100%;height:4px;border-radius:2px}
+#page-daw .mx-n{font-size:10px;color:var(--tx);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%;text-align:center}
+#page-daw .mx-fx{font-size:9px;color:var(--tx-3)}
+#page-daw .mx-mid{display:flex;gap:6px;align-items:flex-end;height:150px}
+#page-daw .mx-fader{writing-mode:vertical-lr;direction:rtl;height:150px;width:18px;accent-color:var(--brand);cursor:pointer}
+#page-daw .mx-m{width:8px;height:150px;background:var(--bg-4);border-radius:3px;position:relative;overflow:hidden}
+#page-daw .mx-m b{position:absolute;left:0;right:0;bottom:0;height:0;background:linear-gradient(0deg,#4ade80,#fbbf24 75%,#ef4444)}
+#page-daw .mx-db{font-family:var(--mono,monospace);font-size:9.5px;color:var(--tx-2)}
+#page-daw .mx-pan{width:64px;accent-color:var(--magenta)}
+#page-daw .mx-btns{display:flex;gap:3px}
+#page-daw .mx-btns button{width:20px;height:18px;font-size:9px;border-radius:3px;border:1px solid var(--line);background:var(--bg-4);color:var(--tx-2);cursor:pointer;padding:0}
+#page-daw .mx-btns button.on-m{background:#f59e0b;color:#111}
+#page-daw .mx-btns button.on-s{background:#5aa9f5;color:#111}
+#page-daw .mx-btns button.on-r{background:var(--red);color:#fff}
+#page-daw .mx-sel{width:100%;font-size:9px;background:var(--bg-4);color:var(--tx-2);border:1px solid var(--line);border-radius:3px;padding:2px}
+#page-daw .clip .ctake{position:absolute;right:4px;top:2px;font-size:8.5px;background:rgba(0,0,0,.45);color:#fff;border-radius:3px;padding:0 4px;pointer-events:none}
 #page-daw .pbig{width:30px;height:30px;border-radius:50%;background:var(--bg-4);
   border:1px solid var(--line-2);color:var(--tx);cursor:pointer;
   display:grid;place-items:center;font-size:11px}
@@ -1966,6 +2000,8 @@ button:active,.nbtn:active,.ibtn:active,.qbtn:active,.ngrid-btn:active{transform
           <div class="midd-item" onclick="document.getElementById('dawLoadInput').click()">📂 Load Project</div>
           <div class="midd-item" onclick="dawExportMIDI()">🎼 Export MIDI</div>
           <div class="midd-item" onclick="dawExportWAV()">🔊 Export WAV</div>
+          <div class="midd-item" onclick="dawExportStems()">🎚 Export stems (one WAV per track)</div>
+          <div class="midd-item" onclick="dawImportAudio()">🎤 Import audio / vocals…</div>
           <div class="midd-item" onclick="dawExportChordSheet()">📄 Chord Sheet PDF</div>
         </div>
       </div>
@@ -1983,6 +2019,7 @@ button:active,.nbtn:active,.ibtn:active,.qbtn:active,.ngrid-btn:active{transform
       </div>
       <div class="mi" onclick="toast('Songbook Studio — double-click the timeline to create a clip, right-click a clip for more options.')">Help</div>
       <input type="file" id="dawLoadInput" accept="application/json" style="display:none" onchange="dawLoadProjectFile(this)">
+      <input type="file" id="dawAudioImportInput" accept="audio/*,.wav,.mp3,.m4a,.aac,.ogg,.flac,.webm" style="display:none" onchange="dawHandleAudioImport(this)">
       <div class="proj" id="dawProjectName" contenteditable spellcheck="false" oninput="dawProject.name=dawProjectName.textContent">Untitled Project</div>
       <div class="spacer"></div>
       <button class="btn" onclick="toast('Real-time collaboration needs a signaling server this build doesn\'t have yet.')">👥 Invite</button>
@@ -1999,6 +2036,7 @@ button:active,.nbtn:active,.ibtn:active,.qbtn:active,.ngrid-btn:active{transform
         <option value="synth">🌊 Synth</option>
         <option value="vocals">🎤 Vocals</option>
         <option value="sample">🔊 Sample</option>
+        <option value="vocalstack">🎙 Vocal stack (6 stems)</option>
       </select>
       <button class="btn" style="padding:4px 9px" onclick="dawAddTrack()">+ Add track</button>
       <span class="lbl">BPM</span><input id="dawBpm" class="tinput" type="number" min="40" max="240" value="120" onchange="dawSetBpm(this.value)">
@@ -2009,6 +2047,9 @@ button:active,.nbtn:active,.ibtn:active,.qbtn:active,.ngrid-btn:active{transform
       </select>
       <span class="lbl">SIG</span><input id="dawSig" class="tinput" value="4/4" readonly>
       <label class="lbl" style="cursor:pointer;display:flex;align-items:center;gap:4px"><input type="checkbox" id="dawRecArmVisible" style="display:none">⏺ REC</label>
+      <button class="btn dawx-tg" id="dawMetroBtn" style="padding:4px 9px" onclick="dawToggleSetting('metronome')" title="Metronome click during playback">🕒 Click</button>
+      <button class="btn dawx-tg" id="dawCountInBtn" style="padding:4px 9px" onclick="dawToggleSetting('countIn')" title="One bar count-in before recording">1-2-3-4</button>
+      <button class="btn" style="padding:4px 9px" onclick="dawOpenPanel();dawSwitchPanelTab('mixer')" title="Mixer">🎚 Mixer</button>
       <div class="spacer"></div>
       <span class="lbl">ZOOM</span><input type="range" id="dawZoom" class="zoom" min="8" max="96" value="24" oninput="dawSetZoom(this.value)">
     </div>
@@ -2062,7 +2103,7 @@ button:active,.nbtn:active,.ibtn:active,.qbtn:active,.ngrid-btn:active{transform
           <div class="pi" onclick="dawAddTrackOfType('vocals')"><i>🎤</i>Voice</div>
           <div class="pi" onclick="dawAddTrackOfType('bass')"><i>🎵</i>Bass</div>
           <div class="pi" onclick="dawOpenSynthPads()"><i>🎹</i>Synth</div>
-          <div class="pi" onclick="toast('Import audio is available from a track\'s sampler panel.')"><i>↓</i>Import</div>
+          <div class="pi" onclick="dawImportAudio()"><i>↓</i>Import</div>
         </div>
       </div>
     </div>
@@ -2098,6 +2139,8 @@ button:active,.nbtn:active,.ibtn:active,.qbtn:active,.ngrid-btn:active{transform
           <button class="tab" data-tab="chords" onclick="dawSwitchPanelTab('chords')">Chords</button>
           <button class="tab" data-tab="pianoroll" onclick="dawSwitchPanelTab('pianoroll')">Piano Roll</button>
           <button class="tab" data-tab="effects" onclick="dawSwitchPanelTab('effects')">Effects</button>
+          <button class="tab" data-tab="vocal" onclick="dawSwitchPanelTab('vocal')">🎤 Vocal</button>
+          <button class="tab" data-tab="mixer" onclick="dawSwitchPanelTab('mixer')">🎚 Mixer</button>
         </div>
         <div class="spacer"></div>
         <button class="btn" style="padding:4px 9px" onclick="dawSavePresetFromPanel()">Save Preset</button>
@@ -13550,6 +13593,9 @@ class DawClip{
     this.colorOverride=null;
     this.muted=false;
     this.loopCount=1;
+    // audio-clip editing (Tier 7): non-destructive gain/fades/trim + take folder
+    this.gain=1;this.fadeIn=0;this.fadeOut=0;this.offsetSec=0;
+    this.takes=null;this.activeTake=0;
   }
 }
 class DawTrack{
@@ -13696,13 +13742,21 @@ function dawBuildClipContent(clip,w,h){
   const buf=clip.payload;
   const n=Math.max(6,Math.min(80,Math.floor(w/2.4)));
   const data=(buf&&buf.getChannelData)?buf.getChannelData(0):null;
+  // only draw the part of the buffer the clip actually plays (trim/split aware)
+  let wStart=0,wLen=data?data.length:0;
+  if(data&&buf.sampleRate){
+    wStart=Math.min(data.length,Math.floor((clip.offsetSec||0)*buf.sampleRate));
+    wLen=Math.max(1,Math.min(data.length-wStart,Math.floor(clip.lengthBeats*60/dawProject.bpm*buf.sampleRate)));
+  }
+  const cg=clip.gain??1;
+  if(clip.takes&&clip.takes.length>1){ const tb=document.createElement('div'); tb.className='ctake'; tb.textContent='T'+((clip.activeTake||0)+1)+'/'+clip.takes.length; setTimeout(()=>wrap.parentElement&&wrap.parentElement.appendChild(tb),0); }
   for(let j=0;j<n;j++){
     const b=document.createElement('div'); b.className='wbar';
     let pct=20;
     if(data){
-      const start=Math.floor((j/n)*data.length),end=Math.floor(((j+1)/n)*data.length);
-      let peak=0; for(let i=start;i<end;i++) peak=Math.max(peak,Math.abs(data[i]));
-      pct=10+peak*88;
+      const start=wStart+Math.floor((j/n)*wLen),end=wStart+Math.floor(((j+1)/n)*wLen);
+      let peak=0; for(let i=start;i<end;i+=4) peak=Math.max(peak,Math.abs(data[i]));
+      pct=10+Math.min(1,peak*cg)*88;
     } else pct=14+Math.abs(Math.sin(j*.9))*74;
     b.style.height=pct+'%';
     wrap.appendChild(b);
@@ -13848,7 +13902,9 @@ const dawEngine={
     this.startCtxTime=ctx.currentTime;
     this.startBeat=dawView.playheadBeat||0;
     this.scheduledUntilBeat=this.startBeat;
+    this.segmentStartBeat=this.startBeat;
     this.isPlaying=true;
+    if(typeof dawStopLiveAudio==='function') dawStopLiveAudio();
     dawProject.tracks.forEach(dawBuildTrackGraph);
     this.tick();
   },
@@ -13863,6 +13919,8 @@ const dawEngine={
       this.startBeat=dawProject.loopStart+overshoot;
       this.startCtxTime=ctx.currentTime;
       this.scheduledUntilBeat=this.startBeat;
+      this.segmentStartBeat=this.startBeat;
+      if(typeof dawStopLiveAudio==='function') dawStopLiveAudio();
       nowBeat=this.startBeat;
     }
     dawView.playheadBeat=nowBeat;
@@ -13871,13 +13929,14 @@ const dawEngine={
     dawProject.tracks.forEach(track=>{
       track.clips.forEach(clip=>{ if(!clip.muted) dawScheduleClipEvents(track,clip,this.scheduledUntilBeat,windowEnd); });
     });
+    if(typeof dawScheduleMetronome==='function') dawScheduleMetronome(this.scheduledUntilBeat,windowEnd);
     this.scheduledUntilBeat=Math.max(this.scheduledUntilBeat,windowEnd);
     updateDawTimeDisplay();
     updateDawPlayhead();
     if(typeof dawRedrawMiniCanvas==='function') dawRedrawMiniCanvas();
     this.schedulerId=requestAnimationFrame(()=>this.tick());
   },
-  stop(){ this.isPlaying=false; if(this.schedulerId) cancelAnimationFrame(this.schedulerId); this.schedulerId=null; },
+  stop(){ this.isPlaying=false; if(this.schedulerId) cancelAnimationFrame(this.schedulerId); this.schedulerId=null; if(typeof dawStopLiveAudio==='function') dawStopLiveAudio(); },
 };
 function dawScheduleClipEvents(track,clip,fromBeat,toBeat){
   for(let rep=0;rep<(clip.loopCount||1);rep++){
@@ -13907,12 +13966,15 @@ function dawScheduleClipEvents(track,clip,fromBeat,toBeat){
         });
       });
     } else if(clip.kind==='audio'){
-      if(clipStart<fromBeat||clipStart>=toBeat) return;
-      const startTime=dawEngine.startCtxTime+((clipStart-dawEngine.startBeat)*60/dawProject.bpm);
-      const ctx=getCtx();
-      const src=ctx.createBufferSource();src.buffer=clip.payload;
-      src.connect(dawTrackOutputNode(track));
-      src.start(startTime);
+      const ctx=getCtx(),spb=60/dawProject.bpm;
+      if(clipStart>=fromBeat&&clipStart<toBeat){
+        const startTime=dawEngine.startCtxTime+((clipStart-dawEngine.startBeat)*spb);
+        dawPlayAudioClip(ctx,dawTrackOutputNode(track),clip,startTime,0,true);
+      } else if(fromBeat===dawEngine.segmentStartBeat&&clipStart<fromBeat&&fromBeat<clipEnd){
+        // playback started (or looped back) in the middle of this clip — start it part-way in
+        const startTime=Math.max(ctx.currentTime,dawEngine.startCtxTime+((fromBeat-dawEngine.startBeat)*spb));
+        dawPlayAudioClip(ctx,dawTrackOutputNode(track),clip,startTime,(fromBeat-clipStart)*spb,true);
+      }
     }
   }
 }
@@ -13990,13 +14052,13 @@ function dawGridDblClick(e){
 function dawShowClipContextMenu(x,y,track,clip){
   const menu=document.getElementById('daw-context-menu'); if(!menu) return;
   const items=[
-    ['Cut',()=>{ dawClipClipboard=JSON.parse(JSON.stringify(clip)); track.clips=track.clips.filter(c=>c.id!==clip.id); renderDawCanvas(); }],
-    ['Copy',()=>{ dawClipClipboard=JSON.parse(JSON.stringify(clip)); }],
-    ['Paste',()=>{ if(!dawClipClipboard) return; const c=new DawClip(clip.startBeat,dawClipClipboard.lengthBeats,dawClipClipboard.kind,dawClipClipboard.payload); c.name=dawClipClipboard.name; track.clips.push(c); renderDawCanvas(); }],
+    ['Cut',()=>{ dawClipClipboard=dawCloneClip(clip); track.clips=track.clips.filter(c=>c.id!==clip.id); renderDawCanvas(); }],
+    ['Copy',()=>{ dawClipClipboard=dawCloneClip(clip); }],
+    ['Paste',()=>{ if(!dawClipClipboard) return; const c=dawCloneClip(dawClipClipboard,clip.startBeat+clip.lengthBeats); track.clips.push(c); renderDawCanvas(); }],
     ['Delete',()=>{ track.clips=track.clips.filter(c=>c.id!==clip.id); renderDawCanvas(); }],
     null,
     ['Rename…',()=>{ const n=prompt('Clip name',clip.name||''); if(n!=null){ clip.name=n; renderDawCanvas(); } }],
-    ['Duplicate',()=>{ const c=new DawClip(clip.startBeat+clip.lengthBeats,clip.lengthBeats,clip.kind,JSON.parse(JSON.stringify(clip.payload||{}))); c.name=clip.name; track.clips.push(c); renderDawCanvas(); }],
+    ['Duplicate',()=>{ const c=dawCloneClip(clip,clip.startBeat+clip.lengthBeats); track.clips.push(c); renderDawCanvas(); }],
     ['Mute clip',()=>{ clip.muted=!clip.muted; renderDawCanvas(); }],
     null,
     ['Change color',()=>{ const c=prompt('Hex color, e.g. #ff7b54',clip.colorOverride||track.color); if(c){ clip.colorOverride=c; renderDawCanvas(); } }],
@@ -14006,6 +14068,12 @@ function dawShowClipContextMenu(x,y,track,clip){
     ['Edit in Piano Roll',()=>{ dawOpenInstrumentPanelForClip(track.id,clip.id); dawSwitchPanelTab('pianoroll'); }],
     ['Open in sampler',()=>{ dawOpenInstrumentPanelForClip(track.id,clip.id); }],
   ];
+  if(clip.kind==='audio'&&typeof dawAudioClipMenuItems==='function'){
+    // audio clips: piano-roll/quantize/MIDI-reverse don't apply — swap in the vocal/audio tools
+    const drop=new Set(['Quantize','Reverse','Edit in Piano Roll','Open in sampler']);
+    for(let i=items.length-1;i>=0;i--) if(items[i]&&drop.has(items[i][0])) items.splice(i,1);
+    items.push(null,...dawAudioClipMenuItems(track,clip));
+  }
   menu.innerHTML='';
   items.forEach(item=>{
     if(item===null){ const sep=document.createElement('div');sep.className='daw-clip-context-menu-sep';menu.appendChild(sep);return; }
@@ -14015,6 +14083,11 @@ function dawShowClipContextMenu(x,y,track,clip){
     menu.appendChild(row);
   });
   menu.style.left=x+'px';menu.style.top=y+'px';menu.style.display='block';
+  // keep a long (audio) menu on screen
+  menu.style.maxHeight='86vh';menu.style.overflowY='auto';
+  const r=menu.getBoundingClientRect();
+  if(r.bottom>window.innerHeight-6) menu.style.top=Math.max(6,window.innerHeight-r.height-6)+'px';
+  if(r.right>window.innerWidth-6) menu.style.left=Math.max(6,window.innerWidth-r.width-6)+'px';
 }
 function dawHideContextMenu(){ const m=document.getElementById('daw-context-menu'); if(m) m.style.display='none'; }
 function dawQuantizeClip(clip){ clip.startBeat=Math.round(clip.startBeat*4)/4; if(clip.kind==='midi') (clip.payload||[]).forEach(n=>{ n.start=Math.round(n.start*4)/4; }); }
@@ -14070,6 +14143,7 @@ function updateDawKeyBpmLabel(){
 }
 function dawAddTrack(){
   const type=document.getElementById('dawAddTrackType')?.value||'keys';
+  if(type==='vocalstack') return dawAddVocalStack();
   return dawAddTrackOfType(type);
 }
 function dawAddTrackOfType(type){
@@ -14086,6 +14160,7 @@ function dawTogglePlay(){
   [document.getElementById('dawPlayBtn'),document.getElementById('dawMiniPlayBtn')].forEach(btn=>{ if(btn){ btn.textContent='⏸';btn.classList.add('on'); } });
 }
 function dawStop(){
+  if(typeof dawRec!=='undefined'&&dawRec.active){ dawStopRecording(); return; } // stopping while recording keeps the take
   dawEngine.stop();
   [document.getElementById('dawPlayBtn'),document.getElementById('dawMiniPlayBtn')].forEach(btn=>{ if(btn){ btn.textContent='▶';btn.classList.remove('on'); } });
 }
@@ -14103,15 +14178,23 @@ function dawSyncLoopButtons(){
 }
 function updateDawTimeDisplay(){
   const el=document.getElementById('dawTimeDisplay'); if(!el) return;
-  const sec=(dawView.playheadBeat||0)*60/dawProject.bpm;
+  const sec=Math.max(0,(dawView.playheadBeat||0)*60/dawProject.bpm); // count-in runs at negative beats
   const mm=Math.floor(sec/60),ss=(sec%60).toFixed(1).padStart(4,'0');
   el.textContent=String(mm).padStart(2,'0')+':'+ss;
 }
 function dawToggleRecordArmGlobal(){
-  const armed=dawProject.tracks.find(t=>t.armed);
+  if(dawRec.active){ dawStopRecording(); return; }
+  let armed=dawProject.tracks.find(t=>t.armed);
+  if(!armed){
+    // one-press recording: use the selected vocal track, else the first vocal track, else make a Lead Vocal track
+    const sel=dawProject.tracks.find(t=>t.id===dawView.selectedTrackId);
+    armed=(sel&&sel.type==='vocals')?sel:dawProject.tracks.find(t=>t.type==='vocals');
+    if(!armed){ armed=dawAddTrackOfType('vocals'); armed.name='Lead Vocal'; dawApplyVocalChain(armed,'Pop Lead',true); }
+    dawProject.tracks.forEach(t=>t.armed=(t===armed));
+    renderDawTrackList();
+  }
   dawSyncLoopButtons();
-  if(!armed){ toast('Arm a track first (its R button), then press Record'); return; }
-  toast('Recording to '+armed.name+' — mic capture into a real audio clip is a later tier');
+  dawStartRecording();
 }
 function dawToggleMenu(name,event){
   event.stopPropagation();
@@ -14163,6 +14246,7 @@ function dawInit(){
   renderDawTimeline();
   updateDawKeyBpmLabel();
   dawSyncLoopButtons();
+  if(typeof dawSyncSettingButtons==='function') dawSyncSettingButtons();
   if(typeof dawStartFxMeterLoop==='function') dawStartFxMeterLoop();
   if(typeof renderDawLoopBrowser==='function') renderDawLoopBrowser();
 }
@@ -14192,6 +14276,8 @@ function dawSwitchPanelTab(tab){
   else if(tab==='effects') renderDawEffectsTab();
   else if(tab==='beatmaker') renderDawBeatmakerPanel();
   else if(tab==='pads') renderDawSynthPads();
+  else if(tab==='vocal') renderDawVocalTab();
+  else if(tab==='mixer') renderDawMixerTab();
   else{
     const body=document.getElementById('daw-panel-body');
     if(body) body.innerHTML='<div style="color:var(--mu);font-size:11px;padding:20px;text-align:center">'+escapeHtml(tab)+' — not built yet</div>';
@@ -14445,6 +14531,11 @@ function dawCurrentTrackForPanel(){ return dawProject.tracks.find(t=>t.id===dawP
 function renderDawInstrumentTab(){
   const body=document.getElementById('daw-panel-body'); if(!body) return;
   const track=dawCurrentTrackForPanel();
+  if(track&&track.type==='vocals'){ // a voice has no keyboard instrument — open the vocal recorder instead
+    dawCurrentPanelTab='vocal';
+    document.querySelectorAll('#daw-panel-tabs .tab[data-tab]').forEach(t=>t.classList.toggle('on',t.dataset.tab==='vocal'));
+    renderDawVocalTab(); return;
+  }
   if(track&&!STUDIO_INSTRUMENTS.some(i=>i.name===track.instrument)) track.instrument='Grand Piano';
   const instName=track?track.instrument:'Grand Piano';
   dawCurrentInstrumentIndex=Math.max(0,STUDIO_INSTRUMENTS.findIndex(i=>i.name===instName));
@@ -15461,16 +15552,25 @@ async function dawExportWAV(){
   if(!dawProject.tracks.length){ toast('Add at least one track first'); return; }
   toast('Rendering WAV…');
   try{
+    const rendered=await dawRenderTracksOffline(dawProject.tracks,true);
+    const blob=audioBufferToWavBlob(rendered);
+    dlBlob(blob,(dawProject.name||'project')+'.wav');
+    toast('WAV exported — '+(dawProject.name||'project')+'.wav');
+  }catch(e){ console.error(e); toast('WAV export failed — '+e.message); }
+}
+// Offline render of a set of tracks through their real gain/pan/FX chains.
+// respectMuteSolo=false is used for stem export (each stem renders at its own fader level).
+async function dawRenderTracksOffline(tracks,respectMuteSolo){
     const allEnds=dawProject.tracks.flatMap(t=>t.clips.map(c=>c.startBeat+c.lengthBeats*(c.loopCount||1)));
     const maxBeat=Math.max(4,...(allEnds.length?allEnds:[4]));
     const durationSec=(maxBeat*60/dawProject.bpm)+2;
     const sr=44100;
     const offline=new OfflineAudioContext(2,Math.ceil(sr*durationSec),sr);
-    const offlineMaster=offline.createGain();offlineMaster.connect(offline.destination);
+    const offlineMaster=offline.createGain();offlineMaster.gain.value=respectMuteSolo&&dawMasterGain?dawMasterGain.gain.value:0.9;offlineMaster.connect(offline.destination);
     const anySolo=dawProject.tracks.some(t=>t.soloed);
-    dawProject.tracks.forEach(track=>{
+    tracks.forEach(track=>{
       const gain=offline.createGain();
-      gain.gain.value=(anySolo?track.soloed:!track.muted)?track.volume:0;
+      gain.gain.value=(!respectMuteSolo||(anySolo?track.soloed:!track.muted))?track.volume:0;
       const panner=offline.createStereoPanner();panner.pan.value=track.pan;
       gain.connect(panner);
       let last=panner;
@@ -15503,16 +15603,12 @@ async function dawExportWAV(){
               });
             });
           } else if(clip.kind==='audio'&&clip.payload){
-            const src=offline.createBufferSource();src.buffer=clip.payload;src.connect(gain);src.start(startTime);
+            dawPlayAudioClip(offline,gain,clip,startTime,0,false);
           }
         }
       });
     });
-    const rendered=await offline.startRendering();
-    const blob=audioBufferToWavBlob(rendered);
-    dlBlob(blob,(dawProject.name||'project')+'.wav');
-    toast('WAV exported — '+(dawProject.name||'project')+'.wav');
-  }catch(e){ console.error(e); toast('WAV export failed — '+e.message); }
+    return await offline.startRendering();
 }
 function dawVarLen(value){
   let buffer=value&0x7F;
@@ -15589,14 +15685,20 @@ async function dawSaveProject(){
     for(const track of dawProject.tracks){
       const clipsOut=[];
       for(const clip of track.clips){
-        let payload=clip.payload;
-        if(clip.kind==='audio'&&payload&&payload.getChannelData){
+        let payload=clip.payload,takesOut=null;
+        if(clip.kind==='audio'&&clip.takes&&clip.takes.length>1){
+          // take folder: store every take once; the active one is referenced by index
+          takesOut=[];
+          for(const tk of clip.takes) takesOut.push(await dawBlobToBase64(audioBufferToWavBlob(tk)));
+          payload={__takeRef:clip.activeTake||0};
+        } else if(clip.kind==='audio'&&payload&&payload.getChannelData){
           const blob=audioBufferToWavBlob(payload);
           payload={__wavBase64:await dawBlobToBase64(blob)};
         }
-        clipsOut.push({id:clip.id,startBeat:clip.startBeat,lengthBeats:clip.lengthBeats,kind:clip.kind,payload,name:clip.name,colorOverride:clip.colorOverride,muted:clip.muted,loopCount:clip.loopCount});
+        clipsOut.push({id:clip.id,startBeat:clip.startBeat,lengthBeats:clip.lengthBeats,kind:clip.kind,payload,name:clip.name,colorOverride:clip.colorOverride,muted:clip.muted,loopCount:clip.loopCount,
+          gain:clip.gain,fadeIn:clip.fadeIn,fadeOut:clip.fadeOut,offsetSec:clip.offsetSec,activeTake:clip.activeTake,takes:takesOut});
       }
-      tracksOut.push({id:track.id,type:track.type,name:track.name,color:track.color,muted:track.muted,soloed:track.soloed,volume:track.volume,pan:track.pan,instrument:track.instrument,effects:track.effects,height:track.height,clips:clipsOut});
+      tracksOut.push({id:track.id,type:track.type,name:track.name,color:track.color,muted:track.muted,soloed:track.soloed,volume:track.volume,pan:track.pan,instrument:track.instrument,effects:track.effects,vocalChain:track.vocalChain||null,height:track.height,clips:clipsOut});
     }
     const out={name:dawProject.name,bpm:dawProject.bpm,key:dawProject.key,timeSig:dawProject.timeSig,loopStart:dawProject.loopStart,loopEnd:dawProject.loopEnd,loopEnabled:dawProject.loopEnabled,tracks:tracksOut};
     dl(JSON.stringify(out),'application/json',(dawProject.name||'project')+'.songbook.json');
@@ -15614,17 +15716,19 @@ function dawLoadProjectFile(inputEl){
       const ctx=getCtx();
       for(const t of (data.tracks||[])){
         const track=new DawTrack(t.type,t.name);
-        Object.assign(track,{id:t.id||track.id,color:t.color||track.color,muted:!!t.muted,soloed:!!t.soloed,volume:t.volume??0.8,pan:t.pan??0,instrument:t.instrument||'Grand Piano',effects:t.effects||[],height:t.height||72});
+        Object.assign(track,{id:t.id||track.id,color:t.color||track.color,muted:!!t.muted,soloed:!!t.soloed,volume:t.volume??0.8,pan:t.pan??0,instrument:t.instrument||'Grand Piano',effects:t.effects||[],vocalChain:t.vocalChain||null,height:t.height||72});
         for(const c of (t.clips||[])){
-          let payload=c.payload;
-          if(c.kind==='audio'&&payload&&payload.__wavBase64){
-            const bin=atob(payload.__wavBase64);
-            const arr=new Uint8Array(bin.length);
-            for(let i=0;i<bin.length;i++) arr[i]=bin.charCodeAt(i);
-            payload=await ctx.decodeAudioData(arr.buffer.slice(0));
+          let payload=c.payload,takes=null;
+          const decodeB64=async b64=>{ const bin=atob(b64); const arr=new Uint8Array(bin.length); for(let i=0;i<bin.length;i++) arr[i]=bin.charCodeAt(i); return await ctx.decodeAudioData(arr.buffer.slice(0)); };
+          if(c.kind==='audio'&&Array.isArray(c.takes)&&c.takes.length){
+            takes=[]; for(const b64 of c.takes) takes.push(await decodeB64(b64));
+            payload=takes[Math.min(takes.length-1,(payload&&payload.__takeRef)||0)];
+          } else if(c.kind==='audio'&&payload&&payload.__wavBase64){
+            payload=await decodeB64(payload.__wavBase64);
           }
           const clip=new DawClip(c.startBeat,c.lengthBeats,c.kind,payload);
-          Object.assign(clip,{id:c.id||clip.id,name:c.name||'',colorOverride:c.colorOverride||null,muted:!!c.muted,loopCount:c.loopCount||1});
+          Object.assign(clip,{id:c.id||clip.id,name:c.name||'',colorOverride:c.colorOverride||null,muted:!!c.muted,loopCount:c.loopCount||1,
+            gain:c.gain??1,fadeIn:c.fadeIn||0,fadeOut:c.fadeOut||0,offsetSec:c.offsetSec||0,takes,activeTake:c.activeTake||0});
           track.clips.push(clip);
         }
         dawProject.tracks.push(track);
@@ -15640,6 +15744,608 @@ function dawLoadProjectFile(inputEl){
   };
   reader.readAsText(file);
 }
+// ══════════════════════════════════════════════════════════════════════════
+// TIER 7 — Vocal Studio + pro tools. Real mic recording into audio clips
+// (count-in, click, input monitoring, latency compensation, take folders),
+// a one-click vocal stem stack with pro vocal chains, offline vocal DSP
+// (pitch correction to key, diatonic harmonies, wide doubles, quick
+// vocal/instrumental split), audio import, clip gain/fades/split/normalize,
+// a mixer view, and per-track stem export. Everything runs on Web Audio —
+// no libraries, no server.
+// ══════════════════════════════════════════════════════════════════════════
+const DAW_SETTINGS_KEY='dawStudioSettings';
+const dawSettings=Object.assign({metronome:false,countIn:true,monitor:false,latencyMs:null,tuneSpeed:0.6},(()=>{ try{ return JSON.parse(localStorage.getItem(DAW_SETTINGS_KEY)||'{}'); }catch(e){ return {}; } })());
+function dawSaveSettings(){ try{ localStorage.setItem(DAW_SETTINGS_KEY,JSON.stringify(dawSettings)); }catch(e){} }
+function dawToggleSetting(key){
+  dawSettings[key]=!dawSettings[key]; dawSaveSettings(); dawSyncSettingButtons();
+  if(key==='monitor') dawUpdateMonitoring();
+  if(dawCurrentPanelTab==='vocal') renderDawVocalTab();
+}
+function dawSyncSettingButtons(){
+  const m=document.getElementById('dawMetroBtn'); if(m) m.classList.toggle('on',!!dawSettings.metronome);
+  const c=document.getElementById('dawCountInBtn'); if(c) c.classList.toggle('on',!!dawSettings.countIn);
+}
+function dawYield(){ return new Promise(r=>setTimeout(r,20)); }
+
+// ── vocal chains (track FX presets built from the existing STUDIO_FX units) ──
+const DAW_VOCAL_CHAINS={
+  'Pop Lead':[['gate',{threshold:-55}],['eq3',{lowGain:-8,lowFreq:110,midGain:-2,midFreq:400,highGain:4,highFreq:9000}],['deesser',{reduction:6}],['compressor',{threshold:-22,ratio:4,attack:0.005,release:0.15,makeup:4}],['delay',{time:0.25,feedback:0.25,mix:0.12}],['reverb',{decay:2.2,mix:0.18}]],
+  'Rap / Hip-Hop':[['gate',{threshold:-50}],['eq3',{lowGain:-10,lowFreq:120,midGain:3,midFreq:3000,highGain:3,highFreq:10000}],['compressor',{threshold:-26,ratio:6,attack:0.002,release:0.1,makeup:6}],['deesser',{reduction:8}],['saturation',{amount:0.2,warmth:0.6,output:1}]],
+  'Airy Ballad':[['eq3',{lowGain:-6,lowFreq:100,highGain:7,highFreq:11000}],['deesser',{}],['compressor',{threshold:-20,ratio:3,makeup:3}],['delay',{time:0.5,feedback:0.35,filter:3000,mix:0.15}],['reverb',{decay:4.5,preDelay:0.04,mix:0.3}]],
+  'Backing Vocals':[['eq3',{lowGain:-12,lowFreq:180,midGain:-3,midFreq:500,highGain:3,highFreq:9000}],['compressor',{threshold:-24,ratio:5,makeup:3}],['doubler',{strength:0.8,spread:0.9}],['reverb',{decay:3,mix:0.35}]],
+  'Ad-libs':[['filter',{type:'highpass',frequency:300,Q:0.7}],['eq3',{lowGain:-6,lowFreq:200,midGain:4,midFreq:2500}],['delay',{time:0.375,feedback:0.45,mix:0.3}],['reverb',{decay:2,mix:0.25}]],
+  'Techno Vocal':[['filter',{type:'highpass',frequency:250,Q:0.7}],['compressor',{threshold:-24,ratio:5,makeup:4}],['delay',{time:0.375,feedback:0.55,filter:2500,mix:0.28}],['reverb',{decay:5,preDelay:0.06,mix:0.35}]],
+  'Telephone':[['filter',{type:'bandpass',frequency:1600,Q:1.2}],['distortion',{drive:20,tone:3500,level:0.8,mix:0.6}],['compressor',{threshold:-20,ratio:6}]],
+  'Robot':[['bitcrusher',{bits:7,downsample:4,mix:0.5}],['chorus',{rate:4,depth:0.8,mix:0.5}],['filter',{type:'highpass',frequency:200}]],
+  'Dry / Natural':[['eq3',{lowGain:-6,lowFreq:90}],['compressor',{threshold:-18,ratio:2.5,makeup:2}]],
+};
+function dawApplyVocalChain(track,chainName,silent){
+  const chain=DAW_VOCAL_CHAINS[chainName]; if(!chain) return;
+  track.effects=chain.map(([type,over])=>{ const def=STUDIO_FX[type]; return {type,params:Object.assign(Object.fromEntries(def.params.map(p=>[p.id,p.def])),over),bypassed:false}; });
+  track.vocalChain=chainName;
+  dawBuildTrackGraph(track); dawRebuildTrackFxChain(track);
+  if(!silent) toast('Vocal chain "'+chainName+'" on '+track.name);
+}
+const DAW_VOCAL_STACK=[
+  {name:'Lead Vocal',chain:'Pop Lead',pan:0,vol:0.9},
+  {name:'Double L',chain:'Backing Vocals',pan:-0.65,vol:0.5},
+  {name:'Double R',chain:'Backing Vocals',pan:0.65,vol:0.5},
+  {name:'Harmony High',chain:'Backing Vocals',pan:-0.35,vol:0.45},
+  {name:'Harmony Low',chain:'Backing Vocals',pan:0.35,vol:0.45},
+  {name:'Ad-libs',chain:'Ad-libs',pan:0.2,vol:0.6},
+];
+function dawAddVocalStack(){
+  let first=null;
+  DAW_VOCAL_STACK.forEach(spec=>{
+    const t=new DawTrack('vocals',spec.name); t.pan=spec.pan; t.volume=spec.vol;
+    dawProject.tracks.push(t); dawBuildTrackGraph(t); dawApplyVocalChain(t,spec.chain,true);
+    if(!first) first=t;
+  });
+  dawView.selectedTrackId=first.id;
+  dawProject.tracks.forEach(t=>t.armed=(t===first));
+  renderDawTrackList(); renderDawTimeline(); dawSyncLoopButtons();
+  dawOpenInstrumentPanelForTrack(first.id);
+  toast('Vocal stack added — 6 stems, each with its own mix chain. Lead Vocal is armed.');
+  return first;
+}
+
+// ── audio clip playback: offset/trim, clip gain, fades. Used live AND offline. ──
+let dawLiveAudioSources=[];
+function dawStopLiveAudio(){ dawLiveAudioSources.forEach(s=>{ try{ s.stop(); }catch(e){} }); dawLiveAudioSources=[]; }
+function dawClipPlayableSec(clip){
+  const buf=clip.payload; if(!buf||!buf.getChannelData) return 0;
+  return Math.max(0,Math.min(buf.duration-(clip.offsetSec||0),clip.lengthBeats*60/dawProject.bpm));
+}
+function dawPlayAudioClip(ctx,dest,clip,when,offsetSec,live){
+  const buf=clip.payload; if(!buf||!buf.getChannelData) return null;
+  const clipDur=dawClipPlayableSec(clip);
+  const off=Math.max(0,offsetSec||0); if(off>=clipDur-0.005) return null;
+  const src=ctx.createBufferSource(); src.buffer=buf;
+  const g=ctx.createGain(); const gain=clip.gain??1;
+  const t0=when-off, end=t0+clipDur, fi=Math.min(clip.fadeIn||0,clipDur/2), fo=Math.min(clip.fadeOut||0,clipDur/2);
+  const envAt=t=>{ let v=gain; const rel=t-t0; if(fi>0&&rel<fi) v*=Math.max(0,rel/fi); if(fo>0&&rel>clipDur-fo) v*=Math.max(0,(clipDur-rel)/fo); return v; };
+  g.gain.setValueAtTime(envAt(when),when);
+  if(fi>0&&t0+fi>when) g.gain.linearRampToValueAtTime(envAt(t0+fi),t0+fi);
+  if(fo>0){ const fs=end-fo; if(fs>when) g.gain.setValueAtTime(envAt(fs),fs); g.gain.linearRampToValueAtTime(0,end); }
+  src.connect(g); g.connect(dest);
+  src.start(when,(clip.offsetSec||0)+off,clipDur-off);
+  if(live){ dawLiveAudioSources.push(src); src.onended=()=>{ dawLiveAudioSources=dawLiveAudioSources.filter(s=>s!==src); }; }
+  return src;
+}
+function dawCloneClip(clip,startBeat){
+  const payload=clip.kind==='audio'?clip.payload:JSON.parse(JSON.stringify(clip.payload||(clip.kind==='midi'?[]:{})));
+  const c=new DawClip(startBeat??clip.startBeat,clip.lengthBeats,clip.kind,payload);
+  Object.assign(c,{name:clip.name,colorOverride:clip.colorOverride,muted:clip.muted,loopCount:clip.loopCount||1,
+    gain:clip.gain??1,fadeIn:clip.fadeIn||0,fadeOut:clip.fadeOut||0,offsetSec:clip.offsetSec||0,
+    takes:clip.takes?clip.takes.slice():null,activeTake:clip.activeTake||0});
+  return c;
+}
+
+// ── metronome / count-in (scheduled from the engine tick, sample-accurate) ──
+function dawScheduleMetronome(fromBeat,toBeat){
+  const countingIn=dawRec.active&&fromBeat<dawRec.startBeat;
+  if(!dawSettings.metronome&&!countingIn) return;
+  const ctx=getCtx(),barLen=dawProject.timeSig[0];
+  for(let b=Math.ceil(fromBeat-1e-9);b<toBeat;b++){
+    if(b<fromBeat) continue;
+    if(!dawSettings.metronome&&b>=dawRec.startBeat) break; // count-in only
+    const t=dawEngine.startCtxTime+(b-dawEngine.startBeat)*60/dawProject.bpm;
+    if(t<ctx.currentTime-0.01) continue;
+    const accent=(((b%barLen)+barLen)%barLen)===0;
+    const o=ctx.createOscillator(),g=ctx.createGain();
+    o.frequency.value=accent?1600:1050; o.type='square';
+    g.gain.setValueAtTime(0.0001,t); g.gain.exponentialRampToValueAtTime(accent?0.35:0.2,t+0.002); g.gain.exponentialRampToValueAtTime(0.0001,t+0.05);
+    o.connect(g); g.connect(ctx.destination); o.start(t); o.stop(t+0.06);
+  }
+}
+
+// ── recording ──
+const dawRec={active:false,starting:false,stream:null,source:null,proc:null,sink:null,monitor:null,chunks:[],firstTime:null,track:null,startBeat:0,t0:0,savedLoop:false,level:0};
+function dawAutoLatencyMs(){ const ctx=getCtx(); return Math.round(((ctx.baseLatency||0)+(ctx.outputLatency||0))*1000); }
+function dawLatencyMs(){ return dawSettings.latencyMs==null?dawAutoLatencyMs():Number(dawSettings.latencyMs)||0; }
+function dawUpdateMonitoring(){
+  if(!dawRec.source||!dawRec.track) return;
+  if(dawRec.monitor){ try{ dawRec.monitor.disconnect(); }catch(e){} dawRec.monitor=null; }
+  if(dawSettings.monitor){
+    const g=getCtx().createGain(); g.gain.value=1;
+    dawRec.source.connect(g); g.connect(dawTrackOutputNode(dawRec.track)); // hear yourself through the track's vocal chain
+    dawRec.monitor=g;
+  }
+}
+async function dawStartRecording(){
+  if(dawRec.active||dawRec.starting) return;
+  const track=dawProject.tracks.find(t=>t.armed);
+  if(!track){ toast('Arm a track first (its R button)'); return; }
+  if(!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia){ toast('This browser can\'t access a microphone'); return; }
+  dawRec.starting=true;
+  const ctx=getCtx(); if(ctx.state==='suspended') await ctx.resume();
+  let stream;
+  try{ stream=await navigator.mediaDevices.getUserMedia(typeof MIC_CONSTRAINTS!=='undefined'?MIC_CONSTRAINTS:{audio:true}); }
+  catch(e){ dawRec.starting=false; toast('Microphone blocked — allow mic access for this page, then press Record again'); return; }
+  if(dawEngine.isPlaying){ dawEngine.stop(); }
+  dawRec.stream=stream; dawRec.track=track; dawRec.chunks=[]; dawRec.firstTime=null; dawRec.level=0;
+  dawRec.source=ctx.createMediaStreamSource(stream);
+  dawRec.proc=ctx.createScriptProcessor(4096,1,1);
+  dawRec.sink=ctx.createGain(); dawRec.sink.gain.value=0;
+  dawRec.source.connect(dawRec.proc); dawRec.proc.connect(dawRec.sink); dawRec.sink.connect(ctx.destination);
+  dawRec.proc.onaudioprocess=e=>{
+    if(!dawRec.active) return;
+    const d=e.inputBuffer.getChannelData(0);
+    if(dawRec.firstTime==null) dawRec.firstTime=e.playbackTime;
+    dawRec.chunks.push(new Float32Array(d));
+    let pk=0; for(let i=0;i<d.length;i+=8) pk=Math.max(pk,Math.abs(d[i]));
+    dawRec.level=Math.max(pk,dawRec.level*0.85);
+  };
+  dawUpdateMonitoring();
+  const countBeats=dawSettings.countIn?dawProject.timeSig[0]:0;
+  dawRec.startBeat=Math.max(0,dawView.playheadBeat||0);
+  dawRec.savedLoop=dawProject.loopEnabled; dawProject.loopEnabled=false; // record straight through
+  dawView.playheadBeat=dawRec.startBeat-countBeats;
+  dawRec.active=true; dawRec.starting=false;
+  dawEngine.play();
+  dawRec.t0=dawEngine.startCtxTime+countBeats*60/dawProject.bpm;
+  [document.getElementById('dawPlayBtn'),document.getElementById('dawMiniPlayBtn')].forEach(btn=>{ if(btn){ btn.textContent='⏸';btn.classList.add('on'); } });
+  dawSyncRecordUI();
+  dawRecMeterLoop();
+  toast(countBeats?'Count-in… recording to '+track.name:'Recording to '+track.name);
+}
+function dawSyncRecordUI(){
+  const rb=document.getElementById('dawRecordBtn'); if(rb) rb.classList.toggle('recording',dawRec.active);
+  const mb=document.getElementById('dawMiniRecBtn'); if(mb) mb.style.color=dawRec.active?'#ef4444':'';
+  const vb=document.getElementById('dawVxRecBtn'); if(vb){ vb.classList.toggle('on',dawRec.active); vb.lastChild.textContent=dawRec.active?' Stop recording':' Record'; }
+}
+function dawRecMeterLoop(){
+  const m=document.getElementById('dawVxMeter'); if(m) m.style.width=Math.min(100,dawRec.level*140)+'%';
+  if(dawRec.active) requestAnimationFrame(dawRecMeterLoop); else if(m) m.style.width='0%';
+}
+function dawStopRecording(){
+  if(!dawRec.active) return;
+  dawRec.active=false;
+  const ctx=getCtx(),sr=ctx.sampleRate;
+  try{ dawRec.source.disconnect(); }catch(e){} try{ dawRec.proc.disconnect(); }catch(e){} try{ dawRec.sink.disconnect(); }catch(e){}
+  if(dawRec.monitor){ try{ dawRec.monitor.disconnect(); }catch(e){} dawRec.monitor=null; }
+  if(dawRec.stream) dawRec.stream.getTracks().forEach(t=>t.stop());
+  dawRec.stream=null; dawRec.source=null; dawRec.proc=null;
+  dawProject.loopEnabled=dawRec.savedLoop;
+  dawStop(); // now a normal stop (dawRec.active is false)
+  dawSyncRecordUI();
+  if(!dawRec.chunks.length||dawRec.firstTime==null){ toast('Nothing was recorded — check the mic'); return; }
+  const total=dawRec.chunks.reduce((s,c)=>s+c.length,0);
+  const all=new Float32Array(total); let p=0; dawRec.chunks.forEach(c=>{ all.set(c,p); p+=c.length; });
+  dawRec.chunks=[];
+  // sample i was captured at ≈ firstTime + i/sr; shift by the round-trip latency so the take lines up with the beat you heard
+  const startIdx=Math.round((dawRec.t0-dawRec.firstTime+dawLatencyMs()/1000)*sr);
+  let data;
+  if(startIdx>=0) data=all.subarray(Math.min(startIdx,all.length));
+  else { data=new Float32Array(all.length-startIdx); data.set(all,-startIdx); }
+  if(data.length<sr*0.15){ toast('Take too short — record a little longer (stop after the count-in finishes)'); return; }
+  const buf=ctx.createBuffer(1,data.length,sr); buf.copyToChannel(data,0);
+  dawAddRecordedTake(dawRec.track,dawRec.startBeat,buf);
+}
+function dawAddRecordedTake(track,startBeat,buf){
+  const lenBeats=buf.duration*dawProject.bpm/60;
+  let clip=track.clips.find(c=>c.kind==='audio'&&Math.abs(c.startBeat-startBeat)<0.05);
+  if(clip){
+    if(!clip.takes) clip.takes=[clip.payload];
+    clip.takes.push(buf); clip.activeTake=clip.takes.length-1; clip.payload=buf; clip.offsetSec=0;
+    clip.lengthBeats=lenBeats; clip.name=track.name+' · Take '+clip.takes.length;
+    toast('Take '+clip.takes.length+' recorded — right-click the clip to switch takes');
+  } else {
+    clip=new DawClip(startBeat,lenBeats,'audio',buf); clip.takes=[buf]; clip.activeTake=0; clip.name=track.name+' · Take 1';
+    track.clips.push(clip);
+    toast('Recorded '+buf.duration.toFixed(1)+'s on '+track.name+'. Record again at the same spot to stack takes.');
+  }
+  dawView.selectedClipId=clip.id; dawView.selectedTrackId=track.id;
+  renderDawTimeline(); renderDawTrackList();
+  if(dawCurrentPanelTab==='vocal') renderDawVocalTab();
+}
+function dawSelectTake(track,clip,i){
+  if(!clip.takes||!clip.takes[i]) return;
+  clip.activeTake=i; clip.payload=clip.takes[i]; clip.offsetSec=0;
+  clip.lengthBeats=clip.payload.duration*dawProject.bpm/60;
+  clip.name=track.name+' · Take '+(i+1);
+  renderDawTimeline(); if(dawCurrentPanelTab==='vocal') renderDawVocalTab();
+}
+
+// ── audio import ──
+let dawImportTarget=null;
+function dawImportAudio(trackId){ dawImportTarget=trackId||null; document.getElementById('dawAudioImportInput')?.click(); }
+async function dawHandleAudioImport(input){
+  const file=input.files&&input.files[0]; input.value=''; if(!file) return;
+  toast('Importing '+file.name+'…');
+  try{
+    const ctx=getCtx();
+    const buf=await ctx.decodeAudioData((await file.arrayBuffer()).slice(0));
+    let track=dawProject.tracks.find(t=>t.id===dawImportTarget);
+    if(!track){
+      const isVox=/vox|vocal|acap|voice|lead|harmony|adlib/i.test(file.name);
+      track=dawAddTrackOfType(isVox?'vocals':'sample');
+      track.name=file.name.replace(/\.[^.]+$/,'').slice(0,28);
+      if(isVox) dawApplyVocalChain(track,'Pop Lead',true);
+    }
+    const startBeat=Math.max(0,Math.round((dawView.playheadBeat||0)*4)/4);
+    const clip=new DawClip(startBeat,buf.duration*dawProject.bpm/60,'audio',buf);
+    clip.name=file.name.replace(/\.[^.]+$/,'');
+    track.clips.push(clip);
+    dawView.selectedClipId=clip.id; dawView.selectedTrackId=track.id;
+    renderDawTrackList(); renderDawTimeline();
+    toast('Imported '+clip.name+' ('+buf.duration.toFixed(1)+'s, '+(buf.numberOfChannels>1?'stereo':'mono')+'). Right-click it for vocal tools.');
+  }catch(e){ console.error(e); toast('Could not read that audio file — try WAV or MP3'); }
+}
+
+// ── offline vocal DSP ──
+// Pitch detection: YIN-style cumulative-mean-normalised difference on a 2× decimated signal.
+function dawDetectPitches(data,sr,hop){
+  const dec=2,dsr=sr/dec,W=1024,dHop=hop/dec;
+  const ds=new Float32Array(Math.floor(data.length/dec));
+  for(let i=0;i<ds.length;i++) ds[i]=(data[i*dec]+data[i*dec+1])*0.5;
+  const minLag=Math.floor(dsr/1000),maxLag=Math.min(W-1,Math.floor(dsr/70));
+  const frames=Math.ceil(data.length/hop),out=new Float32Array(frames),diff=new Float32Array(maxLag+1);
+  for(let k=0;k<frames;k++){
+    const start=Math.round(k*dHop-W/2);
+    if(start<0||start+W+maxLag>=ds.length){ out[k]=0; continue; }
+    let rms=0; for(let i=0;i<W;i+=2) rms+=ds[start+i]*ds[start+i]; rms=Math.sqrt(rms/(W/2));
+    if(rms<0.012){ out[k]=0; continue; }
+    let run=0; diff[0]=1;
+    for(let tau=1;tau<=maxLag;tau++){
+      let s=0; for(let i=0;i<W;i++){ const d=ds[start+i]-ds[start+i+tau]; s+=d*d; }
+      run+=s; diff[tau]=run>0?s*tau/run:1;
+    }
+    let tau=-1;
+    for(let t=minLag;t<=maxLag;t++){ if(diff[t]<0.15){ while(t+1<=maxLag&&diff[t+1]<diff[t]) t++; tau=t; break; } }
+    if(tau<0){ out[k]=0; continue; }
+    const a=diff[tau-1]??diff[tau],b=diff[tau],c=diff[tau+1]??diff[tau];
+    const den=a-2*b+c, shift=den?0.5*(a-c)/den:0;
+    out[k]=dsr/(tau+shift);
+  }
+  return out;
+}
+// Time-preserving pitch shift: a two-head variable delay line. Each read head moves through the
+// signal at rate r (so pitch × r) inside a sliding window G; the heads sit half a window apart and
+// crossfade with sin² weights (which sum to exactly 1). Unlike overlap-add of many grains, this
+// keeps working for the tiny ratios pitch correction needs. ratios[] is per hop, interpolated.
+function dawGranularShift(data,ratios,hop){
+  const len=data.length,out=new Float32Array(len),G=hop*4,half=G/2,nR=ratios.length;
+  let phase=0;
+  for(let op=0;op<len;op++){
+    const kf=op/hop,k0=Math.min(nR-1,Math.floor(kf)),k1=Math.min(nR-1,k0+1),fr=kf-Math.floor(kf);
+    const r=ratios[k0]*(1-fr)+ratios[k1]*fr;
+    phase+=(1-r)/G; phase-=Math.floor(phase);
+    let s=0;
+    for(let h=0;h<2;h++){
+      const ph=(phase+h*0.5)%1;
+      const rp=op+half-ph*G; // centred, so the shifted audio doesn't drift late
+      const i0=Math.floor(rp);
+      if(i0<0||i0+1>=len) continue;
+      const f=rp-i0,w=Math.sin(Math.PI*ph);
+      s+=(data[i0]*(1-f)+data[i0+1]*f)*w*w;
+    }
+    out[op]=s;
+  }
+  return out;
+}
+function dawMidiOf(f){ return 69+12*Math.log2(f/440); }
+function dawInKey(m){ const sc=dawScaleForKey(dawProject.key); return sc.intervals.includes((((m-sc.rootIdx)%12)+12)%12); }
+function dawNearestScaleMidi(mf){ const r=Math.round(mf); for(let d=0;d<=2;d++){ if(dawInKey(r+d)&&dawInKey(r-d)) return Math.abs(r+d-mf)<Math.abs(r-d-mf)?r+d:r-d; if(dawInKey(r+d)) return r+d; if(dawInKey(r-d)) return r-d; } return r; }
+function dawStepScale(m,steps){ let x=m,n=0; const dir=steps>0?1:-1; while(n<Math.abs(steps)){ x+=dir; if(dawInKey(x)) n++; } return x; }
+// mode: {type:'tune',speed} | {type:'harmony',steps} | {type:'detune',cents}
+async function dawProcessVocalBuffer(buf,mode){
+  const ctx=getCtx(),sr=buf.sampleRate,hop=Math.round(sr*0.0116); // ~512 @ 44.1k
+  const chans=[];
+  // pitch is tracked on the mono sum so all channels get identical ratios
+  const mono=new Float32Array(buf.length);
+  for(let c=0;c<buf.numberOfChannels;c++){ const d=buf.getChannelData(c); for(let i=0;i<d.length;i++) mono[i]+=d[i]/buf.numberOfChannels; }
+  await dawYield();
+  const pitches=mode.type==='detune'?null:dawDetectPitches(mono,sr,hop);
+  await dawYield();
+  const frames=Math.ceil(buf.length/hop),ratios=new Float32Array(frames);
+  const DEFAULT_SEMIS={2:4,4:7,[-2]:-3,[-3]:-5,7:12,[-7]:-12};
+  let prev=1,lastSemis=mode.type==='harmony'?(DEFAULT_SEMIS[mode.steps]??0):0; // used until the first voiced frame
+  for(let k=0;k<frames;k++){
+    let target=1;
+    if(mode.type==='detune') target=Math.pow(2,mode.cents/1200);
+    else if(pitches[k]>0){
+      const m=dawMidiOf(pitches[k]);
+      if(mode.type==='tune') target=Math.pow(2,(dawNearestScaleMidi(m)-m)/12);
+      else { const base=dawNearestScaleMidi(m); lastSemis=(Math.abs(mode.steps)===7?12*Math.sign(mode.steps):dawStepScale(base,mode.steps)-base); target=Math.pow(2,lastSemis/12); }
+    } else if(mode.type==='harmony') target=Math.pow(2,lastSemis/12);
+    const a=mode.type==='tune'?Math.max(0.05,mode.speed??0.6):mode.type==='harmony'?0.6:1;
+    prev=prev+(target-prev)*a; ratios[k]=prev;
+  }
+  for(let c=0;c<buf.numberOfChannels;c++){ chans.push(dawGranularShift(buf.getChannelData(c),ratios,hop)); await dawYield(); }
+  const out=ctx.createBuffer(buf.numberOfChannels,buf.length,sr);
+  chans.forEach((d,c)=>out.copyToChannel(d,c));
+  return out;
+}
+async function dawFilterRender(monoData,sr,filters){
+  const off=new OfflineAudioContext(1,monoData.length,sr);
+  const b=off.createBuffer(1,monoData.length,sr); b.copyToChannel(monoData,0);
+  const s=off.createBufferSource(); s.buffer=b; let last=s;
+  filters.forEach(f=>{ const bq=off.createBiquadFilter(); bq.type=f.type; bq.frequency.value=f.freq; if(f.Q) bq.Q.value=f.Q; if(f.gain) bq.gain.value=f.gain; last.connect(bq); last=bq; });
+  last.connect(off.destination); s.start();
+  return (await off.startRendering()).getChannelData(0);
+}
+function dawCopyClipPlacement(src,dst){ dst.offsetSec=src.offsetSec||0; dst.lengthBeats=src.lengthBeats; dst.gain=src.gain??1; dst.fadeIn=src.fadeIn||0; dst.fadeOut=src.fadeOut||0; }
+function dawAddDerivedTrack(srcTrack,srcClip,buf,name,chain,pan,vol){
+  const t=new DawTrack('vocals',name); t.pan=pan; t.volume=vol;
+  const idx=dawProject.tracks.indexOf(srcTrack);
+  dawProject.tracks.splice(idx+1,0,t); dawBuildTrackGraph(t); if(chain) dawApplyVocalChain(t,chain,true);
+  const c=new DawClip(srcClip.startBeat,srcClip.lengthBeats,'audio',buf); dawCopyClipPlacement(srcClip,c); c.name=name;
+  t.clips.push(c);
+  return t;
+}
+async function dawVocalTune(track,clip){
+  toast('Tuning to '+dawProject.key+'… (a few seconds)'); await dawYield();
+  try{
+    const out=await dawProcessVocalBuffer(clip.payload,{type:'tune',speed:dawSettings.tuneSpeed});
+    if(!clip.takes) clip.takes=[clip.payload];
+    clip.takes.push(out); clip.activeTake=clip.takes.length-1; clip.payload=out;
+    clip.name=track.name+' · Tuned ('+dawProject.key+')';
+    renderDawTimeline(); if(dawCurrentPanelTab==='vocal') renderDawVocalTab();
+    toast('Tuned to '+dawProject.key+' — saved as a new take, the original is still in the take list');
+  }catch(e){ console.error(e); toast('Tuning failed — '+e.message); }
+}
+const DAW_HARMONY_LABELS={2:'3rd above',4:'5th above',[-2]:'3rd below',[-3]:'4th below',[-7]:'Octave below',7:'Octave above'};
+async function dawVocalHarmony(track,clip,steps){
+  const label=DAW_HARMONY_LABELS[steps]||(steps+' steps');
+  toast('Building harmony ('+label+', in '+dawProject.key+')…'); await dawYield();
+  try{
+    const out=await dawProcessVocalBuffer(clip.payload,{type:'harmony',steps});
+    dawAddDerivedTrack(track,clip,out,'Harmony '+label,'Backing Vocals',steps>0?-0.35:0.35,0.45);
+    renderDawTrackList(); renderDawTimeline();
+    toast('Harmony track added: '+label+' (follows the key of '+dawProject.key+')');
+  }catch(e){ console.error(e); toast('Harmony failed — '+e.message); }
+}
+async function dawVocalDouble(track,clip){
+  toast('Creating wide double…'); await dawYield();
+  try{
+    const mk=async(cents,delayMs)=>{
+      const shifted=await dawProcessVocalBuffer(clip.payload,{type:'detune',cents});
+      const sr=shifted.sampleRate,d=Math.round(sr*delayMs/1000),ctx=getCtx();
+      const out=ctx.createBuffer(shifted.numberOfChannels,shifted.length,sr);
+      for(let c=0;c<shifted.numberOfChannels;c++){ const s=shifted.getChannelData(c),o=new Float32Array(shifted.length); o.set(s.subarray(0,s.length-d),d); out.copyToChannel(o,c); }
+      return out;
+    };
+    const L=await mk(9,17),R=await mk(-11,26);
+    dawAddDerivedTrack(track,clip,R,'Double R','Backing Vocals',0.7,0.42);
+    dawAddDerivedTrack(track,clip,L,'Double L','Backing Vocals',-0.7,0.42);
+    renderDawTrackList(); renderDawTimeline();
+    toast('Wide double added — two detuned, offset copies panned left and right');
+  }catch(e){ console.error(e); toast('Double failed — '+e.message); }
+}
+async function dawSplitStems(track,clip){
+  const buf=clip.payload;
+  if(!buf||buf.numberOfChannels<2){ toast('Stem split needs a stereo song — this clip is mono'); return; }
+  toast('Splitting vocals and instrumental…'); await dawYield();
+  try{
+    const sr=buf.sampleRate,L=buf.getChannelData(0),R=buf.getChannelData(1),n=buf.length;
+    const mid=new Float32Array(n),side=new Float32Array(n);
+    for(let i=0;i<n;i++){ mid[i]=(L[i]+R[i])*0.5; side[i]=(L[i]-R[i])*0.5; }
+    // vocals: the centre channel, band-limited to the voice range
+    const vox=await dawFilterRender(mid,sr,[{type:'highpass',freq:140,Q:0.7},{type:'highpass',freq:140,Q:0.7},{type:'lowpass',freq:7500,Q:0.7},{type:'peaking',freq:3000,Q:1,gain:2}]);
+    // instrumental: everything panned off-centre + the centre's low end (kick/bass)
+    const low=await dawFilterRender(mid,sr,[{type:'lowpass',freq:150,Q:0.7},{type:'lowpass',freq:150,Q:0.7}]);
+    const ctx=getCtx();
+    const vb=ctx.createBuffer(1,n,sr); vb.copyToChannel(vox,0);
+    const ib=ctx.createBuffer(2,n,sr); const il=new Float32Array(n),ir=new Float32Array(n);
+    for(let i=0;i<n;i++){ il[i]=side[i]*1.4+low[i]; ir[i]=-side[i]*1.4+low[i]; }
+    ib.copyToChannel(il,0); ib.copyToChannel(ir,1);
+    const base=(clip.name||track.name).slice(0,20);
+    const inst=dawAddDerivedTrack(track,clip,ib,base+' · Instrumental',null,0,0.8);
+    inst.type='sample'; inst.color=DAW_TRACK_TYPES.sample.color;
+    dawAddDerivedTrack(track,clip,vb,base+' · Vocals','Dry / Natural',0,0.85);
+    clip.muted=true;
+    renderDawTrackList(); renderDawTimeline();
+    toast('Split done — Vocals + Instrumental tracks added, original clip muted. Works best when the vocal is centred.');
+  }catch(e){ console.error(e); toast('Split failed — '+e.message); }
+}
+function dawReverseAudioClip(track,clip){
+  const buf=clip.payload,ctx=getCtx(),out=ctx.createBuffer(buf.numberOfChannels,buf.length,buf.sampleRate);
+  for(let c=0;c<buf.numberOfChannels;c++){ const d=buf.getChannelData(c),o=new Float32Array(d.length); for(let i=0;i<d.length;i++) o[i]=d[d.length-1-i]; out.copyToChannel(o,c); }
+  if(clip.takes) clip.takes[clip.activeTake||0]=out;
+  clip.payload=out; clip.offsetSec=Math.max(0,buf.duration-(clip.offsetSec||0)-dawClipPlayableSec(clip));
+  renderDawTimeline(); toast('Reversed');
+}
+function dawNormalizeClip(clip){
+  const buf=clip.payload; let pk=0;
+  for(let c=0;c<buf.numberOfChannels;c++){ const d=buf.getChannelData(c); for(let i=0;i<d.length;i++){ const a=Math.abs(d[i]); if(a>pk) pk=a; } }
+  if(pk<1e-4){ toast('Clip is silent'); return; }
+  clip.gain=0.97/pk; renderDawTimeline(); toast('Normalized (clip gain '+(20*Math.log10(clip.gain)).toFixed(1)+' dB)');
+}
+function dawSplitClipAtPlayhead(track,clip){
+  const b=dawView.playheadBeat||0;
+  if(b<=clip.startBeat+0.01||b>=clip.startBeat+clip.lengthBeats-0.01){ toast('Move the playhead inside the clip first'); return; }
+  const cut=b-clip.startBeat;
+  const right=dawCloneClip(clip,b);
+  right.offsetSec=(clip.offsetSec||0)+cut*60/dawProject.bpm; right.lengthBeats=clip.lengthBeats-cut; right.fadeIn=0;
+  clip.lengthBeats=cut; clip.fadeOut=0;
+  track.clips.push(right); renderDawTimeline(); toast('Split at playhead');
+}
+function dawAudioClipMenuItems(track,clip){
+  const items=[];
+  if(clip.takes&&clip.takes.length>1) clip.takes.forEach((t,i)=>items.push([(i===(clip.activeTake||0)?'● ':'○ ')+'Take '+(i+1)+' ('+t.duration.toFixed(1)+'s)',()=>dawSelectTake(track,clip,i)]));
+  if(items.length) items.push(null);
+  items.push(
+    ['🎯 Tune to key ('+dawProject.key+')',()=>dawVocalTune(track,clip)],
+    ['🎶 Harmony — 3rd above',()=>dawVocalHarmony(track,clip,2)],
+    ['🎶 Harmony — 5th above',()=>dawVocalHarmony(track,clip,4)],
+    ['🎶 Harmony — 3rd below',()=>dawVocalHarmony(track,clip,-2)],
+    ['🎶 Octave below',()=>dawVocalHarmony(track,clip,-7)],
+    ['👥 Wide double (L+R)',()=>dawVocalDouble(track,clip)],
+    ['✂ Split stems (vocals / instrumental)',()=>dawSplitStems(track,clip)],
+    null,
+    ['Split at playhead',()=>dawSplitClipAtPlayhead(track,clip)],
+    ['Normalize',()=>dawNormalizeClip(clip)],
+    ['Gain +3 dB',()=>{ clip.gain=(clip.gain??1)*1.4125; renderDawTimeline(); }],
+    ['Gain −3 dB',()=>{ clip.gain=(clip.gain??1)/1.4125; renderDawTimeline(); }],
+    ['Fade in / out (short)',()=>{ clip.fadeIn=0.05; clip.fadeOut=0.15; toast('Fades: 50 ms in, 150 ms out'); }],
+    ['Fade in / out (long)',()=>{ clip.fadeIn=1.5; clip.fadeOut=2.5; toast('Fades: 1.5 s in, 2.5 s out'); }],
+    ['Remove fades',()=>{ clip.fadeIn=0; clip.fadeOut=0; }],
+    ['Reverse audio',()=>dawReverseAudioClip(track,clip)],
+  );
+  return items;
+}
+
+// ── Vocal tab ──
+function renderDawVocalTab(){
+  const body=document.getElementById('daw-panel-body'); if(!body) return;
+  const track=dawCurrentTrackForPanel();
+  const clip=track?track.clips.find(c=>c.id===dawView.selectedClipId&&c.kind==='audio')||track.clips.filter(c=>c.kind==='audio').slice(-1)[0]:null;
+  const chainBtns=Object.keys(DAW_VOCAL_CHAINS).map(n=>`<button class="vx-chip${track&&track.vocalChain===n?' on':''}" data-chain="${escapeHtml(n)}">${escapeHtml(n)}</button>`).join('');
+  const takes=clip&&clip.takes&&clip.takes.length>1?clip.takes.map((t,i)=>`<button class="vx-chip${i===(clip.activeTake||0)?' on':''}" data-take="${i}">Take ${i+1}</button>`).join(''):'';
+  body.innerHTML=`<div class="vx">
+    <div class="vx-row">
+      <button class="vx-rec${dawRec.active?' on':''}" id="dawVxRecBtn"><i></i> ${dawRec.active?'Stop recording':'Record'}</button>
+      <div class="vx-meter"><b id="dawVxMeter"></b></div>
+      <span class="vx-note">${track?'→ '+escapeHtml(track.name):'Select or add a vocal track'}</span>
+    </div>
+    <div class="vx-row">
+      <button class="vx-chip${dawSettings.countIn?' on':''}" data-set="countIn">Count-in</button>
+      <button class="vx-chip${dawSettings.metronome?' on':''}" data-set="metronome">Click</button>
+      <button class="vx-chip${dawSettings.monitor?' on':''}" data-set="monitor" title="Hear yourself through the vocal chain — use headphones">🎧 Monitor</button>
+      <span class="vx-note">Latency</span><input type="number" class="tinput" id="dawVxLat" style="width:58px" value="${dawLatencyMs()}"><span class="vx-note">ms ${dawSettings.latencyMs==null?'(auto)':'<a href="#" id="dawVxLatAuto">auto</a>'}</span>
+    </div>
+    <div class="vx-h">Vocal chain</div>
+    <div class="vx-row">${chainBtns}</div>
+    <div class="vx-h">Vocal stems</div>
+    <div class="vx-row">
+      <button class="vx-chip" id="dawVxStack">+ 6-track vocal stack</button>
+      <button class="vx-chip" id="dawVxImport">↓ Import vocal / song…</button>
+    </div>
+    <div class="vx-h">Selected take ${clip?'— '+escapeHtml(clip.name||''):''}</div>
+    ${clip?`<div class="vx-row">${takes}</div>
+    <div class="vx-row">
+      <button class="vx-chip" data-act="tune">🎯 Tune to ${escapeHtml(dawProject.key)}</button>
+      <span class="vx-note">Natural</span><input type="range" id="dawVxSpeed" min="5" max="100" value="${Math.round(dawSettings.tuneSpeed*100)}" style="width:90px;accent-color:var(--magenta)"><span class="vx-note">Hard</span>
+    </div>
+    <div class="vx-row">
+      <button class="vx-chip" data-harm="2">+ 3rd above</button><button class="vx-chip" data-harm="4">+ 5th above</button><button class="vx-chip" data-harm="-2">+ 3rd below</button><button class="vx-chip" data-harm="-7">+ Octave below</button>
+      <button class="vx-chip" data-act="double">👥 Wide double</button><button class="vx-chip" data-act="split">✂ Split stems</button>
+    </div>
+    <div class="vx-row">
+      <button class="vx-chip" data-act="norm">Normalize</button><button class="vx-chip" data-act="fade">Fades</button><button class="vx-chip" data-act="cut">Split at playhead</button>
+    </div>`:`<div class="vx-note">Press Record (or import a vocal) — the take shows up here with tuning, harmony and double tools. Harmonies and tuning follow the project key (${escapeHtml(dawProject.key)}).</div>`}
+    <div class="vx-note">Tip: record over the same spot again to stack takes, then pick the best one. Wear headphones so the beat doesn't bleed into the mic.</div>
+  </div>`;
+  body.querySelector('#dawVxRecBtn').onclick=()=>{ if(dawRec.active){ dawStopRecording(); return; } if(track){ dawProject.tracks.forEach(t=>t.armed=(t===track)); renderDawTrackList(); } dawToggleRecordArmGlobal(); };
+  body.querySelectorAll('[data-set]').forEach(b=>b.onclick=()=>dawToggleSetting(b.dataset.set));
+  const lat=body.querySelector('#dawVxLat'); lat.onchange=()=>{ dawSettings.latencyMs=Math.max(0,Math.min(1000,Number(lat.value)||0)); dawSaveSettings(); renderDawVocalTab(); };
+  const la=body.querySelector('#dawVxLatAuto'); if(la) la.onclick=e=>{ e.preventDefault(); dawSettings.latencyMs=null; dawSaveSettings(); renderDawVocalTab(); };
+  body.querySelectorAll('[data-chain]').forEach(b=>b.onclick=()=>{ if(!track){ toast('Select a track first'); return; } dawApplyVocalChain(track,b.dataset.chain); renderDawVocalTab(); });
+  body.querySelector('#dawVxStack').onclick=dawAddVocalStack;
+  body.querySelector('#dawVxImport').onclick=()=>dawImportAudio(track&&track.type==='vocals'&&!track.clips.length?track.id:null);
+  if(clip){
+    body.querySelectorAll('[data-take]').forEach(b=>b.onclick=()=>dawSelectTake(track,clip,Number(b.dataset.take)));
+    const sp=body.querySelector('#dawVxSpeed'); sp.oninput=()=>{ dawSettings.tuneSpeed=Number(sp.value)/100; dawSaveSettings(); };
+    body.querySelectorAll('[data-harm]').forEach(b=>b.onclick=()=>dawVocalHarmony(track,clip,Number(b.dataset.harm)));
+    const acts={tune:()=>dawVocalTune(track,clip),double:()=>dawVocalDouble(track,clip),split:()=>dawSplitStems(track,clip),norm:()=>dawNormalizeClip(clip),
+      fade:()=>{ clip.fadeIn=0.05; clip.fadeOut=0.15; toast('Fades: 50 ms in, 150 ms out'); },cut:()=>dawSplitClipAtPlayhead(track,clip)};
+    body.querySelectorAll('[data-act]').forEach(b=>b.onclick=()=>acts[b.dataset.act]());
+  }
+}
+
+// ── Mixer tab ──
+let dawMixerRAF=null;
+function dawGainToDb(g){ return g<=0.0001?'-∞':(20*Math.log10(g)).toFixed(1); }
+function renderDawMixerTab(){
+  const body=document.getElementById('daw-panel-body'); if(!body) return;
+  dawEnsureMaster(); dawProject.tracks.forEach(dawBuildTrackGraph);
+  const chainOpts='<option value="">Vocal chain…</option>'+Object.keys(DAW_VOCAL_CHAINS).map(n=>`<option>${escapeHtml(n)}</option>`).join('');
+  const strip=t=>`<div class="mx-s" data-tid="${t.id}">
+      <div class="mx-top" style="background:${t.color}"></div>
+      <div class="mx-n" title="${escapeHtml(t.name)}">${(DAW_TRACK_TYPES[t.type]||{}).icon||''} ${escapeHtml(t.name)}</div>
+      <div class="mx-fx">${(t.effects||[]).filter(e=>!e.bypassed).length} FX</div>
+      <input type="range" class="mx-pan" min="-100" max="100" value="${Math.round(t.pan*100)}" title="Pan (double-click = centre)">
+      <div class="mx-mid"><input type="range" class="mx-fader" min="0" max="150" value="${Math.round(t.volume*100)}"><div class="mx-m"><b></b></div></div>
+      <div class="mx-db">${dawGainToDb(t.volume)} dB</div>
+      <div class="mx-btns"><button class="${t.muted?'on-m':''}" data-b="m">M</button><button class="${t.soloed?'on-s':''}" data-b="s">S</button><button class="${t.armed?'on-r':''}" data-b="r">R</button></div>
+      <select class="mx-sel">${chainOpts}</select>
+    </div>`;
+  body.innerHTML=`<div class="mx">${dawProject.tracks.map(strip).join('')}
+    <div class="mx-s master" data-tid="__master">
+      <div class="mx-top" style="background:var(--brand)"></div>
+      <div class="mx-n">Master</div><div class="mx-fx">Stereo out</div>
+      <div style="height:16px"></div>
+      <div class="mx-mid"><input type="range" class="mx-fader" min="0" max="150" value="${Math.round(dawMasterGain.gain.value*100)}"><div class="mx-m"><b></b></div></div>
+      <div class="mx-db">${dawGainToDb(dawMasterGain.gain.value)} dB</div>
+      <button class="vx-chip" id="dawMxStems" style="font-size:9.5px;padding:3px 6px">Export stems</button>
+    </div></div>
+    ${dawProject.tracks.length?'':'<div class="vx-note" style="padding:8px">No tracks yet — add a track or a vocal stack.</div>'}`;
+  body.querySelectorAll('.mx-s').forEach(el=>{
+    const tid=el.dataset.tid, dbEl=el.querySelector('.mx-db'), fader=el.querySelector('.mx-fader');
+    if(tid==='__master'){
+      fader.oninput=()=>{ dawMasterGain.gain.value=Number(fader.value)/100; dbEl.textContent=dawGainToDb(dawMasterGain.gain.value)+' dB'; };
+      el.querySelector('#dawMxStems').onclick=dawExportStems;
+      return;
+    }
+    const t=dawProject.tracks.find(x=>x.id===tid); if(!t) return;
+    fader.oninput=()=>{ t.volume=Number(fader.value)/100; dbEl.textContent=dawGainToDb(t.volume)+' dB'; dawUpdateTrackAudioState(t); };
+    fader.onchange=()=>renderDawTrackList(); // sync the track-list volume slider once the drag ends
+    const pan=el.querySelector('.mx-pan'); pan.oninput=()=>{ t.pan=Number(pan.value)/100; dawUpdateTrackAudioState(t); };
+    pan.ondblclick=()=>{ pan.value=0; t.pan=0; dawUpdateTrackAudioState(t); };
+    el.querySelectorAll('[data-b]').forEach(b=>b.onclick=()=>{
+      if(b.dataset.b==='m'){ t.muted=!t.muted; dawUpdateTrackAudioState(t); }
+      else if(b.dataset.b==='s'){ t.soloed=!t.soloed; dawProject.tracks.forEach(dawUpdateTrackAudioState); }
+      else { const on=!t.armed; dawProject.tracks.forEach(x=>x.armed=false); t.armed=on; dawSyncLoopButtons(); }
+      renderDawTrackList(); renderDawMixerTab();
+    });
+    const sel=el.querySelector('.mx-sel'); sel.onchange=()=>{ if(sel.value){ dawApplyVocalChain(t,sel.value); renderDawMixerTab(); } };
+  });
+  dawMixerMeterLoop();
+}
+function dawMixerMeterLoop(){
+  cancelAnimationFrame(dawMixerRAF);
+  const tick=()=>{
+    if(dawCurrentPanelTab!=='mixer'||!document.getElementById('daw-panel')?.classList.contains('open')) return;
+    const buf=new Uint8Array(256);
+    document.querySelectorAll('#daw-panel-body .mx-s').forEach(el=>{
+      const tid=el.dataset.tid, an=tid==='__master'?(typeof analyser!=='undefined'?analyser:null):dawProject.tracks.find(x=>x.id===tid)?._analyser;
+      const bar=el.querySelector('.mx-m b'); if(!an||!bar) return;
+      an.getByteTimeDomainData(buf); let pk=0; for(let i=0;i<buf.length;i++){ const v=Math.abs(buf[i]-128)/128; if(v>pk) pk=v; }
+      const prev=Number(bar.dataset.v||0), v=Math.max(pk,prev*0.9); bar.dataset.v=v; bar.style.height=Math.min(100,v*110)+'%';
+    });
+    dawMixerRAF=requestAnimationFrame(tick);
+  };
+  dawMixerRAF=requestAnimationFrame(tick);
+}
+
+// ── stem export: one WAV per track that has clips, rendered through its own chain ──
+async function dawExportStems(){
+  const tracks=dawProject.tracks.filter(t=>t.clips.some(c=>!c.muted));
+  if(!tracks.length){ toast('Nothing to export yet'); return; }
+  toast('Rendering '+tracks.length+' stems… your browser may ask to allow multiple downloads');
+  try{
+    for(let i=0;i<tracks.length;i++){
+      const t=tracks[i];
+      const rendered=await dawRenderTracksOffline([t],false);
+      const safe=(t.name||('Track '+(i+1))).replace(/[\\/:*?"<>|]+/g,'_');
+      dlBlob(audioBufferToWavBlob(rendered),(dawProject.name||'project')+' - '+String(i+1).padStart(2,'0')+' '+safe+'.wav');
+      await new Promise(r=>setTimeout(r,400));
+    }
+    toast('Exported '+tracks.length+' stems (all the same length, so they line up in any DAW)');
+  }catch(e){ console.error(e); toast('Stem export failed — '+e.message); }
+}
+
 // ── Mini project panel — a scaled-down always-available view + transport ──
 function dawToggleMiniPanel(){
   const panel=document.getElementById('daw-mini-panel'); if(!panel) return;
