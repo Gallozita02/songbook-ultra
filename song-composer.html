@@ -665,6 +665,14 @@ body.hm-open .hm-drawer{transform:none}
 .hm-empty{color:var(--mu,#888);font-size:12px;padding:18px 10px}
 .hm-foot{border-top:1px solid var(--glass-border);padding:9px 14px;font-size:10.5px;color:var(--mu,#888);display:flex;gap:10px;align-items:center}
 @media (max-width:640px){ body.shell-v2 .song-title-nav{max-width:110px} .sh-page{display:none} }
+#page-daw .fxlib-top{display:flex;gap:4px;margin-bottom:6px}
+#page-daw .fxlib-search{flex:1;min-width:0;font-size:11px}
+#page-daw .fxlib{overflow-y:auto;max-height:100%}
+#page-daw .fxcard{position:relative}
+#page-daw .fxstar{position:absolute;right:3px;bottom:2px;font-size:10px;color:var(--tx-3);cursor:pointer;line-height:1;padding:2px}
+#page-daw .fxstar.on{color:#fbbf24}
+#page-daw .fxstar:hover{color:#fbbf24}
+#page-daw .fxpreset{width:calc(100% - 10px);margin:5px 5px 0;font-size:10px;background:var(--bg-4);color:var(--tx-2);border:1px solid var(--line);border-radius:4px;padding:2px}
 #page-daw .dawx-inststat{font-size:10px;color:var(--tx-3);margin-left:6px;white-space:nowrap}
 /* ── Channel EQ (Tier 8) ── */
 #page-daw .fxc.wide{width:420px;flex:0 0 420px}
@@ -13983,6 +13991,7 @@ const dawEngine={
     if(typeof dawStopLiveAudio==='function') dawStopLiveAudio();
     if(typeof dawPreloadForTracks==='function') dawPreloadForTracks(dawProject.tracks); // fetch any sampled instruments in the background
     dawProject.tracks.forEach(dawBuildTrackGraph);
+    if(typeof dawResyncTempoFx==='function') dawResyncTempoFx(this.startCtxTime,this.startBeat);
     this.tick();
   },
   tick(){
@@ -13998,6 +14007,7 @@ const dawEngine={
       this.scheduledUntilBeat=this.startBeat;
       this.segmentStartBeat=this.startBeat;
       if(typeof dawStopLiveAudio==='function') dawStopLiveAudio();
+      if(typeof dawResyncTempoFx==='function') dawResyncTempoFx(this.startCtxTime,this.startBeat);
       nowBeat=this.startBeat;
     }
     dawView.playheadBeat=nowBeat;
@@ -15199,6 +15209,7 @@ function renderDawEffectsTab(){
   body.innerHTML=`<div class="fxwrap">
     <div class="fxchain" id="dawFxChainList"></div>
     <div class="fxlib">
+      <div class="fxlib-top"><input type="text" class="tinput fxlib-search" id="dawFxSearch" placeholder="Search ${Object.keys(STUDIO_FX).length} plugins…" value="${escapeHtml(dawFxSearch)}" oninput="dawFxSearch=this.value;dawRenderFxLibrary(dawCurrentTrackForPanel())"><button class="fxcat${dawFxFavOnly?' on':''}" title="Favourites only" onclick="dawFxFavOnly=!dawFxFavOnly;this.classList.toggle('on',dawFxFavOnly);dawRenderFxLibrary(dawCurrentTrackForPanel())">★</button></div>
       <div class="fxcats" id="dawFxLibCats"></div>
       <div class="fxgrid" id="dawFxLibCards"></div>
       <div class="krow" style="margin-top:8px">
@@ -15223,6 +15234,12 @@ function dawRenderFxChainList(track){
     head.querySelector('button[title="Remove"]').onclick=()=>{ track.effects.splice(index,1);dawRebuildTrackFxChain(track);dawRenderFxChainList(track); };
     head.querySelector('button[title="Bypass"]').onclick=()=>{ effect.bypassed=!effect.bypassed;dawRebuildTrackFxChain(track);dawRenderFxChainList(track); };
     card.appendChild(head);
+    if(def.factory){ // per-plugin factory presets
+      const ps=document.createElement('select'); ps.className='fxpreset';
+      ps.innerHTML='<option value="">Preset…</option>'+Object.keys(def.factory).map(n=>`<option>${escapeHtml(n)}</option>`).join('');
+      ps.onchange=()=>{ const pre=def.factory[ps.value]; if(!pre) return; effect.params=Object.assign(Object.fromEntries(def.params.map(p=>[p.id,p.def])),pre); dawRebuildTrackFxChain(track); dawRenderFxChainList(track); };
+      card.appendChild(ps);
+    }
     const body=document.createElement('div');body.className='fxb';
     let redrawCurve=null;
     if(def.hasGRMeter){
@@ -15275,17 +15292,28 @@ function dawRenderFxLibrary(track){
     catsWrap.appendChild(pill);
   });
   const cardsWrap=document.getElementById('dawFxLibCards'); cardsWrap.innerHTML='';
+  const favs=dawFxFavs(), q=(dawFxSearch||'').trim().toLowerCase();
+  let shown=0;
   Object.entries(STUDIO_FX).forEach(([key,def])=>{
     if(dawFxLibCatFilter&&!def.cats.includes(dawFxLibCatFilter)) return;
+    if(dawFxFavOnly&&!favs.has(key)) return;
+    if(q&&!(def.name+' '+def.cats.join(' ')+' '+(def.desc||'')).toLowerCase().includes(q)) return;
+    shown++;
     const card=document.createElement('div');card.className='fxcard';
     card.innerHTML=`<div class="fxch" style="background:${dawFxColor(key)}">${escapeHtml(def.name)}</div>
       <div class="fxcb">${def.hasCurveDisplay?'<svg width="52" height="24"><path d="M0 16 Q13 6 26 14 T52 9" fill="none" stroke="'+dawFxColor(key)+'" stroke-width="2"/></svg>':def.hasGRMeter?'<svg width="46" height="24">'+[4,12,20,28,36].map((x,i)=>`<rect x="${x}" y="${22-(6+i*3.4)}" width="5" height="${6+i*3.4}" rx="1" fill="${dawFxColor(key)}"/>`).join('')+'</svg>':'<svg width="46" height="26">'+[8,23,38].map(x=>`<circle cx="${x}" cy="13" r="7" fill="none" stroke="#3a3a46" stroke-width="2"/><line x1="${x}" y1="13" x2="${x+4}" y2="8" stroke="${dawFxColor(key)}" stroke-width="1.5"/>`).join('')+'</svg>'}</div>
       <div class="fxcp">▶</div>`;
-    card.title=def.cats.join(', ');
-    card.onclick=()=>{ track.effects.push({type:key,params:Object.fromEntries(def.params.map(p=>[p.id,p.def])),bypassed:false});dawRebuildTrackFxChain(track);dawRenderFxChainList(track); };
+    card.title=(def.desc?def.desc+'\n':'')+def.cats.join(', ');
+    const star=document.createElement('span'); star.className='fxstar'+(favs.has(key)?' on':''); star.textContent=favs.has(key)?'★':'☆'; star.title='Favourite';
+    star.onclick=e=>{ e.stopPropagation(); const f=dawFxFavs(); f.has(key)?f.delete(key):f.add(key); try{ localStorage.setItem('dawFxFavs',JSON.stringify([...f])); }catch(err){} dawRenderFxLibrary(track); };
+    card.appendChild(star);
+    card.onclick=()=>{ if(!track){ toast('Select a track first'); return; } track.effects.push({type:key,params:Object.fromEntries(def.params.map(p=>[p.id,p.def])),bypassed:false});dawRebuildTrackFxChain(track);dawRenderFxChainList(track); };
     cardsWrap.appendChild(card);
   });
+  if(!shown) cardsWrap.innerHTML='<div style="grid-column:1/-1;color:var(--tx-3);font-size:10.5px;padding:10px 2px">'+(dawFxFavOnly?'No favourites yet — tap ☆ on a plugin.':'No plugins match.')+'</div>';
 }
+let dawFxSearch='',dawFxFavOnly=false;
+function dawFxFavs(){ try{ return new Set(JSON.parse(localStorage.getItem('dawFxFavs')||'[]')); }catch(e){ return new Set(); } }
 const DAW_FACTORY_PRESETS={
   'Vocal Clean':[['gate',{}],['eq3',{}],['deesser',{}]],
   'Vocal Air':[['eq3',{highGain:6}],['reverb',{mix:0.2}]],
@@ -17248,6 +17276,311 @@ function dawEncodeWav(buf,bits){
 }
 function dawWavBlob(buf){ return new Blob([dawEncodeWav(buf,dawSettings.wavBits||24)],{type:'audio/wav'}); }
 
+// ══════════════════════════════════════════════════════════════════════════
+// TIER 10 — Plugin library. 23 more processors on top of the original 15
+// (38 total), each a real Web Audio graph that works live and in offline export,
+// with descriptions, factory presets, search and favourites in the library.
+// ══════════════════════════════════════════════════════════════════════════
+const fxDb=db=>Math.pow(10,db/20);
+const fxBeatsSec=b=>b*60/(dawProject.bpm||120);
+const DAW_COMP_LATENCY=0.006; // Chromium's DynamicsCompressor look-ahead; dry paths that get summed with it are delayed to match
+function fxMix(ctx,mix){
+  const input=ctx.createGain(),output=ctx.createGain(),dry=ctx.createGain(),wet=ctx.createGain();
+  dry.gain.value=1-mix; wet.gain.value=mix; input.connect(dry); dry.connect(output); wet.connect(output);
+  return {input,output,wet,set(m){ dry.gain.value=1-m; wet.gain.value=m; }};
+}
+function fxLfo(ctx,rate,type){ const o=ctx.createOscillator(); o.type=type||'sine'; o.frequency.value=rate; o.start(0); return o; }
+function fxShaper(ctx,curve,os){ const s=ctx.createWaveShaper(); s.curve=curve; s.oversample=os||'2x'; return s; }
+function fxCurve(fn,n){ n=n||2048; const c=new Float32Array(n); for(let i=0;i<n;i++) c[i]=fn(i/(n-1)*2-1); return c; }
+function fxBq(ctx,type,f,q,g){ const b=ctx.createBiquadFilter(); b.type=type; b.frequency.value=f; if(q!=null) b.Q.value=q; if(g!=null) b.gain.value=g; return b; }
+// stereo matrix L'=a·L+b·R, R'=c·L+d·R (width, mono, phase, pan law)
+function fxMatrix(ctx,input,output,m){
+  const sp=ctx.createChannelSplitter(2),mg=ctx.createChannelMerger(2),gs={};
+  input.connect(sp);
+  [['a',0,0],['b',1,0],['c',0,1],['d',1,1]].forEach(([k,src,dst])=>{ const g=ctx.createGain(); g.gain.value=m[k]; sp.connect(g,src); g.connect(mg,0,dst); gs[k]=g; });
+  mg.connect(output);
+  return {set(n){ Object.keys(n).forEach(k=>{ if(gs[k]) gs[k].gain.value=n[k]; }); }};
+}
+function fxWidthMatrix(w,mono,phL,phR,pan){
+  if(mono) w=0;
+  const a=0.5*(1+w),b=0.5*(1-w), sl=phL?-1:1, sr=phR?-1:1;
+  const pl=Math.min(1,1-(pan||0)), pr=Math.min(1,1+(pan||0)); // balance-style pan
+  return {a:a*sl*pl,b:b*sr*pl,c:b*sl*pr,d:a*sr*pr};
+}
+const DAW_NEW_FX={
+  // ── Dynamics ──
+  transient:{name:'Transient Shaper',cats:['Dynamics','Drums'],desc:'Add punch or tame attacks; bring up or tuck in the ring/tail.',
+    params:[{id:'attack',label:'Attack',min:-100,max:100,def:40,unit:'%'},{id:'sustain',label:'Sustain',min:-100,max:100,def:0,unit:'%'},{id:'output',label:'Output',min:-12,max:12,def:0,unit:'dB'}],
+    factory:{'Snappy drums':{attack:70,sustain:-20},'Soften attacks':{attack:-60,sustain:10},'Longer tails':{attack:0,sustain:60}},
+    build(ctx,p){
+      const input=ctx.createGain(),output=ctx.createGain(); output.gain.value=fxDb(p.output);
+      const dry=ctx.createDelay(0.05); dry.delayTime.value=DAW_COMP_LATENCY;
+      const comp=ctx.createDynamicsCompressor(); comp.threshold.value=-40; comp.ratio.value=20; comp.knee.value=0; comp.attack.value=0.003; comp.release.value=0.12;
+      const inv=ctx.createGain(); inv.gain.value=-1;
+      const aG=ctx.createGain(),sG=ctx.createGain();
+      input.connect(dry); input.connect(comp);
+      dry.connect(output);                       // the original
+      dry.connect(aG); comp.connect(inv); inv.connect(aG); // transient = original − squashed
+      comp.connect(sG);                          // body/sustain = squashed
+      aG.connect(output); sG.connect(output);
+      const set=()=>{ aG.gain.value=p.attack/100*1.5; sG.gain.value=p.sustain/100*0.5; }; set();
+      return {input,output,setParam(id,v){ p[id]=v; if(id==='output') output.gain.value=fxDb(v); else set(); }};
+    }},
+  multiband:{name:'3-Band Compressor',cats:['Dynamics','Glue Mix','Loudness'],desc:'Compress lows, mids and highs separately — tighten bass without dulling the top.',
+    params:[{id:'lowX',label:'Lo/Mid',min:60,max:500,def:200,unit:'Hz'},{id:'highX',label:'Mid/Hi',min:1500,max:8000,def:3000,unit:'Hz'},{id:'lowThr',label:'Low Thr',min:-50,max:0,def:-20,unit:'dB'},{id:'midThr',label:'Mid Thr',min:-50,max:0,def:-18,unit:'dB'},{id:'highThr',label:'High Thr',min:-50,max:0,def:-22,unit:'dB'},{id:'ratio',label:'Ratio',min:1,max:10,def:3,unit:':1'},{id:'lowGain',label:'Low',min:-12,max:12,def:0,unit:'dB'},{id:'midGain',label:'Mid',min:-12,max:12,def:0,unit:'dB'},{id:'highGain',label:'High',min:-12,max:12,def:0,unit:'dB'}],
+    factory:{'Mix glue':{ratio:2,lowThr:-18,midThr:-16,highThr:-20},'Tight low end':{lowThr:-28,ratio:4,lowGain:1},'De-harsh':{highThr:-30,ratio:4,highGain:-1}},
+    build(ctx,p){
+      const input=ctx.createGain(),output=ctx.createGain();
+      const lp1=fxBq(ctx,'lowpass',p.lowX,0.707),lp2=fxBq(ctx,'lowpass',p.lowX,0.707);
+      const mh1=fxBq(ctx,'highpass',p.lowX,0.707),mh2=fxBq(ctx,'highpass',p.lowX,0.707),ml1=fxBq(ctx,'lowpass',p.highX,0.707),ml2=fxBq(ctx,'lowpass',p.highX,0.707);
+      const hp1=fxBq(ctx,'highpass',p.highX,0.707),hp2=fxBq(ctx,'highpass',p.highX,0.707);
+      const mk=thr=>{ const c=ctx.createDynamicsCompressor(); c.threshold.value=thr; c.ratio.value=p.ratio; c.attack.value=0.01; c.release.value=0.15; c.knee.value=6; return c; };
+      const cL=mk(p.lowThr),cM=mk(p.midThr),cH=mk(p.highThr),gL=ctx.createGain(),gM=ctx.createGain(),gH=ctx.createGain();
+      gL.gain.value=fxDb(p.lowGain); gM.gain.value=fxDb(p.midGain); gH.gain.value=fxDb(p.highGain);
+      input.connect(lp1); lp1.connect(lp2); lp2.connect(cL); cL.connect(gL); gL.connect(output);
+      input.connect(mh1); mh1.connect(mh2); mh2.connect(ml1); ml1.connect(ml2); ml2.connect(cM); cM.connect(gM); gM.connect(output);
+      input.connect(hp1); hp1.connect(hp2); hp2.connect(cH); cH.connect(gH); gH.connect(output);
+      return {input,output,setParam(id,v){ p[id]=v;
+        if(id==='lowX') [lp1,lp2,mh1,mh2].forEach(f=>f.frequency.value=v); else if(id==='highX') [ml1,ml2,hp1,hp2].forEach(f=>f.frequency.value=v);
+        else if(id==='lowThr') cL.threshold.value=v; else if(id==='midThr') cM.threshold.value=v; else if(id==='highThr') cH.threshold.value=v;
+        else if(id==='ratio') [cL,cM,cH].forEach(c=>c.ratio.value=v);
+        else if(id==='lowGain') gL.gain.value=fxDb(v); else if(id==='midGain') gM.gain.value=fxDb(v); else if(id==='highGain') gH.gain.value=fxDb(v); }};
+    }},
+  pump:{name:'Sidechain Pump',cats:['Dynamics','Movement'],desc:'Tempo-synced ducking — the classic EDM/house "pumping" without routing a kick.',
+    params:[{id:'depth',label:'Depth',min:0,max:1,def:0.7,unit:''},{id:'beats',label:'Every',min:0.25,max:2,def:1,unit:' beat'},{id:'release',label:'Release',min:0.1,max:0.95,def:0.55,unit:''},{id:'shape',label:'Curve',min:1,max:4,def:2,unit:''}],
+    factory:{'House (every beat)':{depth:0.75,beats:1,release:0.55},'Subtle groove':{depth:0.35,beats:1,release:0.4},'Half-note swell':{depth:0.85,beats:2,release:0.9},'Trance 8ths':{depth:0.6,beats:0.5,release:0.6}},
+    build(ctx,p){
+      const input=ctx.createGain(),output=ctx.createGain(); output.gain.value=0; input.connect(output);
+      let src=null;
+      const makeBuf=()=>{ const per=fxBeatsSec(p.beats),n=Math.max(2,Math.round(per*ctx.sampleRate)),b=ctx.createBuffer(1,n,ctx.sampleRate),d=b.getChannelData(0),rel=Math.max(1,Math.round(n*p.release));
+        for(let i=0;i<n;i++) d[i]=i<rel?1-p.depth*Math.pow(1-i/rel,p.shape):1; return b; };
+      const start=(when,offset)=>{ if(src){ try{ src.stop(); }catch(e){} } src=ctx.createBufferSource(); src.buffer=makeBuf(); src.loop=true; src.connect(output.gain); src.start(when||0,offset||0); };
+      start(0,0);
+      return {input,output,setParam(id,v){ p[id]=v; start(ctx.currentTime,0); },
+        resync(t0,beat0){ const per=fxBeatsSec(p.beats),beatNow=beat0+(ctx.currentTime-t0)*(dawProject.bpm/60); start(ctx.currentTime,((beatNow*60/dawProject.bpm)%per+per)%per); }};
+    }},
+  // ── Distortion & colour ──
+  tape:{name:'Tape Saturation',cats:['Distortion','Enhance','Glue Mix'],desc:'Warm analog tape: soft saturation, low-end head bump, gentle top roll-off and a touch of wow.',
+    params:[{id:'drive',label:'Drive',min:0,max:1,def:0.35,unit:''},{id:'bump',label:'Bump',min:0,max:6,def:2,unit:'dB'},{id:'tone',label:'Tone',min:4000,max:18000,def:13000,unit:'Hz'},{id:'wow',label:'Wow',min:0,max:1,def:0.15,unit:''},{id:'output',label:'Output',min:-12,max:6,def:0,unit:'dB'}],
+    factory:{'Subtle glue':{drive:0.2,bump:1.5,wow:0},'Warm 70s':{drive:0.5,bump:3,tone:10000,wow:0.3},'Cassette':{drive:0.6,bump:2,tone:7000,wow:0.7}},
+    build(ctx,p){
+      const input=ctx.createGain(),output=ctx.createGain(); output.gain.value=fxDb(p.output);
+      const bump=fxBq(ctx,'peaking',85,0.8,p.bump);
+      const sh=fxShaper(ctx,dawTanhCurve(1+p.drive*4)); const trim=ctx.createGain(); trim.gain.value=1/(1+p.drive*0.8);
+      const lp=fxBq(ctx,'lowpass',p.tone,0.6);
+      const dl=ctx.createDelay(0.05); dl.delayTime.value=0.006;
+      const wow=fxLfo(ctx,0.55),wg=ctx.createGain(); wg.gain.value=p.wow*0.0011; wow.connect(wg); wg.connect(dl.delayTime);
+      const fl=fxLfo(ctx,7.1),fg=ctx.createGain(); fg.gain.value=p.wow*0.00012; fl.connect(fg); fg.connect(dl.delayTime);
+      input.connect(bump); bump.connect(sh); sh.connect(trim); trim.connect(lp); lp.connect(dl); dl.connect(output);
+      return {input,output,setParam(id,v){ p[id]=v;
+        if(id==='drive'){ sh.curve=dawTanhCurve(1+v*4); trim.gain.value=1/(1+v*0.8); } else if(id==='bump') bump.gain.value=v; else if(id==='tone') lp.frequency.value=v;
+        else if(id==='wow'){ wg.gain.value=v*0.0011; fg.gain.value=v*0.00012; } else if(id==='output') output.gain.value=fxDb(v); }};
+    }},
+  overdrive:{name:'Overdrive',cats:['Distortion','Guitar'],desc:'Asymmetric tube-style overdrive with a tone control.',
+    params:[{id:'drive',label:'Drive',min:0,max:1,def:0.5,unit:''},{id:'tone',label:'Tone',min:500,max:9000,def:3200,unit:'Hz'},{id:'level',label:'Level',min:0,max:1.5,def:0.7,unit:''},{id:'mix',label:'Mix',min:0,max:1,def:1,unit:''}],
+    build(ctx,p){
+      const m=fxMix(ctx,p.mix),hp=fxBq(ctx,'highpass',110,0.7),lp=fxBq(ctx,'lowpass',p.tone,0.7),lv=ctx.createGain(); lv.gain.value=p.level;
+      const curve=d=>{ const k=1+d*25; return fxCurve(x=>x>=0?Math.tanh(k*x)/Math.tanh(k):Math.tanh(k*0.6*x)/Math.tanh(k*0.6)); };
+      const sh=fxShaper(ctx,curve(p.drive),'4x');
+      m.input.connect(hp); hp.connect(sh); sh.connect(lp); lp.connect(lv); lv.connect(m.wet);
+      return {input:m.input,output:m.output,setParam(id,v){ p[id]=v; if(id==='drive') sh.curve=curve(v); else if(id==='tone') lp.frequency.value=v; else if(id==='level') lv.gain.value=v; else if(id==='mix') m.set(v); }};
+    }},
+  fuzz:{name:'Fuzz',cats:['Distortion','Guitar','Sound Design'],desc:'Hard-clipping 60s fuzz — thick, buzzy and loud.',
+    params:[{id:'gain',label:'Fuzz',min:1,max:80,def:30,unit:''},{id:'tone',label:'Tone',min:400,max:6000,def:1800,unit:'Hz'},{id:'level',label:'Level',min:0,max:1,def:0.35,unit:''},{id:'mix',label:'Mix',min:0,max:1,def:1,unit:''}],
+    build(ctx,p){
+      const m=fxMix(ctx,p.mix),pre=ctx.createGain(); pre.gain.value=p.gain;
+      const sh=fxShaper(ctx,fxCurve(x=>Math.max(-1,Math.min(1,x*1.5))*0.9+Math.sign(x)*0.1*(Math.abs(x)>0.02?1:Math.abs(x)/0.02)),'4x');
+      const bp=fxBq(ctx,'lowpass',p.tone,1.2),lv=ctx.createGain(); lv.gain.value=p.level;
+      m.input.connect(pre); pre.connect(sh); sh.connect(bp); bp.connect(lv); lv.connect(m.wet);
+      return {input:m.input,output:m.output,setParam(id,v){ p[id]=v; if(id==='gain') pre.gain.value=v; else if(id==='tone') bp.frequency.value=v; else if(id==='level') lv.gain.value=v; else if(id==='mix') m.set(v); }};
+    }},
+  amp:{name:'Amp Simulator',cats:['Distortion','Guitar','Bass'],desc:'Preamp, 3-band tone stack, presence and a speaker-cabinet model.',
+    params:[{id:'gain',label:'Gain',min:0,max:1,def:0.4,unit:''},{id:'bass',label:'Bass',min:-12,max:12,def:2,unit:'dB'},{id:'mid',label:'Mid',min:-12,max:12,def:0,unit:'dB'},{id:'treble',label:'Treble',min:-12,max:12,def:2,unit:'dB'},{id:'presence',label:'Presence',min:0,max:8,def:3,unit:'dB'},{id:'level',label:'Level',min:0,max:1.5,def:0.6,unit:''}],
+    factory:{'Clean jazz':{gain:0.05,bass:3,mid:1,treble:-2,presence:1},'Blues crunch':{gain:0.4,bass:1,mid:3,treble:1,presence:3},'British lead':{gain:0.75,bass:0,mid:4,treble:3,presence:5},'Metal':{gain:1,bass:5,mid:-6,treble:4,presence:6,level:0.45}},
+    build(ctx,p){
+      const input=ctx.createGain(),output=ctx.createGain();
+      const hp=fxBq(ctx,'highpass',90,0.7), pre=ctx.createGain(); pre.gain.value=1+p.gain*18;
+      const sh=fxShaper(ctx,dawTanhCurve(2.5),'4x');
+      const b=fxBq(ctx,'lowshelf',120,null,p.bass),mi=fxBq(ctx,'peaking',700,0.7,p.mid),tr=fxBq(ctx,'highshelf',2800,null,p.treble),pr=fxBq(ctx,'peaking',4500,1,p.presence);
+      const c1=fxBq(ctx,'highpass',80,0.7),c2=fxBq(ctx,'peaking',400,1,-3),c3=fxBq(ctx,'peaking',1800,1.2,3),c4=fxBq(ctx,'lowpass',5200,0.9);
+      const lv=ctx.createGain(); lv.gain.value=p.level/(1+p.gain*2);
+      [input,hp,pre,sh,b,mi,tr,pr,c1,c2,c3,c4,lv].reduce((a,n)=>{ a.connect(n); return n; }); lv.connect(output);
+      return {input,output,setParam(id,v){ p[id]=v; if(id==='gain'){ pre.gain.value=1+v*18; lv.gain.value=p.level/(1+v*2); } else if(id==='bass') b.gain.value=v; else if(id==='mid') mi.gain.value=v; else if(id==='treble') tr.gain.value=v; else if(id==='presence') pr.gain.value=v; else if(id==='level') lv.gain.value=v/(1+p.gain*2); }};
+    }},
+  exciter:{name:'Exciter',cats:['Enhance','Brightness','Vocals'],desc:'Generates fresh upper harmonics for sparkle and air — brighter than EQ without the harshness.',
+    params:[{id:'freq',label:'Freq',min:1500,max:10000,def:3500,unit:'Hz'},{id:'harm',label:'Harmonics',min:0,max:1,def:0.5,unit:''},{id:'amount',label:'Amount',min:0,max:1,def:0.3,unit:''}],
+    build(ctx,p){
+      const input=ctx.createGain(),output=ctx.createGain(),h1=fxBq(ctx,'highpass',p.freq,0.7),h2=fxBq(ctx,'highpass',p.freq,0.7),sh=fxShaper(ctx,dawTanhCurve(1+p.harm*8)),g=ctx.createGain(); g.gain.value=p.amount*0.6;
+      input.connect(output); input.connect(h1); h1.connect(sh); sh.connect(h2); h2.connect(g); g.connect(output);
+      return {input,output,setParam(id,v){ p[id]=v; if(id==='freq'){ h1.frequency.value=v; h2.frequency.value=v; } else if(id==='harm') sh.curve=dawTanhCurve(1+v*8); else if(id==='amount') g.gain.value=v*0.6; }};
+    }},
+  bassenh:{name:'Bass Enhancer',cats:['Bass','Enhance','Loudness'],desc:'Adds harmonics above the bass so it\'s heard on laptop speakers and phones.',
+    params:[{id:'freq',label:'Freq',min:50,max:200,def:100,unit:'Hz'},{id:'harm',label:'Harmonics',min:0,max:1,def:0.6,unit:''},{id:'amount',label:'Amount',min:0,max:1,def:0.4,unit:''}],
+    build(ctx,p){
+      const input=ctx.createGain(),output=ctx.createGain(),lp=fxBq(ctx,'lowpass',p.freq,0.7),sh=fxShaper(ctx,dawTanhCurve(2+p.harm*10)),bp=fxBq(ctx,'bandpass',p.freq*2.5,0.7),g=ctx.createGain(); g.gain.value=p.amount;
+      input.connect(output); input.connect(lp); lp.connect(sh); sh.connect(bp); bp.connect(g); g.connect(output);
+      return {input,output,setParam(id,v){ p[id]=v; if(id==='freq'){ lp.frequency.value=v; bp.frequency.value=v*2.5; } else if(id==='harm') sh.curve=dawTanhCurve(2+v*10); else if(id==='amount') g.gain.value=v; }};
+    }},
+  lofi:{name:'Lo-Fi Vinyl',cats:['Lo-Fi','Sound Design','Enhance'],desc:'Dusty record: narrow bandwidth, wobble, crackle and hiss.',
+    params:[{id:'bandwidth',label:'Bandwidth',min:1500,max:14000,def:5500,unit:'Hz'},{id:'wobble',label:'Wobble',min:0,max:1,def:0.35,unit:''},{id:'crackle',label:'Crackle',min:0,max:1,def:0.35,unit:''},{id:'hiss',label:'Hiss',min:0,max:1,def:0.2,unit:''},{id:'mix',label:'Mix',min:0,max:1,def:1,unit:''}],
+    factory:{'Lo-fi hip hop':{bandwidth:4500,wobble:0.4,crackle:0.4,hiss:0.2},'Old 78 record':{bandwidth:2800,wobble:0.6,crackle:0.8,hiss:0.5},'Light dust':{bandwidth:9000,wobble:0.15,crackle:0.2,hiss:0.05}},
+    build(ctx,p){
+      const m=fxMix(ctx,p.mix),hp=fxBq(ctx,'highpass',120,0.7),lp=fxBq(ctx,'lowpass',p.bandwidth,0.9),lp2=fxBq(ctx,'lowpass',p.bandwidth,0.7);
+      const dl=ctx.createDelay(0.05); dl.delayTime.value=0.008; const w=fxLfo(ctx,0.7),wg=ctx.createGain(); wg.gain.value=p.wobble*0.0018; w.connect(wg); wg.connect(dl.delayTime);
+      m.input.connect(hp); hp.connect(lp); lp.connect(lp2); lp2.connect(dl); dl.connect(m.wet);
+      // crackle + hiss bed (looped noise buffer with sparse clicks)
+      const sr=ctx.sampleRate,b=ctx.createBuffer(1,sr*3,sr),d=b.getChannelData(0);
+      for(let i=0;i<d.length;i++){ d[i]=(Math.random()*2-1)*0.02; if(Math.random()<0.0004){ const amp=(Math.random()*0.7+0.3)*(Math.random()<0.5?-1:1); for(let j=0;j<20&&i+j<d.length;j++) d[i+j]+=amp*Math.exp(-j/3); } }
+      const bed=ctx.createBufferSource(); bed.buffer=b; bed.loop=true; bed.start(0);
+      const bhp=fxBq(ctx,'highpass',1500,0.7),cg=ctx.createGain(),hg=ctx.createGain(); cg.gain.value=p.crackle*0.5;
+      bed.connect(bhp); bhp.connect(cg); cg.connect(m.output);
+      const hissSrc=ctx.createBufferSource(); hissSrc.buffer=dawNoise(ctx); hissSrc.loop=true; hissSrc.start(0); const hlp=fxBq(ctx,'bandpass',6000,0.5); hissSrc.connect(hlp); hlp.connect(hg); hg.connect(m.output);
+      hg.gain.value=p.hiss*0.02;
+      return {input:m.input,output:m.output,setParam(id,v){ p[id]=v; if(id==='bandwidth'){ lp.frequency.value=v; lp2.frequency.value=v; } else if(id==='wobble') wg.gain.value=v*0.0018; else if(id==='crackle') cg.gain.value=v*0.5; else if(id==='hiss') hg.gain.value=v*0.02; else if(id==='mix') m.set(v); }};
+    }},
+  // ── Modulation ──
+  flanger:{name:'Flanger',cats:['Modulation','Movement','Sound Design'],desc:'Jet-plane sweep from a short, swept, fed-back delay.',
+    params:[{id:'rate',label:'Rate',min:0.05,max:5,def:0.25,unit:'Hz'},{id:'depth',label:'Depth',min:0,max:1,def:0.7,unit:''},{id:'delay',label:'Delay',min:0.001,max:0.01,def:0.003,unit:'s'},{id:'feedback',label:'Feedback',min:-0.95,max:0.95,def:0.5,unit:''},{id:'mix',label:'Mix',min:0,max:1,def:0.5,unit:''}],
+    build(ctx,p){
+      const m=fxMix(ctx,p.mix),dl=ctx.createDelay(0.05); dl.delayTime.value=p.delay;
+      const l=fxLfo(ctx,p.rate),lg=ctx.createGain(); lg.gain.value=p.depth*p.delay*0.9; l.connect(lg); lg.connect(dl.delayTime);
+      const fb=ctx.createGain(); fb.gain.value=p.feedback;
+      m.input.connect(dl); dl.connect(fb); fb.connect(dl); dl.connect(m.wet);
+      return {input:m.input,output:m.output,setParam(id,v){ p[id]=v; if(id==='rate') l.frequency.value=v; else if(id==='depth'||id==='delay'){ dl.delayTime.value=p.delay; lg.gain.value=p.depth*p.delay*0.9; } else if(id==='feedback') fb.gain.value=v; else if(id==='mix') m.set(v); }};
+    }},
+  ensemble:{name:'Ensemble',cats:['Modulation','Enhance','Movement'],desc:'Lush three-voice stereo chorus — the classic string-machine shimmer.',
+    params:[{id:'depth',label:'Depth',min:0,max:1,def:0.6,unit:''},{id:'speed',label:'Speed',min:0.2,max:3,def:1,unit:'x'},{id:'mix',label:'Mix',min:0,max:1,def:0.5,unit:''}],
+    build(ctx,p){
+      const m=fxMix(ctx,p.mix),lfos=[],gains=[];
+      [[0.61,-1],[0.73,0],[0.91,1]].forEach(([r,pan],i)=>{
+        const dl=ctx.createDelay(0.05); dl.delayTime.value=0.012+i*0.003;
+        const l=fxLfo(ctx,r*p.speed),g=ctx.createGain(); g.gain.value=p.depth*0.004; l.connect(g); g.connect(dl.delayTime); lfos.push([l,r]); gains.push(g);
+        const pn=ctx.createStereoPanner(); pn.pan.value=pan*0.8; const vg=ctx.createGain(); vg.gain.value=0.6;
+        m.input.connect(dl); dl.connect(vg); vg.connect(pn); pn.connect(m.wet);
+      });
+      return {input:m.input,output:m.output,setParam(id,v){ p[id]=v; if(id==='depth') gains.forEach(g=>g.gain.value=v*0.004); else if(id==='speed') lfos.forEach(([l,r])=>l.frequency.value=r*v); else if(id==='mix') m.set(v); }};
+    }},
+  tremolo:{name:'Tremolo',cats:['Modulation','Movement','Guitar'],desc:'Rhythmic volume pulsing — smooth or choppy.',
+    params:[{id:'rate',label:'Rate',min:0.5,max:16,def:5,unit:'Hz'},{id:'depth',label:'Depth',min:0,max:1,def:0.6,unit:''},{id:'choppy',label:'Choppy',min:0,max:1,def:0,unit:''}],
+    build(ctx,p){
+      const input=ctx.createGain(),output=ctx.createGain(); output.gain.value=1-p.depth/2;
+      const l=fxLfo(ctx,p.rate,p.choppy>0.5?'square':'sine'),g=ctx.createGain(); g.gain.value=p.depth/2; l.connect(g); g.connect(output.gain); input.connect(output);
+      return {input,output,setParam(id,v){ p[id]=v; if(id==='rate') l.frequency.value=v; else if(id==='depth'){ output.gain.value=1-v/2; g.gain.value=v/2; } else if(id==='choppy') l.type=v>0.5?'square':'sine'; }};
+    }},
+  autopan:{name:'Auto-Pan',cats:['Modulation','Movement'],desc:'Sweeps the sound left and right.',
+    params:[{id:'rate',label:'Rate',min:0.05,max:10,def:0.5,unit:'Hz'},{id:'depth',label:'Width',min:0,max:1,def:0.8,unit:''}],
+    build(ctx,p){
+      const input=ctx.createGain(),pn=ctx.createStereoPanner(),l=fxLfo(ctx,p.rate),g=ctx.createGain(); g.gain.value=p.depth; l.connect(g); g.connect(pn.pan); input.connect(pn);
+      return {input,output:pn,setParam(id,v){ p[id]=v; if(id==='rate') l.frequency.value=v; else if(id==='depth') g.gain.value=v; }};
+    }},
+  ringmod:{name:'Ring Modulator',cats:['Modulation','Sound Design'],desc:'Metallic, bell-like and robotic tones from multiplying by a sine.',
+    params:[{id:'freq',label:'Freq',min:20,max:2000,def:300,unit:'Hz'},{id:'mix',label:'Mix',min:0,max:1,def:0.5,unit:''}],
+    build(ctx,p){
+      const m=fxMix(ctx,p.mix),vca=ctx.createGain(); vca.gain.value=0; const o=fxLfo(ctx,p.freq); o.connect(vca.gain); m.input.connect(vca); vca.connect(m.wet);
+      return {input:m.input,output:m.output,setParam(id,v){ p[id]=v; if(id==='freq') o.frequency.value=v; else if(id==='mix') m.set(v); }};
+    }},
+  rotary:{name:'Rotary Speaker',cats:['Modulation','Movement','Guitar'],desc:'Spinning organ speaker: doppler, tremolo and swirl.',
+    params:[{id:'fast',label:'Fast',min:0,max:1,def:0,unit:''},{id:'depth',label:'Depth',min:0,max:1,def:0.7,unit:''},{id:'mix',label:'Mix',min:0,max:1,def:1,unit:''}],
+    build(ctx,p){
+      const m=fxMix(ctx,p.mix),rate=()=>p.fast>0.5?6.6:0.8, l=fxLfo(ctx,rate());
+      const dl=ctx.createDelay(0.02); dl.delayTime.value=0.004; const dg=ctx.createGain(); dg.gain.value=p.depth*0.0012; l.connect(dg); dg.connect(dl.delayTime);
+      const am=ctx.createGain(); am.gain.value=1-p.depth*0.25; const ag=ctx.createGain(); ag.gain.value=p.depth*0.25; l.connect(ag); ag.connect(am.gain);
+      const pn=ctx.createStereoPanner(),pg=ctx.createGain(); pg.gain.value=p.depth*0.7; l.connect(pg); pg.connect(pn.pan);
+      m.input.connect(dl); dl.connect(am); am.connect(pn); pn.connect(m.wet);
+      return {input:m.input,output:m.output,setParam(id,v){ p[id]=v; if(id==='fast') l.frequency.setTargetAtTime(rate(),ctx.currentTime,0.6); else if(id==='depth'){ dg.gain.value=v*0.0012; am.gain.value=1-v*0.25; ag.gain.value=v*0.25; pg.gain.value=v*0.7; } else if(id==='mix') m.set(v); }};
+    }},
+  autowah:{name:'Auto-Wah',cats:['Modulation','Guitar','Movement'],desc:'A resonant band-pass that sweeps by itself — funky guitars and synths.',
+    params:[{id:'rate',label:'Rate',min:0.1,max:8,def:1.5,unit:'Hz'},{id:'freq',label:'Center',min:300,max:3000,def:900,unit:'Hz'},{id:'depth',label:'Depth',min:0,max:1,def:0.8,unit:''},{id:'q',label:'Reso',min:1,max:15,def:6,unit:''},{id:'mix',label:'Mix',min:0,max:1,def:1,unit:''}],
+    build(ctx,p){
+      const m=fxMix(ctx,p.mix),bp=fxBq(ctx,'bandpass',p.freq,p.q),l=fxLfo(ctx,p.rate),g=ctx.createGain(); g.gain.value=p.freq*p.depth*0.8; l.connect(g); g.connect(bp.frequency);
+      const mk=ctx.createGain(); mk.gain.value=2; m.input.connect(bp); bp.connect(mk); mk.connect(m.wet);
+      return {input:m.input,output:m.output,setParam(id,v){ p[id]=v; if(id==='rate') l.frequency.value=v; else if(id==='freq'||id==='depth'){ bp.frequency.value=p.freq; g.gain.value=p.freq*p.depth*0.8; } else if(id==='q') bp.Q.value=v; else if(id==='mix') m.set(v); }};
+    }},
+  // ── Space ──
+  pingpong:{name:'Ping-Pong Delay',cats:['Echo','Space','Vocals'],desc:'Tempo-synced echoes that bounce between left and right.',
+    params:[{id:'beats',label:'Time',min:0.125,max:1,def:0.75,unit:' beat'},{id:'feedback',label:'Feedback',min:0,max:0.9,def:0.45,unit:''},{id:'tone',label:'Tone',min:800,max:12000,def:3500,unit:'Hz'},{id:'mix',label:'Mix',min:0,max:1,def:0.3,unit:''}],
+    factory:{'Dotted 8th':{beats:0.75},'Quarter':{beats:1},'8th':{beats:0.5},'16th slapback':{beats:0.25,feedback:0.25}},
+    build(ctx,p){
+      const m=fxMix(ctx,p.mix),dA=ctx.createDelay(4),dB=ctx.createDelay(4); dA.delayTime.value=dB.delayTime.value=fxBeatsSec(p.beats);
+      const tone=fxBq(ctx,'lowpass',p.tone,0.7),fb=ctx.createGain(); fb.gain.value=p.feedback;
+      const mg=ctx.createChannelMerger(2),mono=ctx.createGain(); mono.channelCount=1; mono.channelCountMode='explicit';
+      m.input.connect(mono); mono.connect(tone); tone.connect(dA); dA.connect(dB); dB.connect(fb); fb.connect(dA);
+      dA.connect(mg,0,0); dB.connect(mg,0,1); mg.connect(m.wet);
+      return {input:m.input,output:m.output,setParam(id,v){ p[id]=v; if(id==='beats') dA.delayTime.value=dB.delayTime.value=fxBeatsSec(v); else if(id==='feedback') fb.gain.value=v; else if(id==='tone') tone.frequency.value=v; else if(id==='mix') m.set(v); }};
+    }},
+  tapeecho:{name:'Tape Echo',cats:['Echo','Space','Lo-Fi'],desc:'Warm, wobbly echoes that darken and saturate as they repeat.',
+    params:[{id:'beats',label:'Time',min:0.25,max:2,def:0.5,unit:' beat'},{id:'feedback',label:'Feedback',min:0,max:0.95,def:0.5,unit:''},{id:'wow',label:'Wow',min:0,max:1,def:0.3,unit:''},{id:'tone',label:'Tone',min:800,max:8000,def:2600,unit:'Hz'},{id:'mix',label:'Mix',min:0,max:1,def:0.3,unit:''}],
+    factory:{'Dub':{beats:0.75,feedback:0.7,tone:1800,mix:0.35},'Slapback':{beats:0.25,feedback:0.15,mix:0.3},'Runaway':{feedback:0.9,wow:0.5,mix:0.35}},
+    build(ctx,p){
+      const m=fxMix(ctx,p.mix),dl=ctx.createDelay(5); dl.delayTime.value=fxBeatsSec(p.beats);
+      const w=fxLfo(ctx,0.5),wg=ctx.createGain(); wg.gain.value=p.wow*0.004; w.connect(wg); wg.connect(dl.delayTime);
+      const lp=fxBq(ctx,'lowpass',p.tone,0.7),hp=fxBq(ctx,'highpass',150,0.7),sh=fxShaper(ctx,dawTanhCurve(1.6)),fb=ctx.createGain(); fb.gain.value=p.feedback;
+      m.input.connect(dl); dl.connect(lp); lp.connect(hp); hp.connect(sh); sh.connect(fb); fb.connect(dl); sh.connect(m.wet);
+      return {input:m.input,output:m.output,setParam(id,v){ p[id]=v; if(id==='beats') dl.delayTime.value=fxBeatsSec(v); else if(id==='feedback') fb.gain.value=v; else if(id==='wow') wg.gain.value=v*0.004; else if(id==='tone') lp.frequency.value=v; else if(id==='mix') m.set(v); }};
+    }},
+  widener:{name:'Stereo Widener',cats:['Space','Enhance','Utility'],desc:'Wider stereo image with mid/side width and a Haas delay; keeps the bass centred.',
+    params:[{id:'width',label:'Width',min:0,max:2,def:1.4,unit:'x'},{id:'haas',label:'Haas',min:0,max:25,def:6,unit:'ms'},{id:'bassMono',label:'Bass mono',min:20,max:300,def:120,unit:'Hz'}],
+    build(ctx,p){
+      const input=ctx.createGain(),output=ctx.createGain();
+      const lo=fxBq(ctx,'lowpass',p.bassMono,0.707),hi=fxBq(ctx,'highpass',p.bassMono,0.707),loMono=ctx.createGain(); loMono.channelCount=1; loMono.channelCountMode='explicit';
+      input.connect(lo); lo.connect(loMono); loMono.connect(output);
+      const wide=ctx.createGain(); input.connect(hi); hi.connect(wide);
+      const sp=ctx.createChannelSplitter(2),mg=ctx.createChannelMerger(2),dR=ctx.createDelay(0.05); dR.delayTime.value=p.haas/1000;
+      wide.connect(sp); sp.connect(mg,0,0); sp.connect(dR,1); dR.connect(mg,0,1);
+      const mtx=ctx.createGain(); mg.connect(mtx);
+      const mm=fxMatrix(ctx,mtx,output,fxWidthMatrix(p.width));
+      return {input,output,setParam(id,v){ p[id]=v; if(id==='width') mm.set(fxWidthMatrix(v)); else if(id==='haas') dR.delayTime.value=v/1000; else if(id==='bassMono'){ lo.frequency.value=v; hi.frequency.value=v; } }};
+    }},
+  // ── EQ & utility ──
+  geq:{name:'Graphic EQ',cats:['Utility','Clean Up','Brightness'],desc:'10-band graphic equaliser, 31 Hz – 16 kHz.',
+    params:[31,62,125,250,500,1000,2000,4000,8000,16000].map(f=>({id:'b'+f,label:f>=1000?(f/1000)+'k':String(f),min:-12,max:12,def:0,unit:'dB'})),
+    factory:{'Smile (V)':{b31:3,b62:4,b125:2,b500:-2,b1000:-2,b2000:-1,b8000:3,b16000:4},'Vocal presence':{b125:-2,b250:-2,b2000:2,b4000:3,b8000:2},'Radio':{b31:-12,b62:-12,b125:-6,b4000:2,b8000:-8,b16000:-12}},
+    build(ctx,p){
+      const fs=[31,62,125,250,500,1000,2000,4000,8000,16000], nodes=fs.map((f,i)=>fxBq(ctx,i===0?'lowshelf':i===fs.length-1?'highshelf':'peaking',f,1.4,p['b'+f]));
+      nodes.reduce((a,n)=>{ a.connect(n); return n; });
+      return {input:nodes[0],output:nodes[nodes.length-1],filters:nodes,setParam(id,v){ p[id]=v; const i=fs.indexOf(Number(id.slice(1))); if(i>=0) nodes[i].gain.value=v; }};
+    }},
+  cutfilter:{name:'Low / High Cut',cats:['Utility','Clean Up'],desc:'Steep 24 dB/oct high-pass and low-pass — clear rumble and fizz.',
+    params:[{id:'low',label:'Low cut',min:20,max:1000,def:80,unit:'Hz'},{id:'high',label:'High cut',min:1000,max:20000,def:18000,unit:'Hz'}],
+    build(ctx,p){
+      const h1=fxBq(ctx,'highpass',p.low,0.54),h2=fxBq(ctx,'highpass',p.low,1.31),l1=fxBq(ctx,'lowpass',p.high,0.54),l2=fxBq(ctx,'lowpass',p.high,1.31);
+      h1.connect(h2); h2.connect(l1); l1.connect(l2);
+      return {input:h1,output:l2,filters:[h1,h2,l1,l2],setParam(id,v){ p[id]=v; if(id==='low'){ h1.frequency.value=v; h2.frequency.value=v; } else { l1.frequency.value=v; l2.frequency.value=v; } }};
+    }},
+  utility:{name:'Utility',cats:['Utility'],desc:'Gain, balance, width, mono and polarity flips — the mixing toolbox.',
+    params:[{id:'gain',label:'Gain',min:-24,max:24,def:0,unit:'dB'},{id:'pan',label:'Balance',min:-1,max:1,def:0,unit:''},{id:'width',label:'Width',min:0,max:2,def:1,unit:'x'},{id:'mono',label:'Mono',min:0,max:1,def:0,unit:''},{id:'phaseL',label:'Ø Left',min:0,max:1,def:0,unit:''},{id:'phaseR',label:'Ø Right',min:0,max:1,def:0,unit:''}],
+    build(ctx,p){
+      const input=ctx.createGain(),output=ctx.createGain(); output.gain.value=fxDb(p.gain);
+      const calc=()=>fxWidthMatrix(p.width,p.mono>0.5,p.phaseL>0.5,p.phaseR>0.5,p.pan);
+      const mm=fxMatrix(ctx,input,output,calc());
+      return {input,output,setParam(id,v){ p[id]=v; if(id==='gain') output.gain.value=fxDb(v); else mm.set(calc()); }};
+    }},
+};
+Object.assign(STUDIO_FX,DAW_NEW_FX);
+// descriptions, extra categories and factory presets for the original 16
+Object.entries({
+  eq3:['Simple 3-band EQ with a curve display.',['EQ']],
+  chaneq:['Logic-style 8-band parametric EQ with live spectrum — drag the points.',['EQ']],
+  compressor:['Evens out volume; adds punch and polish.',['Dynamics']],
+  limiter:['Brick-wall loudness control for the end of a chain.',['Dynamics']],
+  gate:['Silences noise and bleed between phrases.',['Dynamics']],
+  deesser:['Tames harsh "s" and "t" sounds.',['Dynamics']],
+  reverb:['Realistic room/plate/hall space with early reflections.',['Space']],
+  delay:['Classic feedback echo with tone control.',['Space']],
+  chorus:['Thickens and widens with gentle detuned copies.',['Modulation']],
+  doubler:['Fakes a double-tracked vocal with two offset voices.',['Space']],
+  distortion:['Gritty guitar-style distortion.',['Distortion']],
+  saturation:['Soft analog-style warmth and harmonics.',['Distortion']],
+  filter:['Resonant filter with built-in LFO sweep.',['Modulation']],
+  phaser:['Swirling all-pass phase sweep.',['Modulation']],
+  bitcrusher:['Digital crunch: fewer bits, rougher sound.',['Lo-Fi','Distortion']],
+}).forEach(([k,[desc,cats]])=>{ const d=STUDIO_FX[k]; if(!d) return; d.desc=d.desc||desc; cats.forEach(c=>{ if(!d.cats.includes(c)) d.cats.push(c); }); });
+STUDIO_FX.reverb.factory={'Small room':{decay:0.6,preDelay:0.005,damping:0.6,mix:0.2},'Vocal plate':{decay:1.8,preDelay:0.025,damping:0.3,mix:0.22},'Hall':{decay:3.2,preDelay:0.03,damping:0.45,mix:0.3},'Cathedral':{decay:7,preDelay:0.06,damping:0.55,mix:0.4},'Ambience':{decay:0.9,preDelay:0.01,damping:0.5,mix:0.12}};
+STUDIO_FX.compressor.factory={'Vocal':{threshold:-22,ratio:4,attack:0.005,release:0.15,makeup:4},'Drum bus':{threshold:-18,ratio:4,attack:0.02,release:0.1,makeup:3},'Bass':{threshold:-24,ratio:5,attack:0.01,release:0.2,makeup:4},'Gentle glue':{threshold:-14,ratio:2,attack:0.03,release:0.3,makeup:1.5}};
+STUDIO_FX.delay.factory={'Slapback':{time:0.11,feedback:0.15,mix:0.25},'Long echo':{time:0.6,feedback:0.55,mix:0.3},'Dark repeats':{time:0.4,feedback:0.6,filter:1500,mix:0.3}};
+// keep tempo-synced plugins on the beat when playback starts or loops
+function dawResyncTempoFx(t0,beat0){ dawProject.tracks.forEach(t=>(t._fxChain||[]).forEach(fx=>{ if(fx&&fx.resync) fx.resync(t0,beat0); })); }
+
 // ── App shell: one ☰ menu for every page and action ──
 const SHELL_PAGE_NAMES={sheet:'Sheet',create:'Create',piano:'Piano',roll:'Piano Roll',drum:'Drums',learn:'Learn',metro:'Metronome',classic:'Guitar',listen:'Listen',daw:'Studio',dj:'DJ Studio',studio:'Classic Studio',struct:'Structure',tools:'Tools'};
 let shellPage='sheet',hmKb=-1,hmFlat=[];
@@ -17284,6 +17617,7 @@ function hmItems(){
       {icon:'🎤',label:'Record vocal',run:shellInStudio(()=>dawToggleRecordArmGlobal())},
       {icon:'🎙',label:'Add vocal stack (6 stems)',run:shellInStudio(()=>dawAddVocalStack())},
       {icon:'🎚',label:'Mixer',run:shellInStudio(()=>{ dawOpenPanel(); dawSwitchPanelTab('mixer'); })},
+      {icon:'🧩',label:'Plugin library ('+Object.keys(STUDIO_FX).length+' effects)',keys:'effects fx plugins reverb delay compressor distortion amp tape vinyl chorus flanger',run:shellInStudio(()=>{ const t=dawProject.tracks.find(x=>x.id===dawView.selectedTrackId)||dawProject.tracks[0]||dawAddTrackOfType('vocals'); dawPanelTrackId=t.id; dawView.selectedTrackId=t.id; dawOpenPanel(); dawSwitchPanelTab('effects'); })},
       {icon:'✺',label:'Mastering & loudness',keys:'master lufs limiter loud streaming',run:shellInStudio(()=>{ dawOpenPanel(); dawSwitchPanelTab('mixer'); })},
       {icon:'🎹',label:'Instruments (30+ sampled & synth)',keys:'piano guitar strings synth sound',run:shellInStudio(()=>{ const t=dawProject.tracks.find(x=>x.id===dawView.selectedTrackId)||dawProject.tracks.find(x=>x.type!=='vocals'&&x.type!=='drums')||dawAddTrackOfType('keys'); dawOpenInstrumentPanelForTrack(t.id); dawSwitchPanelTab('instrument'); })},
       {icon:'〰',label:'Channel EQ on selected track',keys:'equalizer eq',run:shellInStudio(()=>dawAddChannelEQ())},
