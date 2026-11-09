@@ -1780,6 +1780,130 @@ body.hm-open .hm-drawer{transform:none}
   .classic-show-btn,.classic-strum-btn,.classic-toggle-btn,.nbtn,.ins-btn{min-height:44px}
   .custom-tuning-input{min-height:40px}
 }
+
+/* ══════════════ PRO POLISH (Tier 11) — refined Studio look, one toolbar, song builder ══════════════ */
+body.pg-daw .sh-transport,body.pg-dj .sh-transport{display:none!important} /* Studio & DJ have their own transport */
+body.pg-daw #starfield,body.pg-dj #starfield{opacity:.12}
+#page-daw{--bg:#111116;--bg-2:#17171e;--bg-3:#1f1f28;--bg-4:#292935;--line:rgba(255,255,255,.06);--line-2:rgba(255,255,255,.11);--tx:#ececf2;--tx-2:#a2a2b2;--tx-3:#6e6e7d;--brand:#7552e0;--r:6px}
+#page-daw .app{border:none;border-radius:0;font:13px/1.4 var(--sans,'Inter'),system-ui,sans-serif;background:var(--bg)}
+#page-daw ::-webkit-scrollbar{width:8px;height:8px}
+#page-daw ::-webkit-scrollbar-thumb{background:var(--bg-4);border-radius:8px}
+#page-daw ::-webkit-scrollbar-track{background:transparent}
+/* toolbar */
+#page-daw .tb{height:52px;flex:0 0 52px;display:flex;align-items:center;gap:10px;padding:0 14px;background:linear-gradient(180deg,#1b1b23,#15151b);border-bottom:1px solid var(--line-2);box-shadow:0 1px 0 rgba(0,0,0,.4)}
+#page-daw .tb .proj{margin:0;font-size:13.5px;font-weight:650;letter-spacing:.01em;max-width:200px;padding:5px 8px;border:1px solid transparent}
+#page-daw .tb .proj:hover{border-color:var(--line-2)}
+#page-daw .tb-group{display:flex;align-items:center}
+#page-daw .tb-group select{border-radius:var(--r) 0 0 var(--r);height:30px;border-right:none}
+#page-daw .tb-group .btn{border-radius:0 var(--r) var(--r) 0;height:30px;background:var(--bg-3)}
+#page-daw .tb .btn{height:30px;padding:0 11px;font-size:12px;border-radius:var(--r)}
+#page-daw .tb .tinput{height:30px;border-radius:var(--r);font-size:12px}
+#page-daw .tb-transport{display:flex;align-items:center;gap:8px;padding:4px 6px;background:#0c0c10;border:1px solid var(--line-2);border-radius:999px;box-shadow:inset 0 1px 3px rgba(0,0,0,.6)}
+#page-daw .tb-transport .pbig{width:32px;height:32px;font-size:12px;border:1px solid var(--line-2);background:var(--bg-3);color:var(--tx)}
+#page-daw .tb-transport .pbig.tplay{width:38px;height:38px;font-size:14px;background:var(--brand);border-color:transparent;color:#fff;box-shadow:0 0 16px rgba(117,82,224,.45)}
+#page-daw .tb-transport .pbig.tplay.on{background:#8a6af0}
+#page-daw .tb-transport .pbig.on:not(.tplay){background:rgba(232,181,58,.18);border-color:#e8b53a;color:#e8b53a}
+#page-daw .tb-transport .rec{width:32px;height:32px;border:3px solid #2a2a33;margin:0}
+#page-daw .lcd{display:flex;flex-direction:column;align-items:flex-start;padding:0 12px 0 6px;min-width:118px;font-family:var(--mono);line-height:1.1}
+#page-daw .lcd b{font-size:17px;font-weight:600;color:#9ef0c0;letter-spacing:.04em;text-shadow:0 0 8px rgba(80,230,150,.35)}
+#page-daw .lcd span{font-size:9.5px;color:var(--tx-3);letter-spacing:.04em}
+#page-daw .lcd i{font-style:normal;color:var(--tx-2)}
+#page-daw .tf{display:flex;align-items:center;gap:6px;font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--tx-3)}
+#page-daw .tf .tinput{width:56px;text-transform:none;letter-spacing:0}
+#page-daw .tf select.tinput{width:auto}
+#page-daw .zoom{width:84px}
+@media (max-width:1100px){ #page-daw .tf,#page-daw #dawCountInBtn,#page-daw .zoom{display:none} }
+/* track list */
+#page-daw .tracklist{width:236px;flex-basis:236px;background:var(--bg-2)}
+#page-daw .trow{height:56px;padding:0 10px 0 8px}
+#page-daw .trow.sel{background:linear-gradient(90deg,rgba(117,82,224,.16),transparent 70%)}
+#page-daw .trow.sel::before{width:3px;background:var(--brand)}
+#page-daw .tico{width:28px;height:28px;flex-basis:28px;border-radius:7px;font-size:13px;box-shadow:inset 0 -2px 0 rgba(0,0,0,.25)}
+#page-daw .tname{font-size:12px;font-weight:550}
+#page-daw .msr{width:18px;height:17px;border-radius:4px;font-size:8.5px;font-weight:700}
+#page-daw .vol{width:70px}
+#page-daw .addtrack{color:var(--tx-3);border-top:1px dashed var(--line-2);margin:6px 8px;border-radius:var(--r);justify-content:center}
+/* ruler, sections, grid */
+#page-daw .ruler{height:30px;flex-basis:30px;background:#14141a}
+#page-daw .bar{font-size:9.5px;line-height:14px;color:var(--tx-2);font-family:var(--mono)}
+#page-daw .mk{position:absolute;bottom:0;height:15px;line-height:15px;font-size:9.5px;font-weight:650;padding:0 6px;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;pointer-events:none;background:linear-gradient(90deg,color-mix(in srgb,var(--mk) 55%,transparent),color-mix(in srgb,var(--mk) 18%,transparent));border-left:2px solid var(--mk);letter-spacing:.02em}
+#page-daw .secband{position:absolute;top:0;bottom:0;background:rgba(255,255,255,.018);pointer-events:none}
+#page-daw .gline{background:rgba(255,255,255,.035)}
+#page-daw .gline.b{background:rgba(255,255,255,.08)}
+#page-daw .lane{border-bottom:1px solid rgba(255,255,255,.045)}
+#page-daw .lane.sel{background:rgba(117,82,224,.05)}
+#page-daw .clip{border-radius:7px;border:1px solid rgba(255,255,255,.14);box-shadow:inset 0 1px 0 rgba(255,255,255,.18),0 2px 6px rgba(0,0,0,.35)}
+#page-daw .clip::after{content:'';position:absolute;inset:0;background:linear-gradient(180deg,rgba(255,255,255,.1),rgba(0,0,0,.16));pointer-events:none}
+#page-daw .clip:hover{border-color:rgba(255,255,255,.35)}
+#page-daw .clip.sel{border:1.5px solid #fff;box-shadow:0 0 0 2px rgba(117,82,224,.6),0 4px 14px rgba(0,0,0,.5)}
+#page-daw .cname{font-size:9.5px;font-weight:650;padding:3px 6px;text-shadow:0 1px 2px rgba(0,0,0,.55)}
+#page-daw .wbar{background:rgba(255,255,255,.55)}
+#page-daw .mnote{height:3px;background:rgba(255,255,255,.85);border-radius:2px}
+#page-daw .play{width:2px;background:#ff4d6d;box-shadow:0 0 10px rgba(255,77,109,.7)}
+#page-daw .play::before{border-top-color:#ff4d6d}
+/* layout: the timeline never collapses under an open panel */
+#page-daw .body{min-height:170px}
+#page-daw .panel{border-top:1px solid var(--line-2);box-shadow:0 -8px 24px rgba(0,0,0,.35)}
+#page-daw .panel.open{height:min(380px,calc(100% - 240px))}
+#page-daw .panel.expanded{height:min(640px,calc(100% - 230px))}
+#page-daw .panel .tab{font-size:12px;padding:7px 11px;border-radius:0;border-bottom:2px solid transparent}
+#page-daw .panel .tab.on{color:var(--tx);border-bottom-color:var(--brand);background:transparent}
+/* teleprompter */
+#page-daw .prompter{position:absolute;left:50%;top:10px;transform:translateX(-50%);z-index:30;pointer-events:none;text-align:center;background:rgba(10,10,14,.78);backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,.1);border-radius:14px;padding:8px 22px 9px;min-width:300px;max-width:78%;box-shadow:0 10px 30px rgba(0,0,0,.5)}
+#page-daw .pr-sec{font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;color:#f472b6;font-weight:700}
+#page-daw .pr-cur{font-size:20px;font-weight:650;color:#fff;line-height:1.3;margin:2px 0}
+#page-daw .pr-next{font-size:12.5px;color:var(--tx-3)}
+/* empty state */
+#page-daw .daw-empty{position:absolute;inset:0;display:grid;place-items:center;z-index:25;padding:20px}
+#page-daw .de-card{max-width:620px;width:100%;text-align:center}
+#page-daw .de-t{font-size:24px;font-weight:700;letter-spacing:-.01em}
+#page-daw .de-s{color:var(--tx-2);font-size:13px;margin:4px 0 18px}
+#page-daw .de-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+#page-daw .de-grid button{background:var(--bg-2);border:1px solid var(--line-2);border-radius:12px;padding:16px;text-align:left;color:var(--tx);cursor:pointer;font-family:inherit;transition:border-color .15s,transform .15s,background .15s}
+#page-daw .de-grid button:hover{border-color:var(--brand);background:var(--bg-3);transform:translateY(-1px)}
+#page-daw .de-grid b{display:block;font-size:14px;margin-bottom:4px}
+#page-daw .de-grid span{font-size:11.5px;color:var(--tx-2)}
+/* lyrics tab */
+#page-daw .ly{display:flex;flex-direction:column;gap:1px;max-width:820px}
+#page-daw .ly-sec{font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;padding:10px 4px 4px}
+#page-daw .ly-line{display:grid;grid-template-columns:44px 110px 1fr;gap:10px;align-items:baseline;padding:5px 6px;border-radius:6px}
+#page-daw .ly-line:hover{background:var(--bg-3)}
+#page-daw .ly-line.on{background:rgba(117,82,224,.18)}
+#page-daw .ly-t{font-family:var(--mono);font-size:10.5px;color:var(--tx-3);cursor:pointer}
+#page-daw .ly-t:hover{color:var(--tx)}
+#page-daw .ly-c{font-family:var(--mono);font-size:11px;color:#e8b53a;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#page-daw .ly-x{font-size:14px;color:var(--tx);outline:none;border-radius:4px;padding:0 3px}
+#page-daw .ly-x:focus{background:var(--bg-4)}
+/* song builder dialog */
+.sb-scrim{position:fixed;inset:0;z-index:950;background:rgba(5,4,8,.66);backdrop-filter:blur(6px);display:none;place-items:center;padding:20px}
+.sb-scrim.on{display:grid}
+.sb-card{width:min(980px,100%);max-height:calc(100vh - 40px);overflow:auto;background:#15151c;border:1px solid rgba(255,255,255,.1);border-radius:18px;box-shadow:0 30px 80px rgba(0,0,0,.6);color:#ececf2;font-family:var(--sans)}
+.sb-head{display:flex;justify-content:space-between;align-items:flex-start;padding:20px 22px 10px}
+.sb-title{font-size:22px;font-weight:700;letter-spacing:-.01em}
+.sb-sub{font-size:12.5px;color:#a2a2b2;margin-top:3px}
+.sb-x{background:none;border:none;color:#a2a2b2;font-size:17px;cursor:pointer;width:34px;height:34px;border-radius:10px}
+.sb-x:hover{background:rgba(255,255,255,.07);color:#fff}
+.sb-body{display:grid;grid-template-columns:1.25fr 1fr;gap:18px;padding:8px 22px 22px}
+@media (max-width:760px){ .sb-body{grid-template-columns:1fr} }
+.sb-col{display:flex;flex-direction:column;gap:10px;min-width:0}
+.sb-in{background:#0e0e13;border:1px solid rgba(255,255,255,.1);color:#ececf2;border-radius:10px;padding:10px 12px;font:inherit;font-size:14px;outline:none;width:100%;box-sizing:border-box}
+.sb-in:focus,.sb-ta:focus{border-color:#7552e0;box-shadow:0 0 0 3px rgba(117,82,224,.25)}
+.sb-ta{background:#0e0e13;border:1px solid rgba(255,255,255,.1);color:#ececf2;border-radius:12px;padding:12px 14px;font:15px/1.6 var(--sans);min-height:330px;resize:vertical;outline:none;box-sizing:border-box;width:100%}
+.sb-row{display:flex;justify-content:space-between;align-items:center;gap:10px}
+.sb-link{background:none;border:none;color:#9b7ce8;font:inherit;font-size:12px;cursor:pointer;padding:0;text-decoration:underline;text-underline-offset:3px}
+.sb-stat{font-size:11px;color:#6e6e7d;text-align:right}
+.sb-lbl{display:flex;flex-direction:column;gap:6px;font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:#8a8a9a;font-weight:650}
+.sb-genres{display:grid;grid-template-columns:repeat(3,1fr);gap:7px}
+.sb-g{background:#1d1d26;border:1px solid rgba(255,255,255,.08);color:#ececf2;border-radius:10px;padding:9px 8px;font:inherit;font-size:13px;font-weight:600;cursor:pointer;display:flex;flex-direction:column;align-items:flex-start;gap:1px;transition:all .12s}
+.sb-g small{font-size:10px;color:#6e6e7d;font-weight:500}
+.sb-g:hover{border-color:rgba(117,82,224,.6)}
+.sb-g.on{background:linear-gradient(135deg,rgba(117,82,224,.35),rgba(232,69,156,.2));border-color:#7552e0}
+.sb-grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.sb-chk{display:flex;gap:8px;align-items:flex-start;font-size:12.5px;color:#c8c8d4;cursor:pointer;line-height:1.35}
+.sb-chk input{accent-color:#7552e0;margin-top:2px}
+.sb-warn{font-size:11.5px;color:#fbbf24;background:rgba(251,191,36,.08);border:1px solid rgba(251,191,36,.25);border-radius:10px;padding:8px 10px}
+.sb-go{margin-top:auto;background:linear-gradient(135deg,#7552e0,#e8459c);border:none;color:#fff;font:inherit;font-size:15px;font-weight:700;border-radius:12px;padding:13px;cursor:pointer;box-shadow:0 8px 24px rgba(117,82,224,.35);transition:transform .12s,box-shadow .12s}
+.sb-go:hover{transform:translateY(-1px);box-shadow:0 12px 30px rgba(117,82,224,.45)}
 </style>
 </head>
 <body class="shell-v2">
@@ -1808,9 +1932,8 @@ body.hm-open .hm-drawer{transform:none}
   <div class="nav-right">
     <span class="rec-dot" title="Songbook Ultra"></span>
     <input class="song-title-nav keep" id="titleNav" value="Creep" oninput="syncTitle(this)">
-    <button class="nbtn keep sh-ic" id="shellPlayBtn" onclick="shellPlay()" title="Play / pause (Space)">▶</button>
-    <button class="nbtn keep sh-ic" onclick="shellStop()" title="Stop">■</button>
-    <button class="nbtn keep sh-ic" onclick="hmOpen('')" title="Search everything (Ctrl+K)">⌕</button>
+    <button class="nbtn keep sh-ic sh-transport" id="shellPlayBtn" onclick="shellPlay()" title="Play / pause">▶</button>
+    <button class="nbtn keep sh-ic sh-transport" onclick="shellStop()" title="Stop">■</button>
     <button class="nbtn prim keep" onclick="shellExport()">Export</button>
     <button class="nbtn" onclick="transposeDown()">↓</button>
     <button class="nbtn" onclick="transposeUp()">↑</button>
@@ -2069,66 +2192,45 @@ body.hm-open .hm-drawer{transform:none}
 <div class="page" id="page-daw">
   <div id="daw-root" class="app">
 
-    <!-- top bar -->
-    <div class="topbar">
-      <div class="logo">♪</div>
-      <div class="mi" onclick="dawToggleMenu('file',event)">File
-        <div class="midd" id="dawMenuFile">
-          <div class="midd-item" onclick="dawSaveProject()">💾 Save Project</div>
-          <div class="midd-item" onclick="document.getElementById('dawLoadInput').click()">📂 Load Project</div>
-          <div class="midd-item" onclick="dawExportMIDI()">🎼 Export MIDI</div>
-          <div class="midd-item" onclick="dawExportWAV()">🔊 Export WAV</div>
-          <div class="midd-item" onclick="dawExportStems()">🎚 Export stems (one WAV per track)</div>
-          <div class="midd-item" onclick="dawExportBundle()">📦 Export for Logic / GarageBand / Suno (ZIP)</div>
-          <div class="midd-item" onclick="dawImportAudio()">🎤 Import audio, stems or MIDI…</div>
-          <div class="midd-item" onclick="dawExportChordSheet()">📄 Chord Sheet PDF</div>
-        </div>
-      </div>
-      <div class="mi" onclick="dawToggleMenu('edit',event)">Edit
-        <div class="midd" id="dawMenuEdit">
-          <div class="midd-item" onclick="dawRollUndoFromMenu()">↺ Undo (Piano Roll)</div>
-          <div class="midd-item" onclick="dawClipClipboard?toast('Use right-click on a clip to paste'):toast('Nothing copied yet')">📋 Clipboard</div>
-        </div>
-      </div>
-      <div class="mi" onclick="dawToggleMenu('settings',event)">Settings
-        <div class="midd" id="dawMenuSettings">
-          <div class="midd-item" onclick="dawToggleMiniPanel()">📱 Toggle phone view</div>
-          <div class="midd-item" onclick="document.getElementById('dawLoopToggle').click()">🔁 Toggle loop region</div>
-        </div>
-      </div>
-      <div class="mi" onclick="toast('Songbook Studio — double-click the timeline to create a clip, right-click a clip for more options.')">Help</div>
+    <!-- one toolbar: project · add track · transport · tempo/key · click · view -->
+    <div class="tb">
       <input type="file" id="dawLoadInput" accept="application/json" style="display:none" onchange="dawLoadProjectFile(this)">
       <input type="file" id="dawAudioImportInput" multiple accept="audio/*,.wav,.mp3,.m4a,.aac,.ogg,.flac,.webm,.aif,.aiff,.mid,.midi,audio/midi" style="display:none" onchange="dawHandleAudioImport(this)">
-      <div class="proj" id="dawProjectName" contenteditable spellcheck="false" oninput="dawProject.name=dawProjectName.textContent">Untitled Project</div>
+      <input type="checkbox" id="dawRecArmVisible" style="display:none">
+      <input type="checkbox" id="dawLoopToggle" style="display:none" onchange="dawProject.loopEnabled=this.checked;dawSyncLoopButtons();renderDawTimeline()">
+      <input id="dawSig" value="4/4" readonly style="display:none">
+      <div class="proj" id="dawProjectName" contenteditable spellcheck="false" title="Project name — click to rename" oninput="dawProject.name=dawProjectName.textContent">Untitled Project</div>
+      <div class="tb-group">
+        <select id="dawAddTrackType" class="tinput" title="Track type">
+          <option value="vocals">Vocal</option>
+          <option value="vocalstack">Vocal stack (6)</option>
+          <option value="drums">Drums</option>
+          <option value="bass">Bass</option>
+          <option value="keys">Keys</option>
+          <option value="guitar">Guitar</option>
+          <option value="synth">Synth</option>
+          <option value="sample">Audio</option>
+        </select>
+        <button class="btn" onclick="dawAddTrack()">+ Track</button>
+      </div>
       <div class="spacer"></div>
-    </div>
-
-    <!-- transport -->
-    <div class="transport">
-      <select id="dawAddTrackType" class="tinput" style="width:auto">
-        <option value="drums">🥁 Drums</option>
-        <option value="bass">🎵 Bass</option>
-        <option value="guitar">🎸 Guitar</option>
-        <option value="keys">🎹 Keys</option>
-        <option value="synth">🌊 Synth</option>
-        <option value="vocals">🎤 Vocals</option>
-        <option value="sample">🔊 Sample</option>
-        <option value="vocalstack">🎙 Vocal stack (6 stems)</option>
-      </select>
-      <button class="btn" style="padding:4px 9px" onclick="dawAddTrack()">+ Add track</button>
-      <span class="lbl">BPM</span><input id="dawBpm" class="tinput" type="number" min="40" max="240" value="120" onchange="dawSetBpm(this.value)">
-      <span class="lbl">KEY</span>
-      <select id="dawKey" class="tinput" style="width:auto" onchange="dawSetKey(this.value)">
-        <option>C</option><option>G</option><option>D</option><option>A</option><option>E</option><option>F</option><option>Bb</option>
-        <option>Am</option><option>Em</option><option>Dm</option><option>Gm</option>
-      </select>
-      <span class="lbl">SIG</span><input id="dawSig" class="tinput" value="4/4" readonly>
-<input type="checkbox" id="dawRecArmVisible" style="display:none">
-      <button class="btn dawx-tg" id="dawMetroBtn" style="padding:4px 9px" onclick="dawToggleSetting('metronome')" title="Metronome click during playback">🕒 Click</button>
-      <button class="btn dawx-tg" id="dawCountInBtn" style="padding:4px 9px" onclick="dawToggleSetting('countIn')" title="One bar count-in before recording">1-2-3-4</button>
-      <button class="btn" style="padding:4px 9px" onclick="dawOpenPanel();dawSwitchPanelTab('mixer')" title="Mixer">🎚 Mixer</button>
+      <div class="tb-transport">
+        <button class="pbig" onclick="dawSeekToStart()" title="Go to start">⏮</button>
+        <button class="pbig tplay" id="dawPlayBtn" onclick="dawTogglePlay()" title="Play / pause">▶</button>
+        <button class="rec" id="dawRecordBtn" onclick="dawToggleRecordArmGlobal()" title="Record"></button>
+        <button class="pbig" id="dawLoopBtn" onclick="document.getElementById('dawLoopToggle').click()" title="Loop (drag on the ruler to set the range)">⟲</button>
+        <div class="lcd" title="Position · tempo · key · time signature"><b id="dawTimeDisplay">00:00.0</b><span><i id="dawBpmDisplay">120</i> bpm · <i id="dawKeyDisplay">C</i> · <i id="dawSigDisplay">4/4</i></span></div>
+      </div>
       <div class="spacer"></div>
-      <span class="lbl">ZOOM</span><input type="range" id="dawZoom" class="zoom" min="8" max="96" value="24" oninput="dawSetZoom(this.value)">
+      <label class="tf">BPM<input id="dawBpm" class="tinput" type="number" min="40" max="240" value="120" onchange="dawSetBpm(this.value)"></label>
+      <label class="tf">Key<select id="dawKey" class="tinput" onchange="dawSetKey(this.value)">
+        <option>C</option><option>G</option><option>D</option><option>A</option><option>E</option><option>B</option><option>F</option><option>Bb</option><option>Eb</option><option>Ab</option><option>Db</option>
+        <option>Am</option><option>Em</option><option>Bm</option><option>F#m</option><option>C#m</option><option>Dm</option><option>Gm</option><option>Cm</option><option>Fm</option>
+      </select></label>
+      <button class="btn dawx-tg" id="dawMetroBtn" onclick="dawToggleSetting('metronome')" title="Metronome during playback">Click</button>
+      <button class="btn dawx-tg" id="dawCountInBtn" onclick="dawToggleSetting('countIn')" title="One-bar count-in before recording">Count-in</button>
+      <button class="btn dawx-tg on" id="dawLoopsBtn" onclick="dawToggleLoopBrowser()" title="Show / hide the loop browser">Loops</button>
+      <input type="range" id="dawZoom" class="zoom" min="8" max="96" value="24" oninput="dawSetZoom(this.value)" title="Zoom">
     </div>
 
     <!-- body -->
@@ -2185,42 +2287,22 @@ body.hm-open .hm-drawer{transform:none}
       </div>
     </div>
 
-    <!-- bottom bar -->
-    <div class="bottom">
-      <button class="bbtn" onclick="dawOpenBrowseLoops()">♫ Browse loops</button>
-      <button class="bbtn" onclick="dawOpenBeatmaker()">▦ Patterns Beatmaker</button>
-      <button class="bbtn" onclick="dawOpenSynthPads()">🎹 Play the synth</button>
-      <div class="spacer"></div>
-      <button class="rec" id="dawRecordBtn" onclick="dawToggleRecordArmGlobal()"></button>
-      <button class="pbig" id="dawPlayBtn" onclick="dawTogglePlay()">▶</button>
-      <button class="pbig" onclick="dawSeekToStart()">⏮</button>
-      <button class="pbig" onclick="dawNudgeSeek(-1)">⏪</button>
-      <button class="pbig" onclick="dawNudgeSeek(1)">⏩</button>
-      <button class="pbig" id="dawLoopBtn" onclick="document.getElementById('dawLoopToggle').click()">🔁</button>
-      <input type="checkbox" id="dawLoopToggle" style="display:none" onchange="dawProject.loopEnabled=this.checked;dawSyncLoopButtons()">
-      <div class="spacer"></div>
-      <div class="meta">
-        <span id="dawTimeDisplay">00:00.0</span>
-        <span id="dawKeyDisplay">C</span>
-        <span><span id="dawBpmDisplay">120</span> <em style="font-style:normal;color:var(--tx-3)">bpm</em></span>
-        <span id="dawSigDisplay">4/4</span>
-      </div>
-    </div>
-
     <!-- panel -->
     <div class="panel" id="daw-panel">
       <div class="ph2">
         <button class="tab" id="daw-panel-close" onclick="dawClosePanel()">✕</button>
         <div id="daw-panel-tabs" style="display:flex;gap:2px">
           <button class="tab on" data-tab="instrument" onclick="dawSwitchPanelTab('instrument')">Instrument</button>
-          <button class="tab" data-tab="chords" onclick="dawSwitchPanelTab('chords')">Chords</button>
           <button class="tab" data-tab="pianoroll" onclick="dawSwitchPanelTab('pianoroll')">Piano Roll</button>
+          <button class="tab" data-tab="beatmaker" onclick="dawSwitchPanelTab('beatmaker')">Beat</button>
+          <button class="tab" data-tab="chords" onclick="dawSwitchPanelTab('chords')">Chords</button>
+          <button class="tab" data-tab="vocal" onclick="dawSwitchPanelTab('vocal')">Vocal</button>
+          <button class="tab" data-tab="lyrics" onclick="dawSwitchPanelTab('lyrics')">Lyrics</button>
           <button class="tab" data-tab="effects" onclick="dawSwitchPanelTab('effects')">Effects</button>
-          <button class="tab" data-tab="vocal" onclick="dawSwitchPanelTab('vocal')">🎤 Vocal</button>
-          <button class="tab" data-tab="mixer" onclick="dawSwitchPanelTab('mixer')">🎚 Mixer</button>
+          <button class="tab" data-tab="mixer" onclick="dawSwitchPanelTab('mixer')">Mixer</button>
         </div>
         <div class="spacer"></div>
-        <button class="btn" style="padding:4px 9px" onclick="dawSavePresetFromPanel()">Save Preset</button>
+        <button class="btn" id="dawSavePresetBtn" style="padding:4px 9px;display:none" onclick="dawSavePresetFromPanel()">Save FX chain</button>
         <button class="tab" id="daw-panel-expand" onclick="dawTogglePanelExpand()">⤢</button>
       </div>
       <div class="pb" id="daw-panel-body"></div>
@@ -13780,8 +13862,30 @@ function renderDawTimeline(){
   });
   const play=document.createElement('div'); play.className='play'; play.id='dawPlayheadEl';
   grid.appendChild(play);
+  // section bands behind the lanes so the song's shape is visible at a glance
+  (dawProject.markers||[]).forEach((m,i,all)=>{ if(i%2) return; const x1=xFromBeat(m.beat),x2=i+1<all.length?xFromBeat(all[i+1].beat):x1; if(x2<0||x1>gridW) return; const band=document.createElement('div'); band.className='secband'; band.style.left=x1+'px'; band.style.width=Math.max(0,x2-x1)+'px'; grid.insertBefore(band,grid.firstChild); });
+  const pr=document.createElement('div'); pr.id='dawPrompter'; pr.className='prompter'; grid.appendChild(pr); dawLyricIdx=-2; if(typeof dawLyricsTick==='function') dawLyricsTick(true);
+  if(!dawProject.tracks.length) grid.appendChild(dawEmptyState());
   updateDawPlayhead();
   renderDawRuler(gridW);
+}
+function dawEmptyState(){
+  const el=document.createElement('div'); el.className='daw-empty';
+  el.innerHTML=`<div class="de-card">
+    <div class="de-t">Start a song</div>
+    <div class="de-s">Pick how you want to begin — you can mix and match later.</div>
+    <div class="de-grid">
+      <button data-a="lyrics"><b>✎ Write lyrics</b><span>Your words → full arrangement with a guide melody</span></button>
+      <button data-a="record"><b>⏺ Record a vocal</b><span>Sing or rap straight in, with count-in and takes</span></button>
+      <button data-a="beat"><b>▦ Make a beat</b><span>Drum pattern builder with 5 kits</span></button>
+      <button data-a="import"><b>↓ Import</b><span>Audio, stems or MIDI — from Logic, GarageBand, Suno</span></button>
+    </div></div>`;
+  el.querySelectorAll('button').forEach(b=>b.onclick=e=>{ e.stopPropagation(); const a=b.dataset.a;
+    if(a==='lyrics') sbOpen(); else if(a==='record') dawToggleRecordArmGlobal();
+    else if(a==='beat'){ const t=dawAddTrackOfType('drums'); t.drumKit='Studio'; dawOpenInstrumentPanelForTrack(t.id); dawSwitchPanelTab('beatmaker'); }
+    else dawImportAudio(); });
+  el.addEventListener('mousedown',e=>e.stopPropagation()); el.addEventListener('dblclick',e=>e.stopPropagation());
+  return el;
 }
 function dawBuildClipContent(clip,w,h){
   const contentH=Math.max(h-13,4);
@@ -13859,6 +13963,14 @@ function renderDawRuler(width){
     label.className='bar'; label.style.left=x+'px'; label.textContent=bar+1;
     ruler.appendChild(label);
   }
+  // section markers (from the Song Builder, or added by hand)
+  (dawProject.markers||[]).forEach((m,i,all)=>{
+    const x=xFromBeat(m.beat), nx=i+1<all.length?xFromBeat(all[i+1].beat):x+400;
+    if(nx<0||x>width) return;
+    const el=document.createElement('div'); el.className='mk'; el.style.left=Math.max(0,x)+'px'; el.style.width=Math.max(0,Math.min(width,nx)-Math.max(0,x))+'px';
+    el.style.setProperty('--mk',m.color||'#888'); el.textContent=m.name; el.title=m.name+' — bar '+(Math.floor(m.beat/barLen)+1);
+    ruler.appendChild(el);
+  });
 }
 // backward-compat alias — every existing call site (engine tick, mouse
 // handlers, transport controls) calls renderDawCanvas(); it now drives the
@@ -14019,7 +14131,12 @@ const dawEngine={
     if(typeof dawScheduleMetronome==='function') dawScheduleMetronome(this.scheduledUntilBeat,windowEnd);
     this.scheduledUntilBeat=Math.max(this.scheduledUntilBeat,windowEnd);
     updateDawTimeDisplay();
+    { // follow the playhead: page the view when it reaches the right edge
+      const gw=document.getElementById('daw-grid')?.clientWidth||0, px=xFromBeat(nowBeat);
+      if(gw&&(px>gw-30||px<0)&&!dawView.dragState){ dawView.scrollBeats=Math.max(0,nowBeat-2); renderDawTimeline(); }
+    }
     updateDawPlayhead();
+    if(typeof dawLyricsTick==='function') dawLyricsTick();
     if(typeof dawRedrawMiniCanvas==='function') dawRedrawMiniCanvas();
     this.schedulerId=requestAnimationFrame(()=>this.tick());
   },
@@ -14357,6 +14474,7 @@ function dawClosePanel(){ const panel=document.getElementById('daw-panel'); if(p
 function dawTogglePanelExpand(){ const panel=document.getElementById('daw-panel'); if(panel) panel.classList.toggle('expanded'); }
 function dawSwitchPanelTab(tab){
   dawCurrentPanelTab=tab;
+  const spb=document.getElementById('dawSavePresetBtn'); if(spb) spb.style.display=tab==='effects'?'':'none';
   document.querySelectorAll('#daw-panel-tabs .tab[data-tab]').forEach(t=>t.classList.toggle('on',t.dataset.tab===tab));
   if(tab==='instrument') renderDawInstrumentTab();
   else if(tab==='chords') renderDawChordsTab();
@@ -14366,6 +14484,7 @@ function dawSwitchPanelTab(tab){
   else if(tab==='pads') renderDawSynthPads();
   else if(tab==='vocal') renderDawVocalTab();
   else if(tab==='mixer') renderDawMixerTab();
+  else if(tab==='lyrics') renderDawLyricsTab();
   else{
     const body=document.getElementById('daw-panel-body');
     if(body) body.innerHTML='<div style="color:var(--mu);font-size:11px;padding:20px;text-align:center">'+escapeHtml(tab)+' — not built yet</div>';
@@ -15751,6 +15870,10 @@ async function dawRenderTracksOffline(tracks,respectMuteSolo){
     if(respectMuteSolo&&typeof dawBuildMasterChain==='function') dawBuildMasterChain(offline,dawProject.masterPreset||'Clean',offlineMaster,offline.destination);
     else offlineMaster.connect(offline.destination);
     const anySolo=dawProject.tracks.some(t=>t.soloed);
+    // Pass 1 — "freeze" every instrument/drum track to a dry buffer in short time slices (see dawFreezeTrack).
+    const dry=new Map();
+    await Promise.all(tracks.map(async track=>{ if(!respectMuteSolo||(anySolo?track.soloed:!track.muted)) dry.set(track,await dawFreezeTrack(track,durationSec,sr)); })); // offline contexts render on their own threads, so tracks freeze in parallel
+    // Pass 2 — one light graph: frozen buffers + audio clips → each track's gain/pan/FX → master.
     tracks.forEach(track=>{
       const gain=offline.createGain();
       gain.gain.value=(!respectMuteSolo||(anySolo?track.soloed:!track.muted))?track.volume:0;
@@ -15760,38 +15883,56 @@ async function dawRenderTracksOffline(tracks,respectMuteSolo){
       (track.effects||[]).forEach(effect=>{
         if(effect.bypassed) return;
         const def=STUDIO_FX[effect.type]; if(!def) return;
-        const inst=def.build(offline,effect.params||Object.fromEntries(def.params.map(p=>[p.id,p.def])));
+        const inst=def.build(offline,Object.assign({},effect.params||Object.fromEntries(def.params.map(p=>[p.id,p.def]))));
         last.connect(inst.input);last=inst.output;
       });
       last.connect(offlineMaster);
+      const frozen=dry.get(track);
+      if(frozen){ const s=offline.createBufferSource(); s.buffer=frozen; s.connect(gain); s.start(0); }
       track.clips.forEach(clip=>{
-        if(clip.muted) return;
+        if(clip.muted||clip.kind!=='audio'||!clip.payload) return;
         for(let rep=0;rep<(clip.loopCount||1);rep++){
-          const clipStart=clip.startBeat+rep*clip.lengthBeats;
-          const startTime=clipStart*60/dawProject.bpm;
-          if(startTime>=durationSec) continue;
-          if(clip.kind==='midi'){
-            (clip.payload||[]).forEach(n=>{
-              const noteStart=startTime+n.start*60/dawProject.bpm;
-              const dur=Math.max(0.05,n.dur*60/dawProject.bpm);
-              const voice=dawStartVoice(track.instrument,n.pitch,gain,n.velocity,noteStart,offline);
-              voice.stop(noteStart+dur);
-            });
-          } else if(clip.kind==='pattern'){
-            Object.entries(clip.payload||{}).forEach(([drum,hits])=>{
-              (hits||[]).forEach((on,i)=>{
-                if(!on) return;
-                const stepTime=startTime+(i*(clip.lengthBeats/16))*60/dawProject.bpm;
-                dawDrumHit(drum,stepTime,gain,offline,track.drumKit);
-              });
-            });
-          } else if(clip.kind==='audio'&&clip.payload){
-            dawPlayAudioClip(offline,gain,clip,startTime,0,false);
-          }
+          const startTime=(clip.startBeat+rep*clip.lengthBeats)*60/dawProject.bpm;
+          if(startTime<durationSec) dawPlayAudioClip(offline,gain,clip,startTime,0,false);
         }
       });
     });
     return await offline.startRendering();
+}
+// Renders a track's MIDI notes and drum hits (no effects) to a stereo buffer. Web Audio keeps
+// processing every node created in an offline context for the context's whole length, so one
+// big context with thousands of per-note filters gets slower the longer the song is. Rendering
+// in ~4-bar slices — each holding only the notes that start in it, plus room for their tails —
+// keeps that cost local; the slices are summed back together sample-exactly (notes are independent).
+async function dawFreezeTrack(track,durationSec,sr){
+  const spb=60/dawProject.bpm, events=[];
+  track.clips.forEach(clip=>{
+    if(clip.muted) return;
+    for(let rep=0;rep<(clip.loopCount||1);rep++){
+      const cs=(clip.startBeat+rep*clip.lengthBeats)*spb;
+      if(clip.kind==='midi') (clip.payload||[]).forEach(n=>events.push({t:cs+n.start*spb,dur:Math.max(0.05,n.dur*spb),pitch:n.pitch,vel:n.velocity}));
+      else if(clip.kind==='pattern') Object.entries(clip.payload||{}).forEach(([drum,hits])=>(hits||[]).forEach((on,i)=>{ if(on) events.push({t:cs+i*(clip.lengthBeats/16)*spb,dur:0,drum}); }));
+    }
+  });
+  const ev=events.filter(e=>e.t<durationSec).sort((a,b)=>a.t-b.t);
+  if(!ev.length) return null;
+  const inst=STUDIO_INSTRUMENTS.find(i=>i.name===track.instrument)||STUDIO_INSTRUMENTS[0];
+  const rel=inst.engine==='sample'?inst.release||0.5:inst.engine==='ultra'?(inst.params.amp||[0,0,0,0.3])[3]:(inst.params&&inst.params.release)||0.5;
+  const tail=Math.min(8,Math.max(2,rel*1.8+0.3)), segSec=Math.max(2,16*spb), total=Math.ceil(durationSec*sr);
+  const L=new Float32Array(total),R=new Float32Array(total), jobs=[];
+  for(let s=0;s<durationSec;s+=segSec){
+    const seg=ev.filter(e=>e.t>=s&&e.t<s+segSec); if(!seg.length) continue;
+    const end=Math.min(durationSec,Math.max(...seg.map(e=>e.t+e.dur))+tail);
+    const len=Math.max(1,Math.ceil((end-s)*sr)), off=new OfflineAudioContext(2,len,sr), g=off.createGain(); g.connect(off.destination);
+    seg.forEach(e=>{
+      if(e.drum) dawDrumHit(e.drum,e.t-s,g,off,track.drumKit);
+      else { const v=dawStartVoice(track.instrument||'Grand Piano',e.pitch,g,e.vel,e.t-s,off); v.stop(e.t-s+e.dur); }
+    });
+    jobs.push(off.startRendering().then(b=>{ const o=Math.round(s*sr), bl=b.getChannelData(0), br=b.getChannelData(1), n=Math.min(len,total-o); for(let i=0;i<n;i++){ L[o+i]+=bl[i]; R[o+i]+=br[i]; } }));
+  }
+  await Promise.all(jobs); // slices render concurrently
+  const out=new AudioBuffer({numberOfChannels:2,length:total,sampleRate:sr}); out.copyToChannel(L,0); out.copyToChannel(R,1);
+  return out;
 }
 function dawVarLen(value){
   let buffer=value&0x7F;
@@ -15883,7 +16024,7 @@ async function dawSaveProject(){
       }
       tracksOut.push({id:track.id,type:track.type,name:track.name,color:track.color,muted:track.muted,soloed:track.soloed,volume:track.volume,pan:track.pan,instrument:track.instrument,effects:track.effects,vocalChain:track.vocalChain||null,drumKit:track.drumKit||null,height:track.height,clips:clipsOut});
     }
-    const out={name:dawProject.name,bpm:dawProject.bpm,key:dawProject.key,timeSig:dawProject.timeSig,loopStart:dawProject.loopStart,loopEnd:dawProject.loopEnd,loopEnabled:dawProject.loopEnabled,masterPreset:dawProject.masterPreset||'Clean',tracks:tracksOut};
+    const out={name:dawProject.name,bpm:dawProject.bpm,key:dawProject.key,timeSig:dawProject.timeSig,loopStart:dawProject.loopStart,loopEnd:dawProject.loopEnd,loopEnabled:dawProject.loopEnabled,masterPreset:dawProject.masterPreset||'Clean',markers:dawProject.markers||[],lyrics:dawProject.lyrics||[],genre:dawProject.genre||null,tracks:tracksOut};
     dl(JSON.stringify(out),'application/json',(dawProject.name||'project')+'.songbook.json');
     toast('Project saved');
   }catch(e){ console.error(e); toast('Save failed — '+e.message); }
@@ -15895,7 +16036,7 @@ function dawLoadProjectFile(inputEl){
     try{
       const data=JSON.parse(reader.result);
       dawStop();
-      dawProject={name:data.name||'Untitled Project',bpm:data.bpm||120,key:data.key||'C',timeSig:data.timeSig||[4,4],loopStart:data.loopStart||0,loopEnd:data.loopEnd||16,loopEnabled:!!data.loopEnabled,masterPreset:data.masterPreset||'Clean',tracks:[]};
+      dawProject={name:data.name||'Untitled Project',bpm:data.bpm||120,key:data.key||'C',timeSig:data.timeSig||[4,4],loopStart:data.loopStart||0,loopEnd:data.loopEnd||16,loopEnabled:!!data.loopEnabled,masterPreset:data.masterPreset||'Clean',markers:data.markers||[],lyrics:data.lyrics||[],genre:data.genre||null,tracks:[]};
       if(typeof dawApplyMasterPreset==='function') dawApplyMasterPreset(dawProject.masterPreset);
       const ctx=getCtx();
       for(const t of (data.tracks||[])){
@@ -16819,6 +16960,7 @@ async function dawExportBundle(){
       '  Stems exported from Suno Studio, Logic or GarageBand import the same way.',
     ].filter((l,i,a)=>l!==''||a[i-1]!=='').join('\r\n');
     files.push({name:folder+'READ ME - how to import.txt',data:new TextEncoder().encode(readme)});
+    if((dawProject.lyrics||[]).length) files.push({name:folder+'Lyrics.txt',data:new TextEncoder().encode(dawLyricsAsText())});
     const zip=dawMakeZip(files);
     dlBlob(zip,proj+' - Songbook bundle.zip');
     toast('Bundle ready: '+tracks.length+' stems, full mix'+(midiTracks.length?', MIDI':'')+' and import notes ('+(zip.size/1048576).toFixed(1)+' MB)');
@@ -16979,6 +17121,7 @@ function dawSampleVoice(inst,pitch,dest,velocity,t,ctx){
   const env=ctx.createGain(); env.gain.setValueAtTime(0.0001,t); env.gain.linearRampToValueAtTime(0.6*Math.pow(vel,1.4),t+0.004);
   src.connect(tone); tone.connect(env); env.connect(dest); src.start(t);
   const rel=inst.release||0.5;
+  dawDisposeOnEnd(src,[env]);
   return{stop(at){ const rt=Math.max(at||ctx.currentTime,t+0.005); dawEnvRelease(env.gain,rt,rel); try{ src.stop(rt+rel*1.6+0.05); }catch(e){} }};
 }
 
@@ -16988,6 +17131,16 @@ function dawNoise(ctx){
   let b=dawNoiseBufs.get(ctx);
   if(!b){ b=ctx.createBuffer(1,ctx.sampleRate*2,ctx.sampleRate); const d=b.getChannelData(0); for(let i=0;i<d.length;i++) d[i]=Math.random()*2-1; dawNoiseBufs.set(ctx,b); }
   return b;
+}
+// six inharmonic square waves summed once into a buffer (per context and base pitch) — every hi-hat/cymbal hit reuses it
+const dawMetalBufs=new WeakMap();
+function dawMetalBuffer(ctx,base){
+  let m=dawMetalBufs.get(ctx); if(!m){ m={}; dawMetalBufs.set(ctx,m); }
+  if(m[base]) return m[base];
+  const sr=ctx.sampleRate,len=Math.floor(sr*2),b=ctx.createBuffer(1,len,sr),d=b.getChannelData(0);
+  const fs=[2,3,4.16,5.43,6.79,8.21].map(r=>base*r);
+  for(let i=0;i<len;i++){ let s=0; for(const f of fs) s+=((i*f/sr)%1)<0.5?1:-1; d[i]=s/6*0.9; }
+  m[base]=b; return b;
 }
 const dawCurveCache=new Map();
 function dawTanhCurve(k){ k=Math.round(k*100)/100; if(dawCurveCache.has(k)) return dawCurveCache.get(k); const n=2048,c=new Float32Array(n),norm=Math.tanh(k); for(let i=0;i<n;i++){ const x=i/(n-1)*2-1; c[i]=Math.tanh(k*x)/norm; } dawCurveCache.set(k,c); return c; }
@@ -17000,20 +17153,24 @@ function dawUltraVoice(inst,pitch,dest,velocity,t,ctx){
   const sum=ctx.createGain(), nodes=[];
   (P.osc||[{type:'sawtooth',level:1}]).forEach(L=>{
     const n=Math.max(1,L.voices||1), f=base*Math.pow(2,(L.oct||0)+(L.semi||0)/12);
+    // unison voices share three buses (left / centre / right) instead of one panner each — same image, far less CPU
+    const lvl=ctx.createGain(); lvl.gain.value=(L.level??1)/Math.sqrt(n);
+    const buses={0:lvl};
+    if(n>1&&L.spread){ [-1,1].forEach(side=>{ const p=ctx.createStereoPanner(); p.pan.value=side*L.spread; p.connect(sum); const g=ctx.createGain(); g.gain.value=lvl.gain.value; g.connect(p); buses[side]=g; }); }
+    lvl.connect(sum);
     for(let v=0;v<n;v++){
       const pos=n>1?v/(n-1)*2-1:0;
       const o=ctx.createOscillator(); o.type=L.type||'sawtooth'; o.frequency.value=f;
       o.detune.value=pos*(L.detune||0)+(Math.random()*2-1)*2.5; // analog drift
-      const g=ctx.createGain(); g.gain.value=(L.level??1)/Math.sqrt(n);
-      o.connect(g);
-      if(n>1&&L.spread){ const p=ctx.createStereoPanner(); p.pan.value=pos*L.spread; g.connect(p); p.connect(sum); } else g.connect(sum);
+      o.connect(buses[pos<-0.01&&buses[-1]?-1:pos>0.01&&buses[1]?1:0]);
       o.start(t+Math.random()*0.003); nodes.push(o);
     }
   });
   if(P.sub){ const o=ctx.createOscillator(); o.type='sine'; o.frequency.value=base/2; const g=ctx.createGain(); g.gain.value=P.sub; o.connect(g); g.connect(sum); o.start(t); nodes.push(o); }
   if(P.noise){ const s=ctx.createBufferSource(); s.buffer=dawNoise(ctx); s.loop=true; const g=ctx.createGain(); g.gain.value=P.noise; s.connect(g); g.connect(sum); s.start(t,Math.random()); nodes.push(s); }
   let pre=sum;
-  if(P.drive){ const sh=ctx.createWaveShaper(); sh.curve=dawTanhCurve(1+P.drive*6); sh.oversample='2x'; const dg=ctx.createGain(); dg.gain.value=1/(1+P.drive*1.5); sum.connect(sh); sh.connect(dg); pre=dg; }
+  // per-voice oversampling is too costly; the filter after the shaper removes the aliasing
+  if(P.drive){ const sh=ctx.createWaveShaper(); sh.curve=dawTanhCurve(1+P.drive*6); sh.oversample='none'; const dg=ctx.createGain(); dg.gain.value=1/(1+P.drive*1.5); sum.connect(sh); sh.connect(dg); pre=dg; }
   let post;
   const filters=[];
   if(P.formant){ // vowel "ah": three formant bands in parallel
@@ -17022,13 +17179,14 @@ function dawUltraVoice(inst,pitch,dest,velocity,t,ctx){
   } else {
     const kt=Math.pow(2,((pitch-60)/12)*(P.keytrack||0));
     const fBase=Math.min(18000,(P.cutoff||2000)*kt), amt=(P.fenv||0)*(0.4+0.6*vel);
+    // a moving filter is recalculated every sample, so only ONE filter carries the envelope;
+    // the second (static, cheap) one adds the extra 12 dB/oct slope above the sweep's peak
     const f1=ctx.createBiquadFilter(),f2=ctx.createBiquadFilter();
     f1.type=f2.type='lowpass'; f1.Q.value=P.q||0.7; f2.Q.value=0.5;
-    [f1,f2].forEach(f=>{
-      f.frequency.setValueAtTime(fBase,t);
-      if(amt){ const fa=P.fattack||0.003; f.frequency.linearRampToValueAtTime(Math.min(19000,fBase+amt),t+fa); f.frequency.setTargetAtTime(Math.min(19000,fBase+amt*(P.fsus??0)),t+fa,(P.fdecay||0.3)/3); }
-    });
-    pre.connect(f1); f1.connect(f2); post=f2; filters.push(f1,f2);
+    f1.frequency.setValueAtTime(fBase,t);
+    if(amt){ const fa=P.fattack||0.003; f1.frequency.linearRampToValueAtTime(Math.min(19000,fBase+amt),t+fa); f1.frequency.setTargetAtTime(Math.min(19000,fBase+amt*(P.fsus??0)),t+fa,(P.fdecay||0.3)/3); }
+    f2.frequency.value=Math.min(19000,(fBase+amt)*1.4);
+    pre.connect(f1); f1.connect(f2); post=f2; filters.push(f1);
   }
   const amp=ctx.createGain(), peak=0.3*Math.pow(vel,1.2);
   amp.gain.setValueAtTime(0.0001,t); amp.gain.linearRampToValueAtTime(peak,t+Math.max(0.002,A)); amp.gain.setTargetAtTime(Math.max(0.0001,peak*S),t+Math.max(0.002,A),Math.max(0.01,D/3));
@@ -17041,8 +17199,11 @@ function dawUltraVoice(inst,pitch,dest,velocity,t,ctx){
     if(L.amp){ const trem=ctx.createGain(); trem.gain.value=1-L.amp/2; const g=ctx.createGain(); g.gain.value=L.amp/2; lfo.connect(g); g.connect(trem.gain); amp.disconnect(); amp.connect(trem); trem.connect(dest); }
     lfo.start(t); nodes.push(lfo);
   }
-  return{stop(at){ const rt=Math.max(at||ctx.currentTime,t+0.005); dawEnvRelease(amp.gain,rt,R); nodes.forEach(o=>{ try{ o.stop(rt+R*1.6+0.05); }catch(e){} }); }};
+  return{stop(at){ const rt=Math.max(at||ctx.currentTime,t+0.005); dawEnvRelease(amp.gain,rt,R); nodes.forEach(o=>{ try{ o.stop(rt+R*1.6+0.05); }catch(e){} }); dawDisposeOnEnd(nodes[0],[amp]); }};
 }
+// Once a note has fully ended, cut its chain off from the output so the browser stops processing its
+// filters/gains for the rest of the song (finished-but-connected nodes were the main export bottleneck).
+function dawDisposeOnEnd(src,outs){ if(!src) return; src.onended=()=>outs.forEach(n=>{ try{ n.disconnect(); }catch(e){} }); }
 // ── tine electric piano: FM bell attack that mellows, stereo tremolo ──
 function dawEPVoice(inst,pitch,dest,velocity,t,ctx){
   const P=inst.params, vel=Math.max(0.05,(velocity??100)/127), f=dawMidiToFreq(pitch);
@@ -17058,6 +17219,7 @@ function dawEPVoice(inst,pitch,dest,velocity,t,ctx){
   env.connect(pL); pL.connect(dest);
   [car,mod,tine,lfo].forEach(o=>o.start(t));
   const R=P.release||0.5;
+  dawDisposeOnEnd(car,[pL]);
   return{stop(at){ const rt=Math.max(at||ctx.currentTime,t+0.005); dawEnvRelease(env.gain,rt,R); [car,mod,tine,lfo].forEach(o=>{ try{ o.stop(rt+R*1.6+0.05); }catch(e){} }); }};
 }
 function dawInstrumentStatus(name){
@@ -17091,13 +17253,18 @@ const DAW_DRUM_KITS={
 };
 function dawProDrumHit(type,t,dest,ctx,kitName){
   const K=DAW_DRUM_KITS[kitName]||DAW_DRUM_KITS.Studio;
-  let out=dest;
-  if(K.lofi){ const lp=ctx.createBiquadFilter(); lp.type='lowpass'; lp.frequency.value=3800; const sh=ctx.createWaveShaper(); sh.curve=dawTanhCurve(2.2); lp.connect(sh); sh.connect(dest); out=lp; }
+  // every part of this hit feeds one gain; a silent timer source disconnects it once the longest tail is over
+  const hit=ctx.createGain(); hit.connect(dest);
+  const life={kick:K.kick.len,snare:K.snare.nd,clap:K.clap.d+0.05,hat:K.hat.c,openhat:K.hat.o,cymbal:K.cym.d,rim:0.05,tom:K.tom.d}[type]||0.5;
+  const timer=ctx.createBufferSource(); timer.buffer=ctx.createBuffer(1,1,ctx.sampleRate); timer.loop=true; timer.start(t); timer.stop(t+life+0.15);
+  dawDisposeOnEnd(timer,[hit]);
+  let out=hit;
+  if(K.lofi){ const lp=ctx.createBiquadFilter(); lp.type='lowpass'; lp.frequency.value=3800; const sh=ctx.createWaveShaper(); sh.curve=dawTanhCurve(2.2); lp.connect(sh); sh.connect(hit); out=lp; }
   const noiseSrc=(when,dur)=>{ const s=ctx.createBufferSource(); s.buffer=dawNoise(ctx); s.start(when,Math.random()*1.5,dur+0.05); return s; };
   const envGain=(peak,attack,decay)=>{ const g=ctx.createGain(); g.gain.setValueAtTime(0.0001,t); g.gain.exponentialRampToValueAtTime(peak,t+attack); g.gain.exponentialRampToValueAtTime(0.0001,t+attack+decay); return g; };
   const metal=(base,dur,peak,hp)=>{ // six detuned squares at inharmonic ratios = classic analog hat/cymbal metal
     const sum=ctx.createGain(); sum.gain.value=0.75; // squares lose most energy in the 7–10 kHz band-pass, so start hot
-    [2,3,4.16,5.43,6.79,8.21].forEach(r=>{ const o=ctx.createOscillator(); o.type='square'; o.frequency.value=base*r; o.connect(sum); o.start(t); o.stop(t+dur+0.05); });
+    const src=ctx.createBufferSource(); src.buffer=dawMetalBuffer(ctx,base); src.connect(sum); src.start(t); src.stop(t+dur+0.05); // pre-rendered once per context
     const bp=ctx.createBiquadFilter(); bp.type='bandpass'; bp.frequency.value=10000; bp.Q.value=0.8;
     const h=ctx.createBiquadFilter(); h.type='highpass'; h.frequency.value=hp;
     const g=envGain(peak,0.001,dur); sum.connect(bp); bp.connect(h); h.connect(g); g.connect(out);
@@ -17581,11 +17748,295 @@ STUDIO_FX.delay.factory={'Slapback':{time:0.11,feedback:0.15,mix:0.25},'Long ech
 // keep tempo-synced plugins on the beat when playback starts or loops
 function dawResyncTempoFx(t0,beat0){ dawProject.tracks.forEach(t=>(t._fxChain||[]).forEach(fx=>{ if(fx&&fx.resync) fx.resync(t0,beat0); })); }
 
+// ══════════════════════════════════════════════════════════════════════════
+// TIER 11 — Song Builder: your own lyrics → a full arranged song in Studio
+// (sections, chords, drums, bass, pads, a guide melody that follows the
+// syllables, a vocal track ready to record) + section markers on the ruler,
+// a Lyrics tab and a scrolling teleprompter while you play or record.
+// ══════════════════════════════════════════════════════════════════════════
+const SB_GENRES={
+  'Pop':{bpm:104,kit:'Studio',chords:'Grand Piano',pad:'Pad Synth',bass:'Bass Guitar',lead:'Electric Piano',drum:'pop',bassStyle:'eighths',chordStyle:'block',vocal:'Pop Lead'},
+  'Rock':{bpm:118,kit:'Studio',chords:'Electric Guitar',pad:'Strings',bass:'Bass Guitar',lead:'Lead Synth',drum:'rock',bassStyle:'eighths',chordStyle:'strum',vocal:'Pop Lead',chordFx:'amp'},
+  'Hip-Hop':{bpm:88,kit:'808',chords:'Electric Piano',pad:'Pad Synth',bass:'Sub Bass',lead:'Bell',drum:'trap',bassStyle:'808',chordStyle:'sustain',vocal:'Rap / Hip-Hop',bpl:1},
+  'R&B':{bpm:76,kit:'808',chords:'Electric Piano',pad:'Strings',bass:'Bass Guitar',lead:'Electric Piano',drum:'rnb',bassStyle:'syncop',chordStyle:'sustain',vocal:'Airy Ballad'},
+  'House':{bpm:124,kit:'909',chords:'Grand Piano',pad:'Pad Synth',bass:'Analog Bass',lead:'Lead Synth',drum:'house',bassStyle:'offbeat',chordStyle:'stab',vocal:'Techno Vocal',pump:true},
+  'Techno':{bpm:128,kit:'Techno',chords:'Techno Stab',pad:'Ambient Shimmer',bass:'Acid Bass',lead:'Glass Pluck',drum:'techno',bassStyle:'sixteenth',chordStyle:'stab',vocal:'Techno Vocal',pump:true},
+  'Ballad':{bpm:72,kit:'Studio',chords:'Grand Piano',pad:'Strings',bass:'Upright Bass',lead:'Flute',drum:'ballad',bassStyle:'whole',chordStyle:'arp',vocal:'Airy Ballad'},
+  'Acoustic':{bpm:96,kit:'Studio',chords:'Steel Guitar',pad:'Cello',bass:'Upright Bass',lead:'Nylon Guitar',drum:'acoustic',bassStyle:'half',chordStyle:'strum',vocal:'Dry / Natural'},
+  'Lo-Fi':{bpm:82,kit:'Lo-Fi',chords:'Electric Piano',pad:'Pad Synth',bass:'Upright Bass',lead:'Electric Piano',drum:'lofi',bassStyle:'half',chordStyle:'sustain',vocal:'Dry / Natural',chordFx:'lofi'},
+};
+const SB_SECTION_COLORS={Intro:'#64748b',Verse:'#5aa9f5','Pre-Chorus':'#a78bfa',Chorus:'#f472b6',Bridge:'#fbbf24',Hook:'#f472b6',Outro:'#64748b',Break:'#22d3ee'};
+// chord progressions as scale degrees (1-based), one chord per bar
+const SB_PROG={
+  major:{Intro:[1,5,6,4],Verse:[1,5,6,4],'Pre-Chorus':[2,4,5,5],Chorus:[4,1,5,6],Hook:[4,1,5,6],Bridge:[6,4,1,5],Break:[6,4,1,5],Outro:[1,5,4,1]},
+  minor:{Intro:[1,6,3,7],Verse:[1,6,3,7],'Pre-Chorus':[4,6,7,7],Chorus:[6,7,1,1],Hook:[6,7,1,1],Bridge:[6,3,7,1],Break:[4,7,3,6],Outro:[1,6,7,1]},
+};
+// drum grooves: [verse, chorus] 16-step patterns, voice → step list
+const SB_DRUMS={
+  pop:[{kick:[0,6,8],snare:[4,12],hat:[0,2,4,6,8,10,12,14]},{kick:[0,6,8,11],snare:[4,12],clap:[4,12],hat:[0,2,4,6,8,10,12],openhat:[14]}],
+  rock:[{kick:[0,8,10],snare:[4,12],hat:[0,2,4,6,8,10,12,14]},{kick:[0,3,8,10],snare:[4,12],openhat:[0,2,4,6,8,10,12,14],cymbal:[0]}],
+  trap:[{kick:[0,7,10],snare:[8],hat:[0,2,4,6,8,10,12,14]},{kick:[0,3,7,10,13],snare:[8],clap:[8],hat:[0,1,2,3,4,6,8,9,10,11,12,14,15],openhat:[6]}],
+  rnb:[{kick:[0,9,10],rim:[4,12],hat:[0,2,4,6,8,10,12,14]},{kick:[0,7,9,10],snare:[4,12],clap:[12],hat:[0,2,3,4,6,8,10,11,12,14]}],
+  house:[{kick:[0,4,8,12],openhat:[2,6,10,14],rim:[7,15]},{kick:[0,4,8,12],clap:[4,12],openhat:[2,6,10,14],hat:[0,1,3,4,5,7,8,9,11,12,13,15]}],
+  techno:[{kick:[0,4,8,12],openhat:[2,6,10,14],rim:[3,11]},{kick:[0,4,8,12],clap:[4,12],openhat:[2,6,10,14],hat:[0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15],rim:[3,7,11,15]}],
+  ballad:[{kick:[0,10],rim:[4,12]},{kick:[0,8,10],snare:[4,12],hat:[0,2,4,6,8,10,12,14],cymbal:[0]}],
+  acoustic:[{kick:[0,8],rim:[4,12],hat:[0,4,8,12]},{kick:[0,8,10],snare:[4,12],hat:[0,2,4,6,8,10,12,14]}],
+  lofi:[{kick:[0,7,10],snare:[4,12],hat:[0,2,4,6,8,10,12,14]},{kick:[0,7,10,15],snare:[4,12],hat:[0,2,3,4,6,8,10,11,12,14],openhat:[14]}],
+};
+function sbRng(seedStr){ let h=2166136261; for(const ch of seedStr) h=Math.imul(h^ch.charCodeAt(0),16777619); return ()=>{ h^=h<<13; h^=h>>>17; h^=h<<5; return ((h>>>0)%100000)/100000; }; }
+function sbSyllables(word){
+  const w=word.toLowerCase().replace(/[^a-zà-ÿ']/g,''); if(!w) return 0;
+  let n=(w.match(/[aeiouyà-ÿ]+/g)||[]).length;
+  if(w.length>3&&/[^aeiou]e$/.test(w)&&!/le$/.test(w)) n--; // silent e
+  return Math.max(1,n);
+}
+// Parse lyrics: [Verse] / [Chorus] tags, or blank-line paragraphs (a repeated paragraph = chorus).
+function sbParseLyrics(text){
+  const sections=[]; let cur=null;
+  const norm=s=>s.toLowerCase().replace(/[^a-z]/g,'');
+  const tagName=t=>{ const n=norm(t); return n.startsWith('pre')?'Pre-Chorus':n.startsWith('chorus')||n.startsWith('refrain')?'Chorus':n.startsWith('hook')?'Hook':n.startsWith('bridge')?'Bridge':n.startsWith('intro')?'Intro':n.startsWith('outro')?'Outro':n.startsWith('break')||n.startsWith('drop')?'Break':'Verse'; };
+  const lines=String(text||'').replace(/\r/g,'').split('\n');
+  const hasTags=lines.some(l=>/^\s*[\[(].+[\])]\s*$/.test(l));
+  lines.forEach(raw=>{
+    const l=raw.trim();
+    const tag=/^\s*[\[(](.+)[\])]\s*$/.exec(l);
+    if(tag){ cur={name:tagName(tag[1]),lines:[]}; sections.push(cur); return; }
+    if(!l){ if(!hasTags) cur=null; return; }
+    if(!cur){ cur={name:null,lines:[]}; sections.push(cur); }
+    cur.lines.push(l);
+  });
+  const out=sections.filter(s=>s.lines.length||s.name==='Intro'||s.name==='Outro'||s.name==='Break');
+  if(!hasTags){ // name untagged paragraphs: repeated text → Chorus, others alternate Verse
+    const counts={}; out.forEach(s=>{ const k=s.lines.join('|').toLowerCase(); counts[k]=(counts[k]||0)+1; });
+    let anyChorus=Object.values(counts).some(c=>c>1);
+    out.forEach((s,i)=>{ const k=s.lines.join('|').toLowerCase(); s.name=counts[k]>1?'Chorus':(!anyChorus&&i%2===1?'Chorus':'Verse'); });
+  }
+  return out;
+}
+function sbChordNotes(degree,key){
+  const sc=dawScaleForKey(key), deg=d=>{ const i=((d-1)%7+7)%7, oct=Math.floor((d-1)/7); return sc.rootIdx+sc.intervals[i]+12*oct; };
+  return [deg(degree),deg(degree+2),deg(degree+4)].map(n=>n+48); // root-position triad around C3–C4
+}
+function sbChordName(notes){
+  const r=notes[0]%12, third=(notes[1]-notes[0]+12)%12, fifth=(notes[2]-notes[0]+12)%12;
+  return NOTES[r]+(third===3?(fifth===6?'dim':'m'):'');
+}
+function sbVoice(notes,prev){ // pick the inversion closest to the previous chord (smooth voice leading), kept in 55–74
+  const cands=[]; for(let inv=0;inv<3;inv++) for(let o=-12;o<=12;o+=12){ const v=notes.map((n,i)=>n+o+(i<inv?12:0)).sort((a,b)=>a-b); if(v[0]>=55&&v[2]<=76) cands.push(v); }
+  if(!cands.length) return notes;
+  if(!prev) return cands.sort((a,b)=>Math.abs(a[1]-64)-Math.abs(b[1]-64))[0];
+  return cands.sort((a,b)=>a.reduce((s,n,i)=>s+Math.abs(n-prev[i]),0)-b.reduce((s,n,i)=>s+Math.abs(n-prev[i]),0))[0];
+}
+function sbBuildSong(opts){
+  const G=SB_GENRES[opts.genre]||SB_GENRES.Pop, key=opts.key, mode=/m$/.test(key)?'minor':'major';
+  const barLen=4, bpl=opts.barsPerLine||G.bpl||2, rnd=sbRng(opts.title+opts.lyrics);
+  let parsed=sbParseLyrics(opts.lyrics);
+  if(!parsed.length) parsed=[{name:'Verse',lines:[]}];
+  if(parsed[0].name!=='Intro') parsed.unshift({name:'Intro',lines:[]});
+  if(parsed[parsed.length-1].name!=='Outro') parsed.push({name:'Outro',lines:[]});
+  // arrangement: bars per section = lines × bars-per-line, rounded up to whole 4-bar phrases
+  let bar=0; const arr=parsed.map(s=>{ const bars=Math.max(4,Math.ceil(Math.max(s.lines.length*bpl,4)/4)*4); const sec={...s,startBar:bar,bars}; bar+=bars; return sec; });
+  // fresh project
+  dawStop();
+  dawProject={name:opts.title||'My Song',bpm:opts.bpm||G.bpm,key,timeSig:[4,4],tracks:[],loopStart:0,loopEnd:16,loopEnabled:false,masterPreset:'Warm',markers:[],lyrics:[],genre:opts.genre};
+  dawApplyMasterPreset('Warm');
+  dawView.playheadBeat=0; dawView.scrollBeats=0; dawView.scrollTop=0;
+  const mk=(type,name,inst,vol)=>{ const t=new DawTrack(type,name); if(inst) t.instrument=inst; if(vol!=null) t.volume=vol; dawProject.tracks.push(t); dawBuildTrackGraph(t); return t; };
+  const vox=mk('vocals','Lead Vocal'); dawApplyVocalChain(vox,G.vocal,true); vox.armed=true;
+  const guide=mk('keys','Guide Melody',G.lead,0.42);
+  const chords=mk('keys','Chords',G.chords,0.62);
+  const pad=mk('synth','Pad',G.pad,0.34);
+  const bass=mk('bass','Bass',G.bass,0.7);
+  const drums=mk('drums','Drums',null,0.78); drums.drumKit=G.kit;
+  if(G.chordFx){ const d=STUDIO_FX[G.chordFx]; chords.effects=[{type:G.chordFx,params:Object.fromEntries(d.params.map(p=>[p.id,p.def])),bypassed:false}]; dawRebuildTrackFxChain(chords); }
+  pad.effects=[{type:'reverb',params:{decay:3.5,preDelay:0.03,damping:0.5,mix:0.4},bypassed:false}]; dawRebuildTrackFxChain(pad);
+  if(G.pump){ [pad,chords,bass].forEach(t=>{ const d=STUDIO_FX.pump; t.effects.push({type:'pump',params:Object.assign(Object.fromEntries(d.params.map(p=>[p.id,p.def])),{depth:t===bass?0.5:0.65}),bypassed:false}); dawRebuildTrackFxChain(t); }); }
+  let prevVoicing=null;
+  arr.forEach(sec=>{
+    const sb=sec.startBar*barLen, lenB=sec.bars*barLen, prog=SB_PROG[mode][sec.name]||SB_PROG[mode].Verse;
+    const loud=/Chorus|Hook|Bridge|Break/.test(sec.name), quiet=sec.name==='Intro'||sec.name==='Outro';
+    dawProject.markers.push({beat:sb,name:sec.name,color:SB_SECTION_COLORS[sec.name]||'#888'});
+    // chords / pad / bass — one clip per section
+    const cN=[],pN=[],bN=[],chordsPerBar=[];
+    for(let b=0;b<sec.bars;b++){
+      const deg=prog[b%prog.length], tri=sbChordNotes(deg,key), v=sbVoice(tri,prevVoicing); prevVoicing=v; chordsPerBar.push({v,root:tri[0],name:sbChordName(tri)});
+      const o=b*barLen, vel=quiet?70:loud?100:86;
+      const st=G.chordStyle;
+      if(st==='sustain') v.forEach(p=>cN.push({pitch:p,start:o,dur:3.9,velocity:vel}));
+      else if(st==='block') [0,2].forEach(x=>v.forEach(p=>cN.push({pitch:p,start:o+x,dur:1.9,velocity:vel})));
+      else if(st==='strum') [0,1,1.5,2.5,3,3.5].forEach((x,k)=>v.forEach((p,i)=>cN.push({pitch:p,start:o+x+i*0.012,dur:0.45,velocity:vel-(k%2?12:0)})));
+      else if(st==='stab') [0.5,1.5,2.5,3.5].forEach(x=>v.forEach(p=>cN.push({pitch:p,start:o+x,dur:0.28,velocity:vel})));
+      else if(st==='arp') for(let s=0;s<8;s++){ const p=[v[0],v[1],v[2],v[1]+12,v[2],v[1],v[0]+12,v[1]][s]; cN.push({pitch:p,start:o+s*0.5,dur:0.9,velocity:vel-(s%2?10:0)}); }
+      if(!quiet||sec.name==='Outro') if(loud||sec.name==='Outro'||opts.genre==='Ballad') v.forEach(p=>pN.push({pitch:p+12,start:o,dur:3.95,velocity:72}));
+      const r=tri[0]-12; // bass root ≈ octave 2
+      const bs=G.bassStyle, bv=quiet?75:100;
+      if(sec.name!=='Intro'){
+        if(bs==='eighths') for(let s=0;s<8;s++) bN.push({pitch:r,start:o+s*0.5,dur:0.42,velocity:bv-(s%2?15:0)});
+        else if(bs==='whole') bN.push({pitch:r,start:o,dur:3.9,velocity:bv});
+        else if(bs==='half') [0,2].forEach((x,i)=>bN.push({pitch:i?r+7:r,start:o+x,dur:1.85,velocity:bv}));
+        else if(bs==='808') { bN.push({pitch:r,start:o,dur:1.4,velocity:bv}); bN.push({pitch:r,start:o+2.5,dur:1.2,velocity:bv-10}); }
+        else if(bs==='offbeat') [0.5,1.5,2.5,3.5].forEach(x=>bN.push({pitch:r,start:o+x,dur:0.38,velocity:bv}));
+        else if(bs==='sixteenth') for(let s=0;s<16;s++){ if(s%4===0) continue; bN.push({pitch:s%8===6?r+12:r,start:o+s*0.25,dur:0.2,velocity:s%4===2?bv:bv-25}); }
+        else if(bs==='syncop') [[0,1.2],[1.5,0.6],[2.5,0.4],[3,0.9]].forEach(([x,d],i)=>bN.push({pitch:i===2?r+12:r,start:o+x,dur:d,velocity:bv-(i%2?12:0)}));
+      }
+    }
+    const clip=(t,notes,name)=>{ if(!notes.length) return; const c=new DawClip(sb,lenB,'midi',notes); c.name=name; t.clips.push(c); };
+    clip(chords,cN,sec.name); clip(pad,pN,sec.name); clip(bass,bN,sec.name);
+    // drums: one pattern clip per bar (fill on the last bar of a loud section)
+    const groove=SB_DRUMS[G.drum]||SB_DRUMS.pop;
+    for(let b=0;b<sec.bars;b++){
+      let src=loud?groove[1]:groove[0];
+      if(sec.name==='Intro') src=b<sec.bars-1?{hat:groove[0].hat||[0,4,8,12]}:{...groove[0]};
+      if(sec.name==='Outro'&&b===sec.bars-1) src={kick:[0],cymbal:[0]};
+      const steps=dawNewBeatSteps(16); Object.entries(src).forEach(([d,arr2])=>(arr2||[]).forEach(i=>{ if(steps[d]) steps[d][i]=1; }));
+      if(b===sec.bars-1&&!quiet){ steps.snare[13]=1; steps.snare[14]=1; steps.snare[15]=1; steps.tom[12]=1; } // turnaround fill
+      const c=new DawClip(sb+b*barLen,barLen,'pattern',steps); c.name=sec.name; drums.clips.push(c);
+    }
+    // guide melody + lyric timing
+    const gN=[];
+    sec.lines.forEach((line,li)=>{
+      const lineStart=li*bpl*barLen, words=line.split(/\s+/).filter(Boolean);
+      const syl=[]; words.forEach(w=>{ const n=sbSyllables(w); for(let k=0;k<n;k++) syl.push(k===n-1); });
+      const room=bpl*barLen-1.5, step=syl.length*0.5<=room?0.5:Math.max(0.25,room/syl.length);
+      const pickup=syl.length*step<room-1?0.5:0;
+      const ri=dawScaleForKey(key).rootIdx, rootMidi=60+ri-(ri>7?12:0); // key root in a comfortable singing octave
+      const center=rootMidi+(loud?7:4); // verses sit around the 3rd, choruses lift to the 5th
+      let cur=null;
+      syl.forEach((endOfWord,k)=>{
+        const t=lineStart+pickup+k*step, absBar=Math.floor(t/barLen), ch=chordsPerBar[Math.min(chordsPerBar.length-1,absBar)];
+        const tones=[]; for(let o=-24;o<=24;o+=12) ch.v.forEach(p=>tones.push(p%12+60+o));
+        const arc=Math.sin(Math.PI*k/Math.max(1,syl.length-1))*3; // phrase rises then falls
+        const target=center+arc;
+        if(cur==null||Math.abs(t-Math.round(t))<0.01){ // strong beats land on chord tones
+          cur=tones.reduce((a,b)=>Math.abs(b-target+(rnd()-0.5)*2)<Math.abs(a-target)?b:a,tones[0]);
+        } else { // weak beats move stepwise through the scale
+          const dir=cur<target?1:cur>target?-1:(rnd()<0.5?1:-1);
+          let n=cur+dir; while(!dawInKey(n)) n+=dir; cur=n;
+        }
+        const last=k===syl.length-1;
+        gN.push({pitch:cur,start:t,dur:last?Math.max(0.9,bpl*barLen-pickup-k*step-0.6):Math.max(0.2,step*0.9),velocity:endOfWord?92:84});
+      });
+      dawProject.lyrics.push({beat:sb+lineStart,endBeat:sb+lineStart+bpl*barLen,text:line,section:sec.name,chords:chordsPerBar.slice(li*bpl,li*bpl+bpl).map(c=>c.name)});
+    });
+    if(gN.length){ const c=new DawClip(sb,lenB,'midi',gN); c.name=sec.name+' melody'; guide.clips.push(c); }
+  });
+  if(opts.stack){ // extra vocal stems under the lead
+    let pos=dawProject.tracks.indexOf(vox)+1;
+    DAW_VOCAL_STACK.slice(1).forEach(spec=>{ const t=new DawTrack('vocals',spec.name); t.pan=spec.pan; t.volume=spec.vol; dawProject.tracks.splice(pos++,0,t); dawBuildTrackGraph(t); dawApplyVocalChain(t,spec.chain,true); });
+  }
+  dawView.selectedTrackId=vox.id;
+  const nm=document.getElementById('dawProjectName'); if(nm) nm.textContent=dawProject.name;
+  updateDawKeyBpmLabel(); renderDawTrackList(); renderDawTimeline(); dawSyncLoopButtons();
+  dawPreloadForTracks(dawProject.tracks);
+  return {sections:arr.length,bars:bar,lines:dawProject.lyrics.length};
+}
+// ── builder dialog ──
+function sbOpen(prefill){
+  if(shellPage!=='daw') showPage('daw',null);
+  hmClose();
+  let el=document.getElementById('sbModal');
+  if(!el){ el=document.createElement('div'); el.id='sbModal'; el.className='sb-scrim'; document.body.appendChild(el); }
+  const saved=(()=>{ try{ return JSON.parse(localStorage.getItem('sbDraft')||'{}'); }catch(e){ return {}; } })();
+  const st=Object.assign({title:'',lyrics:'',genre:'Pop',key:'C',bpm:'',stack:false,vocalFile:false},saved,prefill||{});
+  const keys=['C','G','D','A','E','B','F','Bb','Eb','Ab','Db','Am','Em','Bm','F#m','C#m','Dm','Gm','Cm','Fm'];
+  el.innerHTML=`<div class="sb-card" role="dialog" aria-label="Song Builder">
+    <div class="sb-head"><div><div class="sb-title">Write your song</div><div class="sb-sub">Your lyrics → a full arrangement in Studio, with a guide melody and a vocal track ready to record.</div></div><button class="sb-x" aria-label="Close">✕</button></div>
+    <div class="sb-body">
+      <div class="sb-col sb-lyr">
+        <input class="sb-in" id="sbTitle" placeholder="Song title" value="${escapeHtml(st.title)}">
+        <textarea class="sb-ta" id="sbLyrics" spellcheck="true" placeholder="[Verse]\nWrite your lines here, one per line\nAdd as many as you like\n\n[Chorus]\nThe part everyone sings\n\nTip: use [Verse] [Pre-Chorus] [Chorus] [Bridge] — or just leave a blank line between parts.">${escapeHtml(st.lyrics)}</textarea>
+        <div class="sb-row"><button class="sb-link" id="sbFromSheet">Use lyrics from the Sheet page</button><span class="sb-stat" id="sbStat"></span></div>
+      </div>
+      <div class="sb-col sb-opts">
+        <div class="sb-lbl">Style</div>
+        <div class="sb-genres">${Object.keys(SB_GENRES).map(g=>`<button class="sb-g${g===st.genre?' on':''}" data-g="${g}">${g}<small>${SB_GENRES[g].bpm} bpm</small></button>`).join('')}</div>
+        <div class="sb-grid2">
+          <label class="sb-lbl">Key<select class="sb-in" id="sbKey">${keys.map(k=>`<option${k===st.key?' selected':''}>${k}</option>`).join('')}</select></label>
+          <label class="sb-lbl">Tempo (BPM)<input class="sb-in" id="sbBpm" type="number" min="50" max="200" placeholder="auto" value="${st.bpm||''}"></label>
+        </div>
+        <label class="sb-chk"><input type="checkbox" id="sbStack"${st.stack?' checked':''}> Add backing-vocal stems (doubles, harmonies, ad-libs)</label>
+        <label class="sb-chk"><input type="checkbox" id="sbVocalFile"${st.vocalFile?' checked':''}> I already have a vocal recording — import it after building</label>
+        ${dawProject.tracks.some(t=>t.clips.length)?'<div class="sb-warn">This replaces the song currently in Studio. <button class="sb-link" id="sbSaveFirst">Save it first</button></div>':''}
+        <button class="sb-go" id="sbGo">Build my song</button>
+      </div>
+    </div></div>`;
+  el.classList.add('on');
+  const $=id=>el.querySelector('#'+id);
+  const stat=()=>{ const p=sbParseLyrics($('sbLyrics').value); const n=p.reduce((s,x)=>s+x.lines.length,0); $('sbStat').textContent=n?p.map(x=>x.name).join(' · ')+' — '+n+' lines':''; };
+  const draft=()=>{ try{ localStorage.setItem('sbDraft',JSON.stringify({title:$('sbTitle').value,lyrics:$('sbLyrics').value,genre:el.querySelector('.sb-g.on')?.dataset.g,key:$('sbKey').value,bpm:$('sbBpm').value,stack:$('sbStack').checked,vocalFile:$('sbVocalFile').checked})); }catch(e){} };
+  el.querySelector('.sb-x').onclick=()=>{ draft(); el.classList.remove('on'); };
+  el.onclick=e=>{ if(e.target===el){ draft(); el.classList.remove('on'); } };
+  el.querySelectorAll('.sb-g').forEach(b=>b.onclick=()=>{ el.querySelectorAll('.sb-g').forEach(x=>x.classList.toggle('on',x===b)); draft(); });
+  ['sbTitle','sbLyrics','sbKey','sbBpm','sbStack','sbVocalFile'].forEach(id=>$(id).addEventListener('input',()=>{ draft(); if(id==='sbLyrics') stat(); }));
+  $('sbLyrics').addEventListener('keydown',e=>e.stopPropagation()); $('sbTitle').addEventListener('keydown',e=>e.stopPropagation()); // typing never triggers Studio keyboard notes
+  $('sbFromSheet').onclick=()=>{
+    const s=serializeSong();
+    const txt=(s.sections||[]).map(sec=>'['+String(sec.type||'Verse').replace(/^./,c=>c.toUpperCase())+']\n'+sec.lines.map(l=>(l.lyric||'').trim()).filter(Boolean).join('\n')).join('\n\n');
+    $('sbLyrics').value=txt; if(!$('sbTitle').value) $('sbTitle').value=s.title||''; stat(); draft();
+  };
+  const sf=el.querySelector('#sbSaveFirst'); if(sf) sf.onclick=()=>dawSaveProject();
+  $('sbGo').onclick=()=>{
+    const lyrics=$('sbLyrics').value.trim();
+    if(!lyrics){ toast('Write or paste your lyrics first'); $('sbLyrics').focus(); return; }
+    draft();
+    const genre=el.querySelector('.sb-g.on')?.dataset.g||'Pop';
+    const res=sbBuildSong({title:$('sbTitle').value.trim()||'My Song',lyrics,genre,key:$('sbKey').value,bpm:Number($('sbBpm').value)||0,stack:$('sbStack').checked});
+    el.classList.remove('on');
+    dawOpenInstrumentPanelForTrack(dawProject.tracks[0].id); dawSwitchPanelTab('lyrics');
+    toast('Built "'+dawProject.name+'": '+res.sections+' sections, '+res.bars+' bars, '+res.lines+' lyric lines. Press ⏺ to sing along.');
+    if($('sbVocalFile').checked) setTimeout(()=>dawImportAudio(dawProject.tracks[0].id),400);
+  };
+  stat(); setTimeout(()=>$(st.lyrics?'sbGo':'sbLyrics').focus(),50);
+}
+// ── Lyrics tab: every line with its chords; click a line to jump there ──
+function renderDawLyricsTab(){
+  const body=document.getElementById('daw-panel-body'); if(!body) return;
+  const L=dawProject.lyrics||[];
+  if(!L.length){ body.innerHTML=`<div class="vx" style="align-items:flex-start"><div class="vx-note" style="font-size:12px">No lyrics in this project yet.</div><button class="vx-chip on" onclick="sbOpen()">✎ Write lyrics &amp; build a song</button></div>`; return; }
+  let html=`<div class="vx-row" style="margin-bottom:6px"><button class="vx-chip${dawSettings.prompter===false?'':' on'}" onclick="dawSettings.prompter=dawSettings.prompter===false;dawSaveSettings();renderDawLyricsTab()">Teleprompter</button><button class="vx-chip" onclick="sbOpen({title:dawProject.name,lyrics:dawLyricsAsText(),genre:dawProject.genre||'Pop',key:dawProject.key,bpm:dawProject.bpm})">✎ Edit lyrics &amp; rebuild</button></div><div class="ly">`, lastSec='';
+  L.forEach((l,i)=>{
+    if(l.section!==lastSec){ html+=`<div class="ly-sec" style="color:${SB_SECTION_COLORS[l.section]||'#aaa'}">${escapeHtml(l.section)}</div>`; lastSec=l.section; }
+    html+=`<div class="ly-line" data-i="${i}"><span class="ly-t">${dawFmtBarBeat(l.beat)}</span><span class="ly-c">${escapeHtml((l.chords||[]).join(' '))}</span><span class="ly-x" contenteditable spellcheck="true">${escapeHtml(l.text)}</span></div>`;
+  });
+  body.innerHTML=html+'</div><div class="vx-note" style="padding:6px 2px">Click a time to jump there · edit a line to fix a typo · the teleprompter shows these while you play or record.</div>';
+  body.querySelectorAll('.ly-line').forEach(row=>{
+    const i=Number(row.dataset.i);
+    row.querySelector('.ly-t').onclick=()=>{ dawView.playheadBeat=L[i].beat; if(dawEngine.isPlaying) dawEngine.play(); renderDawTimeline(); updateDawTimeDisplay(); dawLyricsTick(true); };
+    const x=row.querySelector('.ly-x'); x.addEventListener('keydown',e=>{ e.stopPropagation(); if(e.key==='Enter'){ e.preventDefault(); x.blur(); } }); x.addEventListener('blur',()=>{ L[i].text=x.textContent.trim(); });
+  });
+  dawLyricsTick(true);
+}
+function dawLyricsAsText(){ let out=[],last=null; (dawProject.lyrics||[]).forEach(l=>{ if(l.section!==last){ out.push((out.length?'\n':'')+'['+l.section+']'); last=l.section; } out.push(l.text); }); return out.join('\n'); }
+function dawFmtBarBeat(beat){ const bl=dawProject.timeSig[0]; return (Math.floor(beat/bl)+1)+'.'+(Math.floor(beat%bl)+1); }
+// ── teleprompter overlay on the timeline ──
+let dawLyricIdx=-2;
+function dawLyricsTick(force){
+  const L=dawProject.lyrics||[]; const box=document.getElementById('dawPrompter');
+  if(!box) return;
+  if(!L.length||dawSettings.prompter===false){ box.style.display='none'; return; }
+  const b=dawView.playheadBeat||0;
+  let i=-1; for(let k=0;k<L.length;k++){ if(L[k].beat<=b+0.25) i=k; else break; }
+  if(i===dawLyricIdx&&!force) return;
+  dawLyricIdx=i;
+  const cur=L[i], next=L[i+1];
+  box.style.display='';
+  box.innerHTML=`<div class="pr-sec">${cur?escapeHtml(cur.section):'Get ready…'}</div><div class="pr-cur">${cur?escapeHtml(cur.text):(next?'♪':'')}</div><div class="pr-next">${next?escapeHtml(next.text):''}</div>`;
+  document.querySelectorAll('#daw-panel-body .ly-line').forEach(r=>r.classList.toggle('on',Number(r.dataset.i)===i));
+  const on=document.querySelector('#daw-panel-body .ly-line.on'); if(on&&dawEngine.isPlaying) on.scrollIntoView({block:'nearest'});
+}
+function dawToggleLoopBrowser(){
+  const side=document.getElementById('daw-sidebar'); if(!side) return;
+  const show=side.style.display==='none'; side.style.display=show?'':'none';
+  document.getElementById('dawLoopsBtn')?.classList.toggle('on',show);
+  setTimeout(renderDawTimeline,0);
+}
+
 // ── App shell: one ☰ menu for every page and action ──
 const SHELL_PAGE_NAMES={sheet:'Sheet',create:'Create',piano:'Piano',roll:'Piano Roll',drum:'Drums',learn:'Learn',metro:'Metronome',classic:'Guitar',listen:'Listen',daw:'Studio',dj:'DJ Studio',studio:'Classic Studio',struct:'Structure',tools:'Tools'};
 let shellPage='sheet',hmKb=-1,hmFlat=[];
 function shellOnPage(name){
   shellPage=name;
+  document.body.className=document.body.className.replace(/\bpg-\S+/g,'').trim()+' pg-'+name; // page-aware chrome (e.g. no duplicate transport on Studio/DJ)
   const el=document.getElementById('shellPageName'); if(el) el.textContent=SHELL_PAGE_NAMES[name]||name;
   if(document.body.classList.contains('hm-open')) hmRender();
 }
@@ -17612,7 +18063,7 @@ function hmItems(){
   const claudeLbl=(document.getElementById('claudeBtnLabel')?.textContent||'Connect Claude').trim();
   const installBtn=document.getElementById('installAppBtn');
   return [
-    {sec:'Make music',items:[pg('⏺','Studio','daw','record · mix · stems'),pg('✦','Create','create','AI song'),pg('♪','Sheet','sheet','chords & lyrics'),pg('🎧','DJ Studio','dj')]},
+    {sec:'Make music',items:[{icon:'✎',label:'Write a song from my lyrics',hint:'new',keys:'song builder lyrics write compose create from scratch my own',run:()=>sbOpen()},pg('⏺','Studio','daw','record · mix · stems'),pg('✦','Create','create','AI song'),pg('♪','Sheet','sheet','chords & lyrics'),pg('🎧','DJ Studio','dj')]},
     {sec:'Studio',items:[
       {icon:'🎤',label:'Record vocal',run:shellInStudio(()=>dawToggleRecordArmGlobal())},
       {icon:'🎙',label:'Add vocal stack (6 stems)',run:shellInStudio(()=>dawAddVocalStack())},
