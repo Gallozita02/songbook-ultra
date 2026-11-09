@@ -1781,6 +1781,7 @@ body.hm-open .hm-drawer{transform:none}
   .custom-tuning-input{min-height:40px}
 }
 
+#page-daw .loopcount{font-size:10px;color:var(--tx-3);padding:6px 9px 4px;letter-spacing:.02em}
 /* ══════════════ PRO POLISH (Tier 11) — refined Studio look, one toolbar, song builder ══════════════ */
 body.pg-daw .sh-transport,body.pg-dj .sh-transport{display:none!important} /* Studio & DJ have their own transport */
 body.pg-daw #starfield,body.pg-dj #starfield{opacity:.12}
@@ -14529,7 +14530,14 @@ function renderDawLoopBrowser(){
   const catWrap=document.getElementById('dawLoopCategoryPills');
   if(catWrap){
     catWrap.innerHTML='';
-    ['All','Drums','Chords','Bass','Melody','Synth Leads','Arpeggios'].forEach(cat=>{
+    // genre picker + loop count (Loop Library v2)
+    let gsel=document.getElementById('dawLoopGenreSel');
+    if(!gsel){ gsel=document.createElement('select'); gsel.id='dawLoopGenreSel'; gsel.className='search'; gsel.style.flex='0 0 auto'; gsel.title='Genre';
+      gsel.innerHTML=['All',...Object.keys(LX_GENRES)].map(g=>`<option>${g}</option>`).join('');
+      gsel.onchange=()=>{ dawLoopGenreFilter=gsel.value; renderDawLoopBrowser(); };
+      document.getElementById('dawLoopSearch')?.after(gsel); }
+    gsel.value=dawLoopGenreFilter;
+    ['All','Drums','Percussion','Bass','Chords','Pads','Hooks','Melody','Arpeggios','Synth Leads'].forEach(cat=>{
       const pill=document.createElement('button');pill.className='pill'+(dawLoopCategoryFilter===cat?' on':'');pill.textContent=cat;
       pill.onclick=()=>{ dawLoopCategoryFilter=cat;renderDawLoopBrowser(); };
       catWrap.appendChild(pill);
@@ -14541,6 +14549,7 @@ function renderDawLoopBrowser(){
   const favorites=dawLoopFavorites();
   let filtered=LOOP_LIBRARY.filter(loop=>{
     if(dawLoopCategoryFilter!=='All'&&loop.category!==dawLoopCategoryFilter) return false;
+    if(dawLoopGenreFilter!=='All'&&!(loop.genre===dawLoopGenreFilter||loop.tags.includes(dawLoopGenreFilter))) return false;
     if(dawLoopFavOnlyOn&&!favorites.has(loop.id)) return false;
     if(dawLoopKeyOnlyOn&&!dawKeyMatches(loop.key,dawProject.key)) return false;
     if(search&&!(loop.name.toLowerCase().includes(search)||loop.tags.some(t=>t.toLowerCase().includes(search)))) return false;
@@ -14549,6 +14558,7 @@ function renderDawLoopBrowser(){
   filtered=filtered.slice().sort((a,b)=>(dawKeyMatches(b.key,dawProject.key)?1:0)-(dawKeyMatches(a.key,dawProject.key)?1:0));
   list.innerHTML='';
   if(!filtered.length){ list.innerHTML='<div style="padding:14px 9px;color:var(--tx-3);font-size:10.5px">No loops match these filters.</div>'; return; }
+  const cnt=document.createElement('div'); cnt.className='loopcount'; cnt.textContent=filtered.length+' loop'+(filtered.length>1?'s':'')+' · all follow your key ('+dawProject.key+') and tempo'; list.appendChild(cnt);
   filtered.forEach(loop=>{
     const item=document.createElement('div');
     item.className='loop'+(dawLoopPreviewId===loop.id?' playing':'');
@@ -14576,6 +14586,7 @@ function dawPreviewLoop(id){
   dawStopLoopPreview();
   const loop=LOOP_LIBRARY.find(l=>l.id===id); if(!loop) return;
   dawLoopPreviewId=id;
+  if(loop.gen){ lxPreview(loop); renderDawLoopBrowser(); return; }
   const bpm=dawProject.bpm||loop.bpm;
   const ctx=getCtx();
   let launchDelayMs=0;
@@ -14593,8 +14604,9 @@ function dawPreviewLoop(id){
   },launchDelayMs));
   renderDawLoopBrowser();
 }
-function dawStopLoopPreview(){ dawLoopPreviewTimers.forEach(t=>clearTimeout(t));dawLoopPreviewTimers=[];dawLoopPreviewId=null;renderDawLoopBrowser(); }
+function dawStopLoopPreview(){ if(typeof lxPreviewTimer!=='undefined') clearTimeout(lxPreviewTimer); dawLoopPreviewTimers.forEach(t=>clearTimeout(t));dawLoopPreviewTimers=[];dawLoopPreviewId=null;renderDawLoopBrowser(); }
 function dawLoopToClipSpec(loop){
+  if(loop.gen&&loop.build) return{kind:'midi',payload:loop.build(dawProject.key),lengthBeats:loop.lengthBeats||16};
   if(loop.pattern) return{kind:'pattern',payload:JSON.parse(JSON.stringify(loop.pattern)),lengthBeats:4};
   const notes=(loop.notes||[]).map(n=>({pitch:noteOctToMidi(n.pitch),start:n.start,dur:n.dur,velocity:100}));
   const lengthBeats=Math.max(4,Math.ceil(Math.max(...notes.map(n=>n.start+n.dur),4)));
@@ -14610,7 +14622,13 @@ function dawTrackTypeForLoopCategory(cat){
 }
 function dawAddLoopToTimeline(loopId,trackId,dropBeat){
   const loop=LOOP_LIBRARY.find(l=>l.id===loopId); if(!loop) return;
-  let track=trackId?dawProject.tracks.find(t=>t.id===trackId):dawCurrentTrackForPanel();
+  let track=trackId?dawProject.tracks.find(t=>t.id===trackId):null;
+  if(loop.gen&&!track){ // generated loops bring their own instrument: reuse a matching track or make one
+    const type=lxTrackType(loop);
+    track=dawProject.tracks.find(t=>t.type===type&&(type==='drums'?(t.drumKit||'Studio')===loop.kit:t.instrument===loop.inst));
+    if(!track){ track=new DawTrack(type,loop.genre+' '+loop.category); if(loop.inst) track.instrument=loop.inst; if(loop.kit) track.drumKit=loop.kit; dawProject.tracks.push(track); dawBuildTrackGraph(track); }
+  }
+  if(!track) track=dawCurrentTrackForPanel();
   if(!track) track=dawProject.tracks.find(t=>t.id===dawView.selectedTrackId);
   if(!track){
     track=new DawTrack(dawTrackTypeForLoopCategory(loop.category));
@@ -18029,6 +18047,152 @@ function dawToggleLoopBrowser(){
   const show=side.style.display==='none'; side.style.display=show?'':'none';
   document.getElementById('dawLoopsBtn')?.classList.toggle('on',show);
   setTimeout(renderDawTimeline,0);
+}
+
+// ══════════════════════════════════════════════════════════════════════════
+// TIER 12 — Loop Library v2: ~420 generated loops across 20 genres (drums,
+// percussion, bass, chords, pads, arps, leads). Melodic loops are stored as
+// scale degrees and built in the project key on use; everything follows the
+// project tempo. Played by the Tier 9 engine (samples / Ultra synth / kits).
+// ══════════════════════════════════════════════════════════════════════════
+const LX_GENRES={
+  'House':{bpm:124,kit:'909',mode:'minor',groove:{kick:[0,4,8,12],clap:[4,12],openhat:[2,6,10,14],hat:[0,4,8,12]},bass:'offbeat',chords:'stab',ci:'Grand Piano',pi:'Pad Synth',bi:'Analog Bass',li:'Lead Synth'},
+  'Deep House':{bpm:120,kit:'909',mode:'minor',groove:{kick:[0,4,8,12],rim:[3,11],openhat:[2,6,10,14],clap:[12]},bass:'syncop',chords:'stab',ci:'Electric Piano',pi:'Strings',bi:'Sub Bass',li:'Glass Pluck'},
+  'Tech House':{bpm:126,kit:'Techno',mode:'minor',groove:{kick:[0,4,8,12],clap:[4,12],hat:[2,6,10,14],rim:[7,15]},bass:'sixteenth',chords:'stab',ci:'Techno Stab',pi:'Pad Synth',bi:'Reese Bass',li:'Glass Pluck'},
+  'Techno':{bpm:130,kit:'Techno',mode:'minor',groove:{kick:[0,4,8,12],openhat:[2,6,10,14],hat:[0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15],clap:[4,12]},bass:'sixteenth',chords:'stab',ci:'Techno Stab',pi:'Ambient Shimmer',bi:'Acid Bass',li:'Glass Pluck'},
+  'Trance':{bpm:138,kit:'909',mode:'minor',groove:{kick:[0,4,8,12],openhat:[2,6,10,14],clap:[4,12],hat:[1,3,5,7,9,11,13,15]},bass:'offbeat',chords:'sustain',ci:'Lead Synth',pi:'Pad Synth',bi:'Analog Bass',li:'Lead Synth'},
+  'Drum & Bass':{bpm:172,kit:'Studio',mode:'minor',groove:{kick:[0,10],snare:[4,12],hat:[0,2,4,6,8,10,12,14]},bass:'whole',chords:'sustain',ci:'Pad Synth',pi:'Strings',bi:'Reese Bass',li:'Glass Pluck'},
+  'Dubstep':{bpm:140,kit:'808',mode:'minor',groove:{kick:[0,14],snare:[8],hat:[0,2,4,6,8,10,12,14]},bass:'808',chords:'sustain',ci:'Pad Synth',pi:'Ambient Shimmer',bi:'Reese Bass',li:'Lead Synth'},
+  'Trap':{bpm:140,kit:'808',mode:'minor',groove:{kick:[0,7,10],snare:[8],hat:[0,1,2,3,4,6,8,9,10,11,12,14,15],openhat:[6]},bass:'808',chords:'sustain',ci:'Bell',pi:'Pad Synth',bi:'Sub Bass',li:'Bell'},
+  'Hip-Hop':{bpm:90,kit:'808',mode:'minor',groove:{kick:[0,7,10],snare:[4,12],hat:[0,2,4,6,8,10,12,14]},bass:'syncop',chords:'sustain',ci:'Electric Piano',pi:'Strings',bi:'Bass Guitar',li:'Electric Piano'},
+  'Lo-Fi':{bpm:82,kit:'Lo-Fi',mode:'major',groove:{kick:[0,7,10],snare:[4,12],hat:[0,2,4,6,8,10,12,14]},bass:'half',chords:'sustain',ci:'Electric Piano',pi:'Pad Synth',bi:'Upright Bass',li:'Electric Piano'},
+  'R&B':{bpm:76,kit:'808',mode:'minor',groove:{kick:[0,9,10],snare:[4,12],hat:[0,2,3,4,6,8,10,11,12,14]},bass:'syncop',chords:'sustain',ci:'Electric Piano',pi:'Strings',bi:'Bass Guitar',li:'Electric Piano'},
+  'Pop':{bpm:104,kit:'Studio',mode:'major',groove:{kick:[0,6,8],snare:[4,12],hat:[0,2,4,6,8,10,12,14]},bass:'eighths',chords:'block',ci:'Grand Piano',pi:'Pad Synth',bi:'Bass Guitar',li:'Lead Synth'},
+  'Rock':{bpm:118,kit:'Studio',mode:'major',groove:{kick:[0,8,10],snare:[4,12],hat:[0,2,4,6,8,10,12,14]},bass:'eighths',chords:'strum',ci:'Electric Guitar',pi:'Strings',bi:'Bass Guitar',li:'Electric Guitar'},
+  'Funk':{bpm:108,kit:'Studio',mode:'minor',groove:{kick:[0,3,10],snare:[4,12],hat:[0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15],openhat:[14]},bass:'funk',chords:'stab',ci:'Electric Guitar',pi:'Hammond Organ',bi:'Bass Guitar',li:'Electric Piano'},
+  'Disco':{bpm:118,kit:'Studio',mode:'major',groove:{kick:[0,4,8,12],snare:[4,12],openhat:[2,6,10,14]},bass:'octave',chords:'stab',ci:'Strings',pi:'Strings',bi:'Bass Guitar',li:'Lead Synth'},
+  'Afrobeat':{bpm:104,kit:'Studio',mode:'minor',groove:{kick:[0,6,10],rim:[3,7,11,14],hat:[0,2,4,6,8,10,12,14],tom:[13]},bass:'syncop',chords:'stab',ci:'Electric Guitar',pi:'Pad Synth',bi:'Bass Guitar',li:'Xylophone'},
+  'Reggaeton':{bpm:94,kit:'808',mode:'minor',groove:{kick:[0,4,8,12],snare:[3,6,11,14],hat:[0,2,4,6,8,10,12,14]},bass:'syncop',chords:'stab',ci:'Steel Guitar',pi:'Pad Synth',bi:'Sub Bass',li:'Lead Synth'},
+  'Ambient':{bpm:80,kit:'Lo-Fi',mode:'major',groove:{kick:[0],rim:[10],hat:[4,12]},bass:'whole',chords:'sustain',ci:'Ambient Shimmer',pi:'Ambient Shimmer',bi:'Sub Bass',li:'Glass Pluck'},
+  'Synthwave':{bpm:100,kit:'Studio',mode:'minor',groove:{kick:[0,8],snare:[4,12],hat:[0,2,4,6,8,10,12,14]},bass:'eighths',chords:'sustain',ci:'Retro Synth 84',pi:'Pad Synth',bi:'Analog Bass',li:'Retro Synth 84'},
+  'Jazz':{bpm:120,kit:'Studio',mode:'major',groove:{cymbal:[0,6,8,14],hat:[4,12],kick:[0]},bass:'walking',chords:'comp',ci:'Grand Piano',pi:'Strings',bi:'Upright Bass',li:'Saxophone'},
+};
+const LX_PROGS={major:[[1,5,6,4],[6,4,1,5],[1,4,6,5],[2,5,1,1]],minor:[[1,6,3,7],[1,7,6,7],[1,4,6,5],[6,7,1,1]]};
+const LX_DRUM_VARIANTS=[['Main','main'],['Full','full'],['Minimal','min'],['Fill','fill'],['Breakdown','break'],['Half-Time','half'],['Intro','intro'],['Groove 2','alt']];
+function lxDrums(G,variant,rnd){
+  const s=dawNewBeatSteps(16), on=(d,a)=>(a||[]).forEach(i=>{ if(s[d]&&i>=0&&i<16) s[d][i]=1; });
+  const g=G.groove;
+  if(variant==='main') Object.entries(g).forEach(([d,a])=>on(d,a));
+  else if(variant==='full'){ Object.entries(g).forEach(([d,a])=>on(d,a)); on('hat',[0,2,4,6,8,10,12,14]); on('clap',g.snare||g.clap||[4,12]); on('openhat',[14]); }
+  else if(variant==='min'){ on('kick',g.kick); on('hat',g.hat||[2,6,10,14]); }
+  else if(variant==='fill'){ Object.entries(g).forEach(([d,a])=>on(d,a.filter(i=>i<12))); on('snare',[12,13,14,15]); on('tom',[10,11]); on('cymbal',[0]); }
+  else if(variant==='break'){ on('clap',g.clap||g.snare||[4,12]); on('hat',g.hat||[0,4,8,12]); on('rim',[6,14]); }
+  else if(variant==='half'){ on('kick',[0,10]); on('snare',[8]); on('hat',[0,4,8,12]); }
+  else if(variant==='intro'){ on('hat',g.hat||[0,2,4,6,8,10,12,14]); on('kick',[0]); }
+  else { Object.entries(g).forEach(([d,a])=>on(d,a.map(i=>rnd()<0.2?Math.min(15,i+1):i))); on('rim',[Math.floor(rnd()*16),Math.floor(rnd()*16)]); }
+  return s;
+}
+function lxPerc(rnd){ const s=dawNewBeatSteps(16); for(let i=0;i<16;i++){ if(rnd()<0.32) s.rim[i]=1; if(rnd()<0.18) s.tom[i]=1; if(i%4===2&&rnd()<0.6) s.clap[i]=1; if(rnd()<0.5) s.hat[i]=1; } return s; }
+// melodic builders → [{pitch,start,dur,velocity}] over 16 beats (4 bars), in the given key
+function lxChordsInKey(prog,key){ let prev=null; return prog.map(d=>{ const tri=sbChordNotes(d,key), v=sbVoice(tri,prev); prev=v; return {v,root:tri[0]}; }); }
+function lxBass(style,prog,key,rnd){
+  const ch=lxChordsInKey(prog,key), N=[];
+  ch.forEach((c,b)=>{ const r=c.root-12, o=b*4, nx=(ch[(b+1)%4].root-12);
+    if(style==='eighths') for(let s=0;s<8;s++) N.push({pitch:r,start:o+s*0.5,dur:0.42,velocity:s%2?85:105});
+    else if(style==='offbeat') [0.5,1.5,2.5,3.5].forEach(x=>N.push({pitch:r,start:o+x,dur:0.38,velocity:100}));
+    else if(style==='sixteenth') for(let s=0;s<16;s++){ if(s%4===0) continue; N.push({pitch:s%8===6?r+12:r,start:o+s*0.25,dur:0.2,velocity:s%4===2?110:80}); }
+    else if(style==='808'){ N.push({pitch:r,start:o,dur:1.4,velocity:110}); N.push({pitch:r,start:o+2.5,dur:1.2,velocity:95}); }
+    else if(style==='syncop') [[0,1.2],[1.5,0.6],[2.5,0.4],[3,0.9]].forEach(([x,d],i)=>N.push({pitch:i===2?r+12:r,start:o+x,dur:d,velocity:i%2?88:105}));
+    else if(style==='half') [0,2].forEach((x,i)=>N.push({pitch:i?r+7:r,start:o+x,dur:1.85,velocity:100}));
+    else if(style==='whole') N.push({pitch:r,start:o,dur:3.9,velocity:100});
+    else if(style==='octave') for(let s=0;s<8;s++) N.push({pitch:s%2?r+12:r,start:o+s*0.5,dur:0.4,velocity:s%2?90:108});
+    else if(style==='funk') [[0,0.4,0],[0.75,0.2,12],[1.5,0.3,0],[2.25,0.2,10],[2.5,0.3,0],[3.5,0.3,7]].forEach(([x,d,iv])=>{ let q=r+iv; while(!dawInKey(q)) q--; N.push({pitch:q,start:o+x,dur:d,velocity:100}); }); // snap the 7th/5th to the key
+    else if(style==='walking'){ const steps=[r,r+(dawInKey(r+2)?2:1),r+(dawInKey(r+4)?4:3),nx+(nx>r?-1:1)]; steps.forEach((p,i)=>N.push({pitch:p,start:o+i,dur:0.9,velocity:96})); }
+  });
+  return N;
+}
+function lxChords(style,prog,key,rnd){
+  const N=[];
+  lxChordsInKey(prog,key).forEach(({v},b)=>{ const o=b*4;
+    if(style==='sustain') v.forEach(p=>N.push({pitch:p,start:o,dur:3.9,velocity:88}));
+    else if(style==='block') [0,2].forEach(x=>v.forEach(p=>N.push({pitch:p,start:o+x,dur:1.9,velocity:90})));
+    else if(style==='strum') [0,1,1.5,2.5,3,3.5].forEach((x,k)=>v.forEach((p,i)=>N.push({pitch:p,start:o+x+i*0.012,dur:0.45,velocity:k%2?80:98})));
+    else if(style==='stab') [0.5,1.5,2.5,3.5].forEach(x=>v.forEach(p=>N.push({pitch:p,start:o+x,dur:0.28,velocity:96})));
+    else if(style==='comp') [[0.5,0.4],[1.75,0.3],[3,0.6]].forEach(([x,d])=>v.forEach(p=>N.push({pitch:p,start:o+x,dur:d,velocity:80+Math.floor(rnd()*20)})));
+  });
+  return N;
+}
+function lxPad(prog,key){ const N=[]; lxChordsInKey(prog,key).forEach(({v},b)=>v.forEach(p=>N.push({pitch:p+12,start:b*4,dur:3.95,velocity:76}))); return N; }
+function lxArp(kind,prog,key){
+  const N=[], pat={up:[0,1,2,3],updown:[0,1,2,1],down:[3,2,1,0],broken:[0,2,1,3]}[kind]||[0,1,2,3];
+  lxChordsInKey(prog,key).forEach(({v},b)=>{ const tones=[v[0]+12,v[1]+12,v[2]+12,v[0]+24]; for(let s=0;s<16;s++) N.push({pitch:tones[pat[s%4]],start:b*4+s*0.25,dur:0.22,velocity:s%4===0?100:82}); });
+  return N;
+}
+function lxLead(prog,key,rnd){
+  const N=[], ch=lxChordsInKey(prog,key), ri=dawScaleForKey(key).rootIdx, top=72+ri-(ri>4?12:0);
+  const rhythm=[[0,0.75],[0.75,0.25],[1,0.5],[1.5,1],[2.5,0.5],[3,1]].filter(()=>rnd()<0.85);
+  let cur=top;
+  ch.forEach(({v},b)=>rhythm.forEach(([x,d],k)=>{
+    if(k===0){ const tones=v.map(p=>p%12+60).flatMap(p=>[p,p+12]); cur=tones.reduce((a,c)=>Math.abs(c-top)<Math.abs(a-top)?c:a,tones[0]); }
+    else { const dir=rnd()<0.5?1:-1; let n=cur+dir; while(!dawInKey(n)) n+=dir; cur=Math.max(top-7,Math.min(top+9,n)); while(!dawInKey(cur)) cur--; } // clamp, then back onto the scale
+    N.push({pitch:cur,start:b*4+x,dur:d*0.9,velocity:90});
+  }));
+  return N;
+}
+// Hooks: a 2-bar motif stated, repeated, then answered — the repetition is what makes a hook stick.
+// Shapes are scale-step contours (relative to the chord's top note) with rhythms in beats.
+const LX_HOOK_SHAPES=[
+  {name:'Anthem',steps:[0,0,1,2,1,0],rh:[[0,0.5],[0.5,0.5],[1,0.5],[1.5,1],[3,0.5],[3.5,0.5]]},
+  {name:'Bounce',steps:[0,2,0,2,3,2],rh:[[0,0.25],[0.5,0.25],[1,0.25],[1.5,0.25],[2,0.75],[3,0.75]]},
+  {name:'Sigh',steps:[4,3,2,1,0],rh:[[0,1],[1,0.5],[1.5,0.5],[2,0.5],[2.5,1.5]]},
+  {name:'Call',steps:[0,-1,0,2,4],rh:[[0.5,0.25],[0.75,0.25],[1,0.5],[2,0.5],[2.5,1.5]]},
+  {name:'Riff',steps:[0,0,-2,0,1,-2],rh:[[0,0.25],[0.75,0.25],[1.5,0.5],[2,0.25],[2.75,0.25],[3.5,0.5]]},
+];
+function lxHook(shape,prog,key){
+  const ch=lxChordsInKey(prog,key), N=[], ri=dawScaleForKey(key).rootIdx, home=67+ri-(ri>5?12:0);
+  const stepFrom=(base,k)=>{ let n=base; const dir=k>0?1:-1; for(let c=0;c<Math.abs(k);c++){ n+=dir; while(!dawInKey(n)) n+=dir; } return n; };
+  ch.forEach(({v},b)=>{
+    const anchor=v.map(p=>p%12+60).flatMap(p=>[p,p+12]).reduce((a,c)=>Math.abs(c-home)<Math.abs(a-home)?c:a);
+    const answer=b===3; // bar 4 answers the phrase: same rhythm, contour turned upside down and resolving home
+    shape.rh.forEach(([x,d],k)=>{ const st=answer?-shape.steps[k]:shape.steps[k]; const last=answer&&k===shape.rh.length-1;
+      N.push({pitch:last?anchor:stepFrom(anchor,st),start:b*4+x,dur:d*0.92,velocity:k===0?104:90}); });
+  });
+  return N;
+}
+const LX_LOOPS=[];
+(function buildLoopLibraryV2(){
+  Object.entries(LX_GENRES).forEach(([genre,G])=>{
+    const rnd=sbRng(genre), progs=LX_PROGS[G.mode], gid=genre.toLowerCase().replace(/[^a-z]+/g,'-');
+    const add=(role,category,name,extra)=>LX_LOOPS.push(Object.assign({id:'lx-'+gid+'-'+LX_LOOPS.length,gen:true,name:genre+' — '+name,category,bpm:G.bpm,key:null,genre,tags:[genre,role,'Adaptive'],lengthBeats:16},extra));
+    LX_DRUM_VARIANTS.forEach(([nm,v])=>add('Drums','Drums',nm+' Beat',{kit:G.kit,pattern:lxDrums(G,v,rnd),lengthBeats:4}));
+    add('Percussion','Percussion','Percussion',{kit:G.kit,pattern:lxPerc(rnd),lengthBeats:4});
+    const bassStyles=[G.bass,G.bass==='eighths'?'octave':'eighths','half',G.bass==='808'?'syncop':'808'];
+    bassStyles.forEach((st,i)=>{ const pr=progs[i%4]; add('Bass','Bass',(i?['Line','Groove','Roots','Bounce'][i]:'Main')+' Bass',{inst:G.bi,build:key=>lxBass(st,pr,key,sbRng(genre+'b'+i))}); });
+    [G.chords,'sustain','block',G.chords==='stab'?'comp':'stab'].forEach((st,i)=>{ const pr=progs[i%4]; add('Chords','Chords',['Main','Pad-Hold','Pulse','Groove'][i]+' Chords',{inst:i===1?G.pi:G.ci,build:key=>lxChords(st,pr,key,sbRng(genre+'c'+i))}); });
+    [0,2].forEach(i=>add('Pads','Pads',(i?'Rising':'Warm')+' Pad',{inst:G.pi,build:key=>lxPad(progs[i],key)}));
+    [['up','Arp Up'],['broken','Arp Broken'],['updown','Arp Bounce']].forEach(([k,nm],i)=>add('Arpeggios','Arpeggios',nm,{inst:G.li==='Electric Piano'?'Glass Pluck':G.li,build:key=>lxArp(k,progs[(i+1)%4],key)}));
+    [0,1].forEach(i=>add('Melody','Melody',['Hook','Motif'][i]+' Melody',{inst:G.li,build:key=>lxLead(progs[i*2],key,sbRng(genre+'m'+i))}));
+    LX_HOOK_SHAPES.forEach((h,i)=>add('Hooks','Hooks',h.name+' Hook',{inst:i%2?G.li:(G.ci==='Techno Stab'?'Glass Pluck':G.li),build:key=>lxHook(h,progs[i%4],key)}));
+  });
+  LOOP_LIBRARY.push(...LX_LOOPS);
+})();
+function lxTrackType(loop){ if(loop.category==='Hooks') return 'synth'; return loop.category==='Drums'||loop.category==='Percussion'?'drums':loop.category==='Bass'?'bass':loop.category==='Pads'?'synth':loop.category==='Chords'?'keys':'synth'; }
+let dawLoopGenreFilter='All';
+// preview a generated loop through the real engine, quantised to the next bar if Studio is playing
+let lxPreviewTimer=null;
+function lxPreview(loop){
+  clearTimeout(lxPreviewTimer);
+  const ctx=getCtx(), dest=dawEnsureMaster(), spb=60/(dawProject.bpm||loop.bpm);
+  const play=()=>{
+    if(dawLoopPreviewId!==loop.id) return;
+    const t0=ctx.currentTime+0.06;
+    if(loop.pattern) Object.entries(loop.pattern).forEach(([d,h])=>h.forEach((on,i)=>{ if(on) dawDrumHit(d,t0+i*(loop.lengthBeats/16)*spb,dest,null,loop.kit); }));
+    else loop.build(dawProject.key).forEach(n=>{ const v=dawStartVoice(loop.inst,n.pitch,dest,n.velocity,t0+n.start*spb); v.stop(t0+(n.start+n.dur)*spb); });
+    lxPreviewTimer=setTimeout(play,loop.lengthBeats*spb*1000);
+  };
+  const go=()=>{ let delay=0; if(dawEngine.isPlaying){ const bl=dawProject.timeSig[0]; delay=((bl-(dawView.playheadBeat%bl))%bl)*spb*1000; } lxPreviewTimer=setTimeout(play,delay); };
+  const inst=STUDIO_INSTRUMENTS.find(i=>i.name===loop.inst);
+  if(inst&&inst.engine==='sample') dawLoadSampleLib(inst.lib).then(go); else go();
 }
 
 // ── App shell: one ☰ menu for every page and action ──
