@@ -1783,7 +1783,8 @@ body.hm-open .hm-drawer{transform:none}
 
 #page-daw .loopcount{font-size:10px;color:var(--tx-3);padding:6px 9px 4px;letter-spacing:.02em}
 /* ══════════════ PRO POLISH (Tier 11) — refined Studio look, one toolbar, song builder ══════════════ */
-body.pg-daw .sh-transport,body.pg-dj .sh-transport{display:none!important} /* Studio & DJ have their own transport */
+body.pg-daw .sh-transport,body.pg-dj .sh-transport,body.pg-mpc .sh-transport{display:none!important}
+body.pg-mpc #starfield{opacity:0} /* Studio & DJ have their own transport */
 body.pg-daw #starfield,body.pg-dj #starfield{opacity:.12}
 #page-daw{--bg:#111116;--bg-2:#17171e;--bg-3:#1f1f28;--bg-4:#292935;--line:rgba(255,255,255,.06);--line-2:rgba(255,255,255,.11);--tx:#ececf2;--tx-2:#a2a2b2;--tx-3:#6e6e7d;--brand:#7552e0;--r:6px}
 #page-daw .app{border:none;border-radius:0;font:13px/1.4 var(--sans,'Inter'),system-ui,sans-serif;background:var(--bg)}
@@ -1905,6 +1906,65 @@ body.pg-daw #starfield,body.pg-dj #starfield{opacity:.12}
 .sb-warn{font-size:11.5px;color:#fbbf24;background:rgba(251,191,36,.08);border:1px solid rgba(251,191,36,.25);border-radius:10px;padding:8px 10px}
 .sb-go{margin-top:auto;background:linear-gradient(135deg,#7552e0,#e8459c);border:none;color:#fff;font:inherit;font-size:15px;font-weight:700;border-radius:12px;padding:13px;cursor:pointer;box-shadow:0 8px 24px rgba(117,82,224,.35);transition:transform .12s,box-shadow .12s}
 .sb-go:hover{transform:translateY(-1px);box-shadow:0 12px 30px rgba(117,82,224,.45)}
+
+/* ══════════════ BEAT PADS (Tier 13) — hardware-style pad instrument ══════════════ */
+#page-mpc{background:radial-gradient(1200px 500px at 70% -10%,rgba(56,140,255,.22),transparent 60%),radial-gradient(900px 400px at 0% 0%,rgba(255,80,60,.14),transparent 60%),#07070a;min-height:100%;overflow:auto}
+.mpc-stage{max-width:1180px;margin:0 auto;padding:34px 22px 40px;display:flex;flex-direction:column;gap:22px;font-family:var(--sans)}
+.mpc-hero h1{font-size:clamp(34px,5vw,62px);line-height:1;font-weight:800;letter-spacing:-.03em;color:#fff;margin:0}
+.mpc-hero h1 span{background:linear-gradient(90deg,#1e7bff,#5fe1ff);-webkit-background-clip:text;background-clip:text;color:transparent}
+.mpc-hero p{color:#9a9aa6;font-size:14.5px;max-width:640px;margin:12px 0 0;line-height:1.5}
+/* the device */
+.mpc-dev{--body:#ebe6da;--body2:#d9d3c4;--ink:#2d2b26;--pad:#8fb9a3;--pad2:#7aa48e;--glow:#7dffb8;--lcd:#0d1a12;--lcdtx:#9dffb4;
+  display:grid;grid-template-columns:330px 1fr;gap:26px;padding:24px;border-radius:26px;background:linear-gradient(160deg,var(--body),var(--body2));
+  box-shadow:0 30px 70px rgba(0,0,0,.65),inset 0 2px 0 rgba(255,255,255,.35),inset 0 -6px 0 rgba(0,0,0,.18);color:var(--ink)}
+.mpc-dev.skin-midnight{--body:#26262b;--body2:#151518;--ink:#c9c9d2;--pad:#4a4a52;--pad2:#3a3a41;--glow:#ff3b3b;--lcd:#120607;--lcdtx:#ff6b5e}
+.mpc-dev.skin-crimson{--body:#c8201e;--body2:#9c1311;--ink:#ffe3dc;--pad:#7a1110;--pad2:#5f0c0b;--glow:#ffd36b;--lcd:#170705;--lcdtx:#ffcf6b}
+.mpc-brand{font-weight:800;letter-spacing:.18em;font-size:12px;opacity:.85}.mpc-brand b{letter-spacing:.06em}
+.mpc-l{display:flex;flex-direction:column;gap:14px}
+.mpc-lcd{background:var(--lcd);color:var(--lcdtx);font-family:var(--mono);font-size:11px;line-height:1.55;padding:10px 12px;border-radius:8px;border:3px solid rgba(0,0,0,.55);
+  box-shadow:inset 0 0 18px rgba(0,0,0,.8);text-shadow:0 0 6px currentColor;min-height:74px;letter-spacing:.03em}
+.mpc-lcd b{font-weight:700}.mpc-lcd i{font-style:normal}.mpc-lcd i.r{color:#ff5a5a}
+.mpc-knobs{display:flex;justify-content:space-around}
+.mpc-kn{display:flex;flex-direction:column;align-items:center;gap:5px;font-size:9px;font-weight:700;letter-spacing:.12em;opacity:.8}
+.mpc-kn .knob{--a:0deg;width:46px;height:46px;border-radius:50%;cursor:ns-resize;position:relative;touch-action:none;
+  background:radial-gradient(circle at 35% 30%,#5a5a62,#1b1b1f 70%);box-shadow:0 4px 8px rgba(0,0,0,.5),inset 0 1px 1px rgba(255,255,255,.25)}
+.mpc-kn .knob::after{content:'';position:absolute;left:50%;top:5px;width:3px;height:13px;margin-left:-1.5px;border-radius:2px;background:#fff;transform-origin:50% 18px;transform:rotate(var(--a))}
+.mpc-jog{width:132px;height:132px;margin:2px auto;border-radius:50%;cursor:grab;touch-action:none;
+  background:radial-gradient(circle at 50% 50%,#2c2c32 0 34%,#111 35% 37%,#2a2a30 38%);box-shadow:0 10px 22px rgba(0,0,0,.55),inset 0 2px 2px rgba(255,255,255,.18),inset 0 -4px 8px rgba(0,0,0,.6)}
+.mpc-jog div{width:100%;height:100%;border-radius:50%;background:repeating-conic-gradient(rgba(255,255,255,.06) 0 4deg,transparent 4deg 12deg);position:relative}
+.mpc-jog div::after{content:'';position:absolute;top:14px;left:50%;width:10px;height:10px;margin-left:-5px;border-radius:50%;background:#888;box-shadow:inset 0 2px 3px rgba(0,0,0,.6)}
+.mpc-row{display:flex;gap:8px;align-items:center;justify-content:center}
+.mpc-row.small{justify-content:flex-start;gap:5px;font-size:9px;font-weight:700;letter-spacing:.12em}
+.mpc-row.small>span{opacity:.7;width:52px}
+.mpc-b{width:52px;height:38px;border-radius:9px;border:none;cursor:pointer;font-size:15px;background:linear-gradient(#5b5b62,#38383e);color:#eee;box-shadow:0 4px 0 #1d1d21,0 6px 10px rgba(0,0,0,.4)}
+.mpc-b:active{transform:translateY(3px);box-shadow:0 1px 0 #1d1d21}
+.mpc-b.rec{color:#ff5050}.mpc-b.rec.on{background:#e02a2a;color:#fff;box-shadow:0 4px 0 #7a0e0e,0 0 18px rgba(255,60,60,.7)}
+.mpc-b.play.on{background:#20b35a;color:#fff;box-shadow:0 4px 0 #0c5a2b,0 0 18px rgba(40,220,110,.6)}
+.mpc-s{border:none;border-radius:6px;padding:5px 8px;font:inherit;font-size:9.5px;font-weight:700;letter-spacing:.08em;cursor:pointer;background:rgba(0,0,0,.18);color:inherit}
+.mpc-s.on{background:var(--ink);color:var(--body)}
+.mpc-s.big{font-size:11px;padding:8px 12px;background:#1b1b22;color:#e6e6ee}
+.mpc-s.big.on{background:#e02a2a;color:#fff}
+.mpc-r{display:flex;flex-direction:column;gap:12px;min-width:0}
+.mpc-banks{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.mpc-banks button{border:none;border-radius:8px;padding:8px 4px;font:inherit;font-size:10px;font-weight:800;letter-spacing:.1em;cursor:pointer;background:rgba(0,0,0,.16);color:inherit}
+.mpc-banks button.on{background:var(--ink);color:var(--body);box-shadow:0 0 0 2px var(--glow) inset}
+.mpc-pads{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;padding:16px;border-radius:16px;background:rgba(0,0,0,.22);box-shadow:inset 0 3px 10px rgba(0,0,0,.35)}
+.mpc-pad{aspect-ratio:1;border:none;border-radius:12px;cursor:pointer;position:relative;touch-action:none;user-select:none;color:rgba(255,255,255,.88);
+  background:linear-gradient(160deg,var(--pad),var(--pad2));box-shadow:0 5px 0 rgba(0,0,0,.32),inset 0 2px 0 rgba(255,255,255,.22),inset 0 -3px 6px rgba(0,0,0,.18);transition:transform .05s,box-shadow .08s,filter .08s}
+.mpc-pad b{position:absolute;left:8px;top:7px;font-size:10px;font-weight:800;letter-spacing:.06em;text-align:left;max-width:calc(100% - 14px);overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+.mpc-pad small{position:absolute;right:8px;bottom:6px;font-size:10px;font-weight:700;opacity:.55}
+.mpc-pad.hit{transform:translateY(3px);filter:brightness(1.45) saturate(1.3);box-shadow:0 2px 0 rgba(0,0,0,.32),0 0 26px var(--glow),inset 0 0 22px rgba(255,255,255,.35)}
+.mpc-pad.empty{opacity:.55}
+.mpc-pad.drop{outline:3px dashed var(--glow);outline-offset:2px}
+.mpc-dev.bank-B{--glow:#7fb2ff}.mpc-dev.bank-C{--glow:#ffd36b}.mpc-dev.bank-D{--glow:#ff7be0}
+.mpc-tools{display:flex;flex-wrap:wrap;gap:10px;align-items:flex-end;background:#101015;border:1px solid rgba(255,255,255,.08);border-radius:16px;padding:14px 16px;color:#d7d7e0}
+.mpc-tools label{display:flex;flex-direction:column;gap:5px;font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#7f7f8c}
+.mpc-tools select{background:#08080b;border:1px solid rgba(255,255,255,.12);color:#ececf2;border-radius:8px;padding:7px 8px;font:inherit;font-size:12px;text-transform:none;letter-spacing:0}
+.mpc-sp{flex:1}
+.mpc-cta{border:none;border-radius:999px;padding:12px 22px;font:inherit;font-size:14px;font-weight:800;color:#fff;cursor:pointer;background:linear-gradient(90deg,#1e7bff,#5fe1ff);box-shadow:0 8px 26px rgba(30,123,255,.45)}
+.mpc-cta:hover{filter:brightness(1.1)}
+.mpc-hint{font-size:11px;color:#7f7f8c}
+@media (max-width:860px){ .mpc-dev{grid-template-columns:1fr} .mpc-jog{width:110px;height:110px} }
 </style>
 </head>
 <body class="shell-v2">
@@ -2444,6 +2504,8 @@ body.pg-daw #starfield,body.pg-dj #starfield{opacity:.12}
   </div>
 </div>
 
+<!-- BEAT PADS (MPC-style) — built by mpcInit() -->
+<div class="page" id="page-mpc"></div>
 <!-- PIANO ROLL -->
 <div class="page" id="page-roll">
   <div class="roll-toolbar">
@@ -8623,6 +8685,8 @@ function showPage(name,btn){
     const oc=b.getAttribute('onclick')||'';
     b.classList.toggle('on', oc.indexOf(`showPage('${name}'`)>-1);
   });
+  if(name==='mpc'&&typeof mpcInit==='function') mpcInit();
+  if(name!=='mpc'&&typeof mpcStopAll==='function') mpcStopAll();
   if(typeof shellOnPage==='function') shellOnPage(name);
 }
 function railOn(btn){ /* highlighting now handled centrally by showPage(); kept as a safe no-op */ }
@@ -18195,8 +18259,257 @@ function lxPreview(loop){
   if(inst&&inst.engine==='sample') dawLoadSampleLib(inst.lib).then(go); else go();
 }
 
+// ══════════════════════════════════════════════════════════════════════════
+// TIER 13 — Beat Pads: an MPC-style pad instrument. 4 banks × 16 pads (two
+// layered drum kits, chords in key, notes on any instrument, your own
+// samples), note repeat, swing, 1/2/4-bar loop recording with overdub,
+// metronome, three hardware colourways, and Send to Studio.
+// ══════════════════════════════════════════════════════════════════════════
+const MPC_KEYS=['z','x','c','v','a','s','d','f','q','w','e','r','1','2','3','4']; // pad 1 = bottom-left, like the hardware
+const MPC_DRUMS=['kick','snare','clap','hat','openhat','rim','tom','cymbal'];
+const mpc={built:false,bank:'A',kitA:'Studio',kitB:'808',chordInst:'Electric Piano',noteInst:'Bass Guitar',noteOct:2,bpm:94,swing:0.54,vol:0.9,
+  bars:2,playing:false,rec:false,metro:true,repeat:0,events:[],t0:0,step:0,timer:null,held:new Map(),voices:new Map(),samples:new Array(16).fill(null),skin:'ivory',undo:[]};
+function mpcSaveState(){ try{ localStorage.setItem('mpcState',JSON.stringify({kitA:mpc.kitA,kitB:mpc.kitB,chordInst:mpc.chordInst,noteInst:mpc.noteInst,noteOct:mpc.noteOct,bpm:mpc.bpm,swing:mpc.swing,bars:mpc.bars,skin:mpc.skin,metro:mpc.metro})); }catch(e){} }
+function mpcStepSec(){ return 60/mpc.bpm/4; }
+function mpcOut(){ if(!mpc.out){ mpc.out=getCtx().createGain(); mpc.out.connect(dawEnsureMaster()); } mpc.out.gain.value=mpc.vol; return mpc.out; }
+function mpcPadLabel(bank,i){
+  if(bank==='A') return (i<8?MPC_DRUMS[i]:MPC_DRUMS[i-8]).replace('openhat','open hat').toUpperCase();
+  if(bank==='B'){ const d=(i%8)+1, tri=sbChordNotes(d,dawProject.key), nm=sbChordName(tri); if(i<8) return nm;
+    const ps=mpcChordPitches(i), sev=((ps[3]-ps[0])%12+12)%12; // name the 7th by its real quality
+    return /dim$/.test(nm)?nm.replace('dim','m7♭5'):nm+(sev===11?(nm.endsWith('m')?'(maj7)':'maj7'):'7'); }
+  if(bank==='C'){ return NOTES[mpcNotePitch(i)%12]+Math.floor(mpcNotePitch(i)/12-1); }
+  return mpc.samples[i]?(mpc.samples[i].name||'SAMPLE '+(i+1)).slice(0,10).toUpperCase():'EMPTY';
+}
+function mpcNotePitch(i){ const sc=dawScaleForKey(dawProject.key), o=Math.floor(i/7); return 12*(mpc.noteOct+1)+sc.rootIdx+sc.intervals[i%7]+12*o; }
+function mpcChordPitches(i){ const d=(i%8)+1, tri=sbChordNotes(d,dawProject.key).map(p=>p+12); if(i>=8){ const sc=dawScaleForKey(dawProject.key),deg=d+6,ii=((deg-1)%7+7)%7; tri.push(sc.rootIdx+sc.intervals[ii]+12*Math.floor((deg-1)/7)+60); } return tri; }
+// trigger a pad now (or at time `at`); returns a release function for sustained banks
+function mpcTrigger(bank,i,vel,at){
+  const ctx=getCtx(), t=at||ctx.currentTime, out=mpcOut();
+  if(bank==='A'){ dawDrumHit(MPC_DRUMS[i%8],t,out,null,i<8?mpc.kitA:mpc.kitB); return null; }
+  if(bank==='D'){ const smp=mpc.samples[i]; if(!smp) return null; const s=ctx.createBufferSource(); s.buffer=smp.buf; const g=ctx.createGain(); g.gain.value=vel/110; s.connect(g); g.connect(out); s.start(t); return ()=>{}; }
+  const ps=bank==='B'?mpcChordPitches(i):[mpcNotePitch(i)];
+  const vs=ps.map(p=>dawStartVoice(bank==='B'?mpc.chordInst:mpc.noteInst,p,out,vel,t));
+  return when=>vs.forEach(v=>v.stop(when));
+}
+function mpcPadDown(i,vel){
+  const bank=mpc.bank; vel=vel||100;
+  if(mpc.held.has(i)) return;
+  const rel=mpcTrigger(bank,i,vel);
+  mpc.held.set(i,{bank,rel,at:getCtx().currentTime,vel});
+  mpcFlash(i,true);
+  if(mpc.rec&&mpc.playing&&!mpc.repeat){ mpcPushUndo(); mpc.events.push({bank,pad:i,step:mpcNowStep(),vel,len:1}); mpc.held.get(i).recIdx=mpc.events.length-1; }
+}
+function mpcPadUp(i){
+  const h=mpc.held.get(i); if(!h) return; mpc.held.delete(i);
+  if(h.rel) h.rel(getCtx().currentTime+0.02);
+  if(h.recIdx!=null){ const ev=mpc.events[h.recIdx]; if(ev) ev.len=Math.max(1,Math.round((getCtx().currentTime-h.at)/mpcStepSec())); }
+  mpcFlash(i,false);
+}
+function mpcNowStep(){ const total=mpc.bars*16; return ((Math.round((getCtx().currentTime-mpc.t0)/mpcStepSec())%total)+total)%total; }
+function mpcPushUndo(){ mpc.undo.push(JSON.stringify(mpc.events)); if(mpc.undo.length>40) mpc.undo.shift(); }
+// look-ahead sequencer (25 ms tick, 120 ms horizon) — sample-accurate timing from the audio clock
+function mpcTick(){
+  const ctx=getCtx(), sd=mpcStepSec(), total=mpc.bars*16, horizon=ctx.currentTime+0.12;
+  while(mpc.nextTime<horizon){
+    const st=mpc.step%total, swingOff=(st%2===1)?(mpc.swing-0.5)*2*sd*0.5:0, t=mpc.nextTime+Math.max(0,swingOff);
+    mpc.events.forEach(ev=>{ if(ev.step===st){ const r=mpcTrigger(ev.bank,ev.pad,ev.vel,t); if(r) r(t+ev.len*sd); mpcFlashAt(ev.pad,ev.bank,t); } });
+    if(mpc.repeat){ const every=mpc.repeat; mpc.held.forEach((h,pad)=>{ if(st%every===0){ const r=mpcTrigger(h.bank,pad,h.vel,t); if(r) r(t+sd*every*0.8); if(mpc.rec&&!mpc.events.some(e=>e.step===st&&e.pad===pad&&e.bank===h.bank)) mpc.events.push({bank:h.bank,pad,step:st,vel:h.vel,len:every}); } }); }
+    if(mpc.metro&&st%4===0){ const o=ctx.createOscillator(),g=ctx.createGain(); o.frequency.value=st%16===0?1600:1050; o.type='square'; g.gain.setValueAtTime(0.0001,t); g.gain.exponentialRampToValueAtTime(st%16===0?0.18:0.1,t+0.002); g.gain.exponentialRampToValueAtTime(0.0001,t+0.04); o.connect(g); g.connect(ctx.destination); o.start(t); o.stop(t+0.05); }
+    if(st%4===0) setTimeout(()=>mpcLcd(),Math.max(0,(t-ctx.currentTime)*1000));
+    mpc.step++; mpc.nextTime+=sd;
+  }
+}
+function mpcPlay(){
+  if(mpc.playing){ mpcStop(); return; }
+  const ctx=getCtx(); if(ctx.state==='suspended') ctx.resume();
+  mpc.playing=true; mpc.step=0; mpc.t0=ctx.currentTime+0.08; mpc.nextTime=mpc.t0;
+  mpc.timer=setInterval(mpcTick,25); mpcTick(); mpcUi();
+}
+function mpcStop(){ mpc.playing=false; clearInterval(mpc.timer); mpc.timer=null; if(mpc.rec){ mpc.rec=false; } mpcUi(); }
+function mpcStopAll(){ if(mpc.playing) mpcStop(); mpc.held.forEach((h,i)=>mpcPadUp(i)); }
+function mpcToggleRec(){ mpc.rec=!mpc.rec; if(mpc.rec&&!mpc.playing) mpcPlay(); mpcUi(); }
+function mpcFlash(i,on){ const el=document.querySelector('#mpcPads .mpc-pad[data-i="'+i+'"]'); if(el) el.classList.toggle('hit',on); }
+function mpcFlashAt(pad,bank,t){ if(bank!==mpc.bank) return; const d=Math.max(0,(t-getCtx().currentTime)*1000); setTimeout(()=>{ mpcFlash(pad,true); setTimeout(()=>{ if(!mpc.held.has(pad)) mpcFlash(pad,false); },110); },d); }
+function mpcLcd(){
+  const l=document.getElementById('mpcLcd'); if(!l) return;
+  const total=mpc.bars*16, st=mpc.playing?((mpc.step-1)%total+total)%total:0;
+  const bankName={A:'DRUMS '+mpc.kitA+'+'+mpc.kitB,B:'CHORDS '+mpc.chordInst,C:'NOTES '+mpc.noteInst,D:'SAMPLES'}[mpc.bank];
+  l.innerHTML=`<div><b>BANK ${mpc.bank}</b> ${escapeHtml(bankName.toUpperCase())}</div><div>BPM ${mpc.bpm} · SWING ${Math.round(mpc.swing*100)}% · KEY ${escapeHtml(dawProject.key)}</div><div>${mpc.rec?'<i class="r">● REC</i>':mpc.playing?'<i>▶ PLAY</i>':'■ STOP'} · BAR ${Math.floor(st/16)+1}.${Math.floor(st%16/4)+1} / ${mpc.bars} · ${mpc.events.length} HITS${mpc.repeat?' · REPEAT 1/'+(16/mpc.repeat):''}</div>`;
+}
+function mpcUi(){
+  if(!mpc.built) return;
+  const q=s=>document.querySelector(s);
+  q('#mpcPlayBtn')?.classList.toggle('on',mpc.playing); q('#mpcRecBtn')?.classList.toggle('on',mpc.rec);
+  document.querySelectorAll('#page-mpc [data-bank]').forEach(b=>b.classList.toggle('on',b.dataset.bank===mpc.bank));
+  document.querySelectorAll('#page-mpc [data-rep]').forEach(b=>b.classList.toggle('on',Number(b.dataset.rep)===mpc.repeat));
+  document.querySelectorAll('#page-mpc [data-bars]').forEach(b=>b.classList.toggle('on',Number(b.dataset.bars)===mpc.bars));
+  q('#mpcMetroBtn')?.classList.toggle('on',mpc.metro);
+  const dev=q('#mpcDev'); if(dev) dev.className='mpc-dev skin-'+mpc.skin+' bank-'+mpc.bank;
+  document.querySelectorAll('#mpcPads .mpc-pad').forEach(p=>{ const i=Number(p.dataset.i); p.querySelector('b').textContent=mpcPadLabel(mpc.bank,i); p.classList.toggle('empty',mpc.bank==='D'&&!mpc.samples[i]); });
+  const sd=q('#mpcSampleTools'); if(sd) sd.style.display=mpc.bank==='D'?'':'none';
+  mpcLcd(); mpcSaveState();
+}
+function mpcKnob(el,get,set,min,max){
+  const draw=()=>{ el.style.setProperty('--a',(-135+(get()-min)/(max-min)*270)+'deg'); };
+  el.addEventListener('pointerdown',e=>{ e.preventDefault(); const y0=e.clientY,v0=get(); el.setPointerCapture(e.pointerId);
+    const mv=ev=>{ set(Math.max(min,Math.min(max,v0+(y0-ev.clientY)/150*(max-min)))); draw(); mpcLcd(); };
+    const up=()=>{ el.removeEventListener('pointermove',mv); el.removeEventListener('pointerup',up); mpcSaveState(); };
+    el.addEventListener('pointermove',mv); el.addEventListener('pointerup',up); });
+  el.addEventListener('wheel',e=>{ e.preventDefault(); set(Math.max(min,Math.min(max,get()+(e.deltaY<0?1:-1)*(max-min)/50))); draw(); mpcLcd(); },{passive:false});
+  draw();
+}
+let mpcSampleTarget=0,mpcRecSample=null;
+async function mpcRecordSample(){
+  const i=mpcSampleTarget;
+  if(mpcRecSample){ const r=mpcRecSample; mpcRecSample=null; r.stop(); return; }
+  let stream; try{ stream=await navigator.mediaDevices.getUserMedia(typeof MIC_CONSTRAINTS!=='undefined'?MIC_CONSTRAINTS:{audio:true}); }catch(e){ toast('Microphone blocked — allow mic access to record a sample'); return; }
+  const ctx=getCtx(), src=ctx.createMediaStreamSource(stream), proc=ctx.createScriptProcessor(4096,1,1), sink=ctx.createGain(); sink.gain.value=0; const chunks=[];
+  proc.onaudioprocess=e=>chunks.push(new Float32Array(e.inputBuffer.getChannelData(0)));
+  src.connect(proc); proc.connect(sink); sink.connect(ctx.destination);
+  const btn=document.getElementById('mpcRecSmp'); if(btn){ btn.textContent='■ Stop recording'; btn.classList.add('on'); }
+  toast('Recording into pad '+(i+1)+' — click again to stop');
+  mpcRecSample={stop(){
+    src.disconnect(); proc.disconnect(); sink.disconnect(); stream.getTracks().forEach(t=>t.stop());
+    if(btn){ btn.textContent='● Record to pad'; btn.classList.remove('on'); }
+    const n=chunks.reduce((a,c)=>a+c.length,0); if(n<ctx.sampleRate*0.05){ toast('Too short'); return; }
+    const all=new Float32Array(n); let o=0; chunks.forEach(c=>{ all.set(c,o); o+=c.length; });
+    let st=0; while(st<all.length&&Math.abs(all[st])<0.02) st++; st=Math.max(0,st-Math.floor(ctx.sampleRate*0.005)); // trim leading silence
+    const data=all.subarray(st); const b=ctx.createBuffer(1,data.length,ctx.sampleRate); b.copyToChannel(data,0);
+    mpc.samples[i]={buf:b,name:'Rec '+(i+1)}; mpcUi(); toast('Pad '+(i+1)+' loaded ('+b.duration.toFixed(1)+'s)');
+  }};
+}
+async function mpcLoadSampleFile(file,i){
+  try{ const b=await getCtx().decodeAudioData((await file.arrayBuffer()).slice(0)); mpc.samples[i]={buf:b,name:file.name.replace(/\.[^.]+$/,'')}; mpcUi(); toast('Pad '+(i+1)+': '+mpc.samples[i].name); }
+  catch(e){ toast('Could not read that audio file'); }
+}
+// Send the recorded loop to Studio as real tracks/clips (drums → pattern clips, chords/notes → MIDI, samples → audio)
+async function mpcSendToStudio(){
+  if(!mpc.events.length){ toast('Record something first: press ● then play the pads'); return; }
+  const bars=mpc.bars, bpm=mpc.bpm;
+  dawSetBpm(bpm);
+  const start=Math.ceil(dawFurthestBeat()===32&&!dawProject.tracks.some(t=>t.clips.length)?0:dawFurthestBeat()/4)*4;
+  const mkTrack=(type,name,inst)=>{ const t=new DawTrack(type,name); if(inst) t.instrument=inst; dawProject.tracks.push(t); dawBuildTrackGraph(t); return t; };
+  [[0,mpc.kitA],[8,mpc.kitB]].forEach(([off,kit])=>{
+    const ev=mpc.events.filter(e=>e.bank==='A'&&e.pad>=off&&e.pad<off+8); if(!ev.length) return;
+    const t=mkTrack('drums','Pads '+kit); t.drumKit=kit;
+    for(let b=0;b<bars;b++){ const st=dawNewBeatSteps(16); ev.filter(e=>Math.floor(e.step/16)===b).forEach(e=>st[MPC_DRUMS[e.pad-off]][e.step%16]=1); const c=new DawClip(start+b*4,4,'pattern',st); c.name='Beat Pads'; t.clips.push(c); }
+  });
+  [['B',mpc.chordInst,'Pad Chords','keys',mpcChordPitches],['C',mpc.noteInst,'Pad Notes','bass',i=>[mpcNotePitch(i)]]].forEach(([bank,inst,name,type,fn])=>{
+    const ev=mpc.events.filter(e=>e.bank===bank); if(!ev.length) return;
+    const t=mkTrack(type,name,inst); const notes=[]; ev.forEach(e=>fn(e.pad).forEach(p=>notes.push({pitch:p,start:e.step/4,dur:Math.max(0.25,e.len/4),velocity:e.vel})));
+    const c=new DawClip(start,bars*4,'midi',notes); c.name=name; t.clips.push(c);
+  });
+  const sev=mpc.events.filter(e=>e.bank==='D'&&mpc.samples[e.pad]);
+  if(sev.length){ // render the sample hits to one audio clip
+    const sr=44100,len=Math.ceil((bars*4*60/bpm+3)*sr),off=new OfflineAudioContext(2,len,sr);
+    sev.forEach(e=>{ const s=off.createBufferSource(); s.buffer=mpc.samples[e.pad].buf; const g=off.createGain(); g.gain.value=e.vel/110; s.connect(g); g.connect(off.destination); s.start(e.step*60/bpm/4); });
+    const buf=await off.startRendering(); const t=mkTrack('sample','Pad Samples'); const c=new DawClip(start,bars*4,'audio',buf); c.name='Pad Samples'; t.clips.push(c);
+  }
+  mpcStopAll(); showPage('daw',null); renderDawTrackList(); renderDawTimeline();
+  toast('Beat sent to Studio at bar '+(start/4+1)+' — '+bars+' bar'+(bars>1?'s':'')+', '+mpc.events.length+' hits');
+}
+function mpcInit(){
+  if(mpc.built){ mpcUi(); return; }
+  try{ Object.assign(mpc,JSON.parse(localStorage.getItem('mpcState')||'{}')); }catch(e){}
+  const page=document.getElementById('page-mpc'); if(!page) return;
+  const kits=Object.keys(DAW_DRUM_KITS), insts=STUDIO_INSTRUMENTS.map(i=>i.name);
+  const opt=(list,sel)=>list.map(x=>`<option${x===sel?' selected':''}>${escapeHtml(x)}</option>`).join('');
+  page.innerHTML=`<div class="mpc-stage">
+    <div class="mpc-hero"><h1>Beat <span>Pads</span></h1><p>Play with your fingers, mouse or keyboard (Z X C V · A S D F · Q W E R · 1 2 3 4). Record a loop, layer it, then send it to Studio.</p></div>
+    <div class="mpc-dev" id="mpcDev">
+      <div class="mpc-l">
+        <div class="mpc-brand">SONGBOOK <b>PAD-16</b></div>
+        <div class="mpc-lcd" id="mpcLcd"></div>
+        <div class="mpc-knobs">
+          <div class="mpc-kn"><div class="knob" id="mpcKnVol"></div><span>VOLUME</span></div>
+          <div class="mpc-kn"><div class="knob" id="mpcKnSwing"></div><span>SWING</span></div>
+          <div class="mpc-kn"><div class="knob" id="mpcKnBpm"></div><span>TEMPO</span></div>
+        </div>
+        <div class="mpc-jog" id="mpcJog" title="Drag or scroll to change tempo"><div></div></div>
+        <div class="mpc-row">
+          <button class="mpc-b rec" id="mpcRecBtn" title="Record (overdub)">●</button>
+          <button class="mpc-b" id="mpcStopBtn" title="Stop">■</button>
+          <button class="mpc-b play" id="mpcPlayBtn" title="Play loop">▶</button>
+        </div>
+        <div class="mpc-row small">
+          <span>REPEAT</span><button class="mpc-s" data-rep="0">OFF</button><button class="mpc-s" data-rep="2">1/8</button><button class="mpc-s" data-rep="1">1/16</button>
+        </div>
+        <div class="mpc-row small">
+          <span>BARS</span><button class="mpc-s" data-bars="1">1</button><button class="mpc-s" data-bars="2">2</button><button class="mpc-s" data-bars="4">4</button><button class="mpc-s" id="mpcMetroBtn">CLICK</button>
+        </div>
+        <div class="mpc-row small"><button class="mpc-s" id="mpcUndo">UNDO</button><button class="mpc-s" id="mpcClear">CLEAR</button></div>
+      </div>
+      <div class="mpc-r">
+        <div class="mpc-banks"><button data-bank="A">A · DRUMS</button><button data-bank="B">B · CHORDS</button><button data-bank="C">C · NOTES</button><button data-bank="D">D · SAMPLES</button></div>
+        <div class="mpc-pads" id="mpcPads">${[12,13,14,15,8,9,10,11,4,5,6,7,0,1,2,3].map(i=>`<button class="mpc-pad" data-i="${i}"><b></b><small>${MPC_KEYS[i].toUpperCase()}</small></button>`).join('')}</div>
+      </div>
+    </div>
+    <div class="mpc-tools">
+      <label>Kit 1–8<select id="mpcKitA">${opt(kits,mpc.kitA)}</select></label>
+      <label>Kit 9–16<select id="mpcKitB">${opt(kits,mpc.kitB)}</select></label>
+      <label>Chords<select id="mpcChordInst">${opt(insts,mpc.chordInst)}</select></label>
+      <label>Notes<select id="mpcNoteInst">${opt(insts,mpc.noteInst)}</select></label>
+      <label>Octave<select id="mpcNoteOct">${[1,2,3,4,5].map(o=>`<option${o===mpc.noteOct?' selected':''}>${o}</option>`).join('')}</select></label>
+      <label>Key<select id="mpcKey">${['C','G','D','A','E','B','F','Bb','Eb','Ab','Db','Am','Em','Bm','F#m','C#m','Dm','Gm','Cm','Fm'].map(k=>`<option${k===dawProject.key?' selected':''}>${k}</option>`).join('')}</select></label>
+      <label>Finish<select id="mpcSkin"><option value="ivory">Ivory</option><option value="midnight">Midnight</option><option value="crimson">Crimson</option></select></label>
+      <span class="mpc-sp"></span>
+      <button class="mpc-cta" id="mpcSend">Send to Studio →</button>
+    </div>
+    <div class="mpc-tools" id="mpcSampleTools" style="display:none">
+      <label>Pad<select id="mpcSmpPad">${[...Array(16)].map((_,i)=>`<option value="${i}">Pad ${i+1} (${MPC_KEYS[i].toUpperCase()})</option>`).join('')}</select></label>
+      <button class="mpc-s big" id="mpcRecSmp">● Record to pad</button>
+      <button class="mpc-s big" id="mpcLoadSmp">↓ Load file</button>
+      <button class="mpc-s big" id="mpcClearSmp">Clear pad</button>
+      <input type="file" id="mpcSmpFile" accept="audio/*" style="display:none">
+      <span class="mpc-hint">Tip: drop an audio file straight onto a pad. Your samples stay on this device for this session.</span>
+    </div>
+  </div>`;
+  mpc.built=true;
+  const $=id=>document.getElementById(id);
+  document.querySelectorAll('#mpcPads .mpc-pad').forEach(p=>{
+    const i=Number(p.dataset.i);
+    p.addEventListener('pointerdown',e=>{ e.preventDefault(); const r=p.getBoundingClientRect(); const vel=Math.round(70+57*(1-(e.clientY-r.top)/r.height)); p.setPointerCapture(e.pointerId); mpcPadDown(i,vel); }); // hit higher on the pad = harder
+    p.addEventListener('pointerup',()=>mpcPadUp(i)); p.addEventListener('pointercancel',()=>mpcPadUp(i));
+    p.addEventListener('dragover',e=>{ e.preventDefault(); p.classList.add('drop'); }); p.addEventListener('dragleave',()=>p.classList.remove('drop'));
+    p.addEventListener('drop',e=>{ e.preventDefault(); p.classList.remove('drop'); const f=e.dataTransfer.files&&e.dataTransfer.files[0]; if(f){ mpc.bank='D'; mpcLoadSampleFile(f,i); } });
+  });
+  document.querySelectorAll('#page-mpc [data-bank]').forEach(b=>b.onclick=()=>{ mpc.bank=b.dataset.bank; mpcUi(); });
+  document.querySelectorAll('#page-mpc [data-rep]').forEach(b=>b.onclick=()=>{ mpc.repeat=Number(b.dataset.rep); mpcUi(); });
+  document.querySelectorAll('#page-mpc [data-bars]').forEach(b=>b.onclick=()=>{ mpc.bars=Number(b.dataset.bars); mpc.events=mpc.events.filter(e=>e.step<mpc.bars*16); mpcUi(); });
+  $('mpcMetroBtn').onclick=()=>{ mpc.metro=!mpc.metro; mpcUi(); };
+  $('mpcPlayBtn').onclick=mpcPlay; $('mpcStopBtn').onclick=()=>{ if(mpc.playing) mpcStop(); }; $('mpcRecBtn').onclick=mpcToggleRec;
+  $('mpcUndo').onclick=()=>{ if(mpc.undo.length){ mpc.events=JSON.parse(mpc.undo.pop()); mpcLcd(); } };
+  $('mpcClear').onclick=()=>{ mpcPushUndo(); mpc.events=[]; mpcLcd(); };
+  $('mpcSend').onclick=mpcSendToStudio;
+  [['mpcKitA','kitA'],['mpcKitB','kitB'],['mpcChordInst','chordInst'],['mpcNoteInst','noteInst']].forEach(([id,k])=>$(id).onchange=e=>{ mpc[k]=e.target.value; const inst=STUDIO_INSTRUMENTS.find(x=>x.name===e.target.value); if(inst&&inst.engine==='sample') dawLoadSampleLib(inst.lib); mpcUi(); });
+  $('mpcNoteOct').onchange=e=>{ mpc.noteOct=Number(e.target.value); mpcUi(); };
+  $('mpcKey').onchange=e=>{ dawSetKey(e.target.value); mpcUi(); };
+  $('mpcSkin').value=mpc.skin; $('mpcSkin').onchange=e=>{ mpc.skin=e.target.value; mpcUi(); };
+  $('mpcSmpPad').onchange=e=>{ mpcSampleTarget=Number(e.target.value); };
+  $('mpcRecSmp').onclick=mpcRecordSample;
+  $('mpcLoadSmp').onclick=()=>$('mpcSmpFile').click();
+  $('mpcSmpFile').onchange=e=>{ const f=e.target.files[0]; e.target.value=''; if(f) mpcLoadSampleFile(f,mpcSampleTarget); };
+  $('mpcClearSmp').onclick=()=>{ mpc.samples[mpcSampleTarget]=null; mpcUi(); };
+  mpcKnob($('mpcKnVol'),()=>mpc.vol,v=>{ mpc.vol=v; if(mpc.out) mpc.out.gain.value=v; },0,1.2);
+  mpcKnob($('mpcKnSwing'),()=>mpc.swing,v=>{ mpc.swing=v; },0.5,0.75);
+  mpcKnob($('mpcKnBpm'),()=>mpc.bpm,v=>{ mpc.bpm=Math.round(v); },60,180);
+  const jog=$('mpcJog'); let jy=null,jb=0,ja=0;
+  jog.addEventListener('pointerdown',e=>{ jy=e.clientY; jb=mpc.bpm; jog.setPointerCapture(e.pointerId); });
+  jog.addEventListener('pointermove',e=>{ if(jy==null) return; mpc.bpm=Math.max(60,Math.min(180,Math.round(jb+(jy-e.clientY)/3))); ja=(mpc.bpm-60)*6; jog.firstElementChild.style.transform='rotate('+ja+'deg)'; mpcLcd(); });
+  jog.addEventListener('pointerup',()=>{ jy=null; mpcSaveState(); });
+  jog.addEventListener('wheel',e=>{ e.preventDefault(); mpc.bpm=Math.max(60,Math.min(180,mpc.bpm+(e.deltaY<0?1:-1))); jog.firstElementChild.style.transform='rotate('+((mpc.bpm-60)*6)+'deg)'; mpcLcd(); },{passive:false});
+  window.addEventListener('keydown',e=>{
+    if(shellPage!=='mpc'||e.repeat||e.ctrlKey||e.metaKey||e.altKey||/INPUT|SELECT|TEXTAREA/.test(document.activeElement?.tagName)) return;
+    const i=MPC_KEYS.indexOf(e.key.toLowerCase()); if(i>=0){ e.preventDefault(); mpcPadDown(i,e.shiftKey?127:100); return; }
+    if(e.key===' '){ e.preventDefault(); mpcPlay(); }
+  });
+  window.addEventListener('keyup',e=>{ if(shellPage!=='mpc') return; const i=MPC_KEYS.indexOf(e.key.toLowerCase()); if(i>=0) mpcPadUp(i); });
+  [mpc.chordInst,mpc.noteInst].forEach(n=>{ const inst=STUDIO_INSTRUMENTS.find(x=>x.name===n); if(inst&&inst.engine==='sample') dawLoadSampleLib(inst.lib); });
+  mpcUi();
+}
+
 // ── App shell: one ☰ menu for every page and action ──
-const SHELL_PAGE_NAMES={sheet:'Sheet',create:'Create',piano:'Piano',roll:'Piano Roll',drum:'Drums',learn:'Learn',metro:'Metronome',classic:'Guitar',listen:'Listen',daw:'Studio',dj:'DJ Studio',studio:'Classic Studio',struct:'Structure',tools:'Tools'};
+const SHELL_PAGE_NAMES={mpc:'Beat Pads',sheet:'Sheet',create:'Create',piano:'Piano',roll:'Piano Roll',drum:'Drums',learn:'Learn',metro:'Metronome',classic:'Guitar',listen:'Listen',daw:'Studio',dj:'DJ Studio',studio:'Classic Studio',struct:'Structure',tools:'Tools'};
 let shellPage='sheet',hmKb=-1,hmFlat=[];
 function shellOnPage(name){
   shellPage=name;
@@ -18227,7 +18540,7 @@ function hmItems(){
   const claudeLbl=(document.getElementById('claudeBtnLabel')?.textContent||'Connect Claude').trim();
   const installBtn=document.getElementById('installAppBtn');
   return [
-    {sec:'Make music',items:[{icon:'✎',label:'Write a song from my lyrics',hint:'new',keys:'song builder lyrics write compose create from scratch my own',run:()=>sbOpen()},pg('⏺','Studio','daw','record · mix · stems'),pg('✦','Create','create','AI song'),pg('♪','Sheet','sheet','chords & lyrics'),pg('🎧','DJ Studio','dj')]},
+    {sec:'Make music',items:[{icon:'✎',label:'Write a song from my lyrics',hint:'new',keys:'song builder lyrics write compose create from scratch my own',run:()=>sbOpen()},pg('⏺','Studio','daw','record · mix · stems'),pg('▦','Beat Pads (MPC)','mpc','finger drumming · samples'),pg('✦','Create','create','AI song'),pg('♪','Sheet','sheet','chords & lyrics'),pg('🎧','DJ Studio','dj')]},
     {sec:'Studio',items:[
       {icon:'🎤',label:'Record vocal',run:shellInStudio(()=>dawToggleRecordArmGlobal())},
       {icon:'🎙',label:'Add vocal stack (6 stems)',run:shellInStudio(()=>dawAddVocalStack())},
