@@ -2223,6 +2223,25 @@ body.pg-stems .sh-transport{display:none!important}
 .sb-lw-row .sb-in{padding:7px 8px;font-size:12.5px}
 .sb-lw-go{background:linear-gradient(135deg,#7c3aed,#ec4899);border:none;color:#fff;font:inherit;font-size:13px;font-weight:800;border-radius:999px;padding:9px 18px;cursor:pointer}
 .sb-lw-go:disabled{opacity:.6;cursor:wait}
+
+/* ══════════════ NOVA multi-engine synth (Tier 19) ══════════════ */
+.nv{margin:0 0 14px;padding:14px;border-radius:18px;background:linear-gradient(160deg,rgba(124,58,237,.16),rgba(236,72,153,.08) 60%,rgba(46,230,182,.06));border:1px solid rgba(167,139,250,.22);color:#f6f3ff;font-family:var(--sans)}
+.nv-bar{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.nv-logo{font-size:15px;letter-spacing:.24em;background:linear-gradient(90deg,#a78bfa,#f472b6 55%,#5eead4);-webkit-background-clip:text;background-clip:text;color:transparent;margin-right:6px}
+.nv select,.nv input{background:#0b0918;border:1px solid rgba(167,139,250,.22);color:#f6f3ff;border-radius:10px;padding:6px 8px;font:inherit;font-size:12px}
+.nv input#nvSearch{flex:1;min-width:140px}
+.nv-preset{min-width:200px;max-width:320px}
+.nv-b{background:rgba(255,255,255,.05);border:1px solid rgba(167,139,250,.22);color:#e9e4ff;border-radius:999px;padding:6px 11px;font:inherit;font-size:12px;font-weight:700;cursor:pointer}
+.nv-b:hover{border-color:#ec4899}
+.nv-b.on{background:linear-gradient(135deg,#7c3aed,#ec4899);color:#fff;border-color:transparent}
+.nv-name{margin:10px 2px 6px;font-size:20px;font-weight:800;letter-spacing:-.01em}
+.nv-name span{font-size:12px;font-weight:600;color:#a39cc0;margin-left:8px}
+.nv-macros{display:flex;gap:14px;padding:8px 10px;margin-bottom:10px;border-radius:14px;background:rgba(11,9,24,.6);border:1px solid rgba(46,230,182,.22)}
+.nv-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:10px}
+.nv-card{background:rgba(17,14,34,.72);border:1px solid rgba(167,139,250,.14);border-radius:14px;padding:10px}
+.nv-h{display:flex;flex-wrap:wrap;gap:6px;align-items:center;font-size:11px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:#a39cc0;margin-bottom:6px}
+.nv-h select{text-transform:none;letter-spacing:0;font-size:11.5px;padding:4px 6px}
+.nv-knobs{display:flex;flex-wrap:wrap;gap:8px}
 </style>
 </head>
 <body class="shell-v2">
@@ -15042,6 +15061,7 @@ function dawMidiToFreq(m){ return 440*Math.pow(2,(m-69)/12); }
 // stop() early on a real keyup (live keyboard playing) — same engine, two calling styles.
 function dawStartVoice(instrumentName,pitch,destNode,velocity,startTime,ctxOverride){
   const ctx=ctxOverride||getCtx();
+  if(typeof instrumentName==='string'&&instrumentName.startsWith('Nova:')&&typeof dawNovaVoice==='function') return dawNovaVoice(novaPatchFor(instrumentName),pitch,destNode,velocity,startTime||ctx.currentTime,ctx); // Tier 19 multi-engine synth
   let inst=STUDIO_INSTRUMENTS.find(i=>i.name===instrumentName)||STUDIO_INSTRUMENTS[0];
   // Tier 9 engines: recorded samples and the layered "Ultra" synth. A sampled instrument
   // whose samples haven't arrived yet (first use, or offline) plays its synth fallback.
@@ -15137,11 +15157,12 @@ function renderDawInstrumentTab(){
     document.querySelectorAll('#daw-panel-tabs .tab[data-tab]').forEach(t=>t.classList.toggle('on',t.dataset.tab==='vocal'));
     renderDawVocalTab(); return;
   }
-  if(track&&!STUDIO_INSTRUMENTS.some(i=>i.name===track.instrument)) track.instrument='Grand Piano';
+  const isNova=track&&String(track.instrument).startsWith('Nova:');
+  if(track&&!isNova&&!STUDIO_INSTRUMENTS.some(i=>i.name===track.instrument)) track.instrument='Grand Piano';
   const instName=track?track.instrument:'Grand Piano';
   dawCurrentInstrumentIndex=Math.max(0,STUDIO_INSTRUMENTS.findIndex(i=>i.name===instName));
   const cats=[...new Set(STUDIO_INSTRUMENTS.map(i=>i.cat||'Other'))];
-  const instOptions=cats.map(c=>`<optgroup label="${escapeHtml(c)}">${STUDIO_INSTRUMENTS.filter(i=>(i.cat||'Other')===c).map(i=>`<option${i.name===instName?' selected':''}>${escapeHtml(i.name)}</option>`).join('')}</optgroup>`).join('');
+  const instOptions=`<optgroup label="Synth"><option value="__nova__"${isNova?' selected':''}>Nova — multi-engine synth (${NOVA_PRESETS.length.toLocaleString()} presets)</option></optgroup>`+cats.map(c=>`<optgroup label="${escapeHtml(c)}">${STUDIO_INSTRUMENTS.filter(i=>(i.cat||'Other')===c).map(i=>`<option${i.name===instName?' selected':''}>${escapeHtml(i.name)}</option>`).join('')}</optgroup>`).join('');
   const isDrums=track&&track.type==='drums';
   body.innerHTML=`<div class="krow">
     <div class="instsel">
@@ -15167,6 +15188,7 @@ function renderDawInstrumentTab(){
   <div class="kb" id="dawKeyboardWrap"></div>
   <div style="font-size:9.5px;color:var(--tx-3);padding:6px 2px 0">Sampled instruments: <a href="https://github.com/nbrosowsky/tonejs-instruments" target="_blank" rel="noopener" style="color:inherit">tonejs-instruments</a> by Nicholaus Brosowsky, CC-BY 3.0 — loaded the first time you use them; synth fallback while offline.</div>`;
   dawBuildKeyboardDOM();
+  if(isNova&&typeof novaRenderEditor==='function'){ const ed=document.createElement('div'); ed.id='novaEditor'; body.insertBefore(ed,document.getElementById('dawKeyboardWrap')); novaRenderEditor(track); }
   const cur=STUDIO_INSTRUMENTS.find(i=>i.name===instName);
   if(cur&&cur.engine==='sample') dawLoadSampleLib(cur.lib).then(()=>{ const s=document.getElementById('dawInstName'); if(s) s.innerHTML=dawInstrumentStatus(instName); });
 }
@@ -16268,7 +16290,7 @@ async function dawFreezeTrack(track,durationSec,sr){
   const ev=events.filter(e=>e.t<durationSec).sort((a,b)=>a.t-b.t);
   if(!ev.length) return null;
   const inst=STUDIO_INSTRUMENTS.find(i=>i.name===track.instrument)||STUDIO_INSTRUMENTS[0];
-  const rel=inst.engine==='sample'?inst.release||0.5:inst.engine==='ultra'?(inst.params.amp||[0,0,0,0.3])[3]:(inst.params&&inst.params.release)||0.5;
+  const rel=String(track.instrument).startsWith('Nova:')?(novaPatchFor(track.instrument).aenv||[0,0,0,1])[3]:inst.engine==='sample'?inst.release||0.5:inst.engine==='ultra'?(inst.params.amp||[0,0,0,0.3])[3]:(inst.params&&inst.params.release)||0.5;
   const tail=Math.min(8,Math.max(2,rel*1.8+0.3)), segSec=Math.max(2,16*spb), total=Math.ceil(durationSec*sr);
   const L=new Float32Array(total),R=new Float32Array(total), jobs=[];
   for(let s=0;s<durationSec;s+=segSec){
@@ -16373,9 +16395,9 @@ async function dawSaveProject(){
         clipsOut.push({id:clip.id,startBeat:clip.startBeat,lengthBeats:clip.lengthBeats,kind:clip.kind,payload,name:clip.name,colorOverride:clip.colorOverride,muted:clip.muted,loopCount:clip.loopCount,
           gain:clip.gain,fadeIn:clip.fadeIn,fadeOut:clip.fadeOut,offsetSec:clip.offsetSec,activeTake:clip.activeTake,takes:takesOut});
       }
-      tracksOut.push({id:track.id,type:track.type,name:track.name,color:track.color,muted:track.muted,soloed:track.soloed,volume:track.volume,pan:track.pan,instrument:track.instrument,effects:track.effects,vocalChain:track.vocalChain||null,drumKit:track.drumKit||null,height:track.height,clips:clipsOut});
+      tracksOut.push({id:track.id,type:track.type,name:track.name,color:track.color,muted:track.muted,soloed:track.soloed,volume:track.volume,pan:track.pan,instrument:track.instrument,effects:track.effects,vocalChain:track.vocalChain||null,drumKit:track.drumKit||null,novaPatch:String(track.instrument).startsWith('Nova:')?novaPatchFor(track.instrument):null,height:track.height,clips:clipsOut});
     }
-    const out={name:dawProject.name,bpm:dawProject.bpm,key:dawProject.key,timeSig:dawProject.timeSig,loopStart:dawProject.loopStart,loopEnd:dawProject.loopEnd,loopEnabled:dawProject.loopEnabled,masterPreset:dawProject.masterPreset||'Clean',markers:dawProject.markers||[],lyrics:dawProject.lyrics||[],genre:dawProject.genre||null,tracks:tracksOut};
+    const out={name:dawProject.name,bpm:dawProject.bpm,key:dawProject.key,timeSig:dawProject.timeSig,loopStart:dawProject.loopStart,loopEnd:dawProject.loopEnd,loopEnabled:dawProject.loopEnabled,masterPreset:dawProject.masterPreset||'Clean',novaUser:typeof novaSerializeUser==='function'?await novaSerializeUser():null,markers:dawProject.markers||[],lyrics:dawProject.lyrics||[],genre:dawProject.genre||null,tracks:tracksOut};
     dl(JSON.stringify(out),'application/json',(dawProject.name||'project')+'.songbook.json');
     toast('Project saved');
   }catch(e){ console.error(e); toast('Save failed — '+e.message); }
@@ -16389,10 +16411,12 @@ function dawLoadProjectFile(inputEl){
       dawStop();
       dawProject={name:data.name||'Untitled Project',bpm:data.bpm||120,key:data.key||'C',timeSig:data.timeSig||[4,4],loopStart:data.loopStart||0,loopEnd:data.loopEnd||16,loopEnabled:!!data.loopEnabled,masterPreset:data.masterPreset||'Clean',markers:data.markers||[],lyrics:data.lyrics||[],genre:data.genre||null,tracks:[]};
       if(typeof dawApplyMasterPreset==='function') dawApplyMasterPreset(dawProject.masterPreset);
+      if(data.novaUser&&typeof novaRestoreUser==='function') await novaRestoreUser(data.novaUser);
       const ctx=getCtx();
       for(const t of (data.tracks||[])){
         const track=new DawTrack(t.type,t.name);
         Object.assign(track,{id:t.id||track.id,color:t.color||track.color,muted:!!t.muted,soloed:!!t.soloed,volume:t.volume??0.8,pan:t.pan??0,instrument:t.instrument||'Grand Piano',effects:t.effects||[],vocalChain:t.vocalChain||null,drumKit:t.drumKit||null,height:t.height||72});
+        if(t.novaPatch&&typeof novaAssign==='function') novaAssign(track,t.novaPatch,true);
         for(const c of (t.clips||[])){
           let payload=c.payload,takes=null;
           const decodeB64=async b64=>{ const bin=atob(b64); const arr=new Uint8Array(bin.length); for(let i=0;i<bin.length;i++) arr[i]=bin.charCodeAt(i); return await ctx.decodeAudioData(arr.buffer.slice(0)); };
@@ -17429,7 +17453,7 @@ function dawLoadSampleLib(lib){
 }
 function dawPreloadForTracks(tracks){
   const libs=new Set();
-  (tracks||[]).forEach(t=>{ const i=STUDIO_INSTRUMENTS.find(x=>x.name===t.instrument); if(i&&i.engine==='sample'&&t.clips.some(c=>c.kind==='midi')) libs.add(i.lib); });
+  (tracks||[]).forEach(t=>{ if(String(t.instrument).startsWith('Nova:')){ const p=novaPatchFor(t.instrument); ['A','B'].forEach(k=>{ const L=p[k]; if(L&&L.eng==='samp'&&L.src&&!L.src.startsWith('user:')) libs.add(L.src); }); return; } const i=STUDIO_INSTRUMENTS.find(x=>x.name===t.instrument); if(i&&i.engine==='sample'&&t.clips.some(c=>c.kind==='midi')) libs.add(i.lib); });
   return Promise.all([...libs].map(dawLoadSampleLib));
 }
 function dawEnvRelease(param,rt,release){
@@ -17554,7 +17578,9 @@ function dawInstrumentStatus(name){
   return i.engine==='ultra'?'◆ Ultra synth':'◆ Synth';
 }
 function dawSetInstrument(name){
-  const track=dawCurrentTrackForPanel(); if(track) track.instrument=name;
+  const track=dawCurrentTrackForPanel();
+  if(name==='__nova__'){ if(track){ const np=novaAssign(track,track.novaPatch||NOVA_PRESETS[0]); renderDawInstrumentTab(); novaAutoLevel(np); } return; }
+  if(track) track.instrument=name;
   dawCurrentInstrumentIndex=Math.max(0,STUDIO_INSTRUMENTS.findIndex(i=>i.name===name));
   const sel=document.getElementById('dawInstSelect'); if(sel) sel.value=name;
   const st=document.getElementById('dawInstName'); if(st) st.innerHTML=dawInstrumentStatus(name);
@@ -19544,6 +19570,282 @@ Reply with ONLY the lyrics, each section headed like [Verse 1], [Chorus], [Bridg
     finally{ setClaudeThinking&&setClaudeThinking(false); }
   }
   return {text:lwBuiltIn(o),by:'built-in writer'};
+}
+
+// ══════════════════════════════════════════════════════════════════════════
+// TIER 19 — Nova: a multi-engine synth. Two layers (A/B), each Analog,
+// Wavetable, Harmonics (additive), Granular or Sampler; sub + noise; a
+// multimode filter with drive/envelope/keytrack; amp + filter envelopes; two
+// LFOs; macros; ~1,280 generated presets; import your own samples and
+// wavetables. A patch lives on the track (instrument name "Nova:<trackId>").
+// ══════════════════════════════════════════════════════════════════════════
+const NOVA_H=64; // harmonics per wavetable frame
+const NOVA_TABLES={
+  'Basic Shapes':f=>{ const s=n=>n===1?1:0, tri=n=>n%2?1/(n*n)*((n>>1)%2?-1:1):0, saw=n=>1/n, sq=n=>n%2?1/n:0;
+    const seg=f*3, i=Math.min(2,Math.floor(seg)), x=seg-i, A=[s,tri,saw][i], B=[tri,saw,sq][i]; return n=>A(n)*(1-x)+B(n)*x; },
+  'Vowel Morph':f=>{ const V=[[800,1150,2900],[400,2000,2600],[300,2600,3200],[450,800,2800],[325,700,2500]], p=f*4, i=Math.min(3,Math.floor(p)), x=p-i;
+    const fm=V[i].map((v,k)=>v*(1-x)+V[i+1][k]*x); return n=>{ const hz=n*130.8; return fm.reduce((a,c,k)=>a+Math.exp(-Math.pow((hz-c)/(c*0.18),2))*[1,0.6,0.25][k],0)+0.02/n; }; },
+  'Digital Sweep':f=>{ const cut=2+Math.round(f*62); return n=>n<=cut?1/Math.sqrt(n):0; },
+  'Hollow PWM':f=>{ const w=0.5-f*0.45; return n=>Math.abs(Math.sin(n*Math.PI*w))*2/(n*Math.PI); },
+  'Glass':f=>{ const peaks=[1,3,7,11,16,23,31]; return n=>peaks.includes(n)?Math.pow(0.82,peaks.indexOf(n))*(1-f*0.6)+(n===peaks[Math.min(6,Math.floor(f*7))]?f:0):0; },
+  'Growl':f=>n=>(1/n)*Math.abs(Math.cos(n*Math.PI*(0.05+f*0.45))),
+  'Organ Bank':f=>{ const sets=[[1,1,0.6,0.3,0,0],[1,0.8,0.8,0.6,0.4,0.2],[0.6,1,0.5,0.8,0.6,0.5],[1,0,0.8,0,0.6,0.4]], p=f*3, i=Math.min(2,Math.floor(p)), x=p-i, hn=[1,2,3,4,6,8];
+    return n=>{ const k=hn.indexOf(n); return k<0?0:sets[i][k]*(1-x)+sets[i+1][k]*x; }; },
+  'Choir':f=>{ const a=[700,1200,2600], o=[450,850,2700], fm=a.map((v,k)=>v*(1-f)+o[k]*f); return n=>{ const hz=n*130.8; return fm.reduce((s,c,k)=>s+Math.exp(-Math.pow((hz-c)/(c*0.12),2))*[1,0.7,0.3][k],0)*(1+0.1*Math.sin(n)); }; },
+};
+const NOVA_TEXTURES=['Air Pad','Glass Shimmer','Choir Ahh','Tape Strings','Metal Rain','Ocean Noise'];
+const NOVA_USER={samples:{},tables:{}}; // imported by the user (session + saved with projects)
+const NOVA_REG={};
+const novaWaveCache=new WeakMap(), novaTexCache=new WeakMap();
+function novaTableFrames(name){ const u=NOVA_USER.tables[name]; if(u) return u.frames; const fn=NOVA_TABLES[name]||NOVA_TABLES['Basic Shapes']; return [...Array(8)].map((_,i)=>{ const h=fn(i/7), a=new Float32Array(NOVA_H+1); for(let n=1;n<=NOVA_H;n++) a[n]=h(n); return a; }); }
+function novaWave(ctx,key,amps){ let m=novaWaveCache.get(ctx); if(!m){ m=new Map(); novaWaveCache.set(ctx,m); } if(m.has(key)) return m.get(key);
+  const re=new Float32Array(amps.length), im=Float32Array.from(amps); im[0]=0; const w=ctx.createPeriodicWave(re,im); m.set(key,w); return w; }
+function novaHarmAmps(L){ const a=new Float32Array(NOVA_H+1), cnt=Math.round(L.count||32); for(let n=1;n<=Math.min(NOVA_H,cnt);n++){ let v=1/Math.pow(n,L.tilt??1); if(n%2===0) v*=1-(L.odd??0); const pk=L.peak||0; if(pk) v*=1+(L.peakGain??2)*Math.exp(-Math.pow((n-pk)/2.5,2)); a[n]=v; } return a; }
+function novaTexture(ctx,name){ // granular source material, synthesised once per context (≈3 s, rooted at C3)
+  if(NOVA_USER.samples[name]) return NOVA_USER.samples[name].buf;
+  let m=novaTexCache.get(ctx); if(!m){ m={}; novaTexCache.set(ctx,m); } if(m[name]) return m[name];
+  const sr=ctx.sampleRate,len=Math.floor(sr*3),b=ctx.createBuffer(1,len,sr),d=b.getChannelData(0),f0=130.81; let seed=12345; const rnd=()=>{ seed=(seed*1103515245+12345)&0x7fffffff; return seed/0x7fffffff*2-1; };
+  let lp=0;
+  for(let i=0;i<len;i++){ const t=i/sr; let v=0;
+    if(name==='Air Pad'){ for(let k=0;k<5;k++){ const ph=(t*f0*(1+(k-2)*0.004))%1; v+=(ph*2-1)*0.18; } v+=rnd()*0.05; lp+=0.08*(v-lp); v=lp*1.4; }
+    else if(name==='Glass Shimmer'){ [[1,1],[2.76,0.5],[5.4,0.3],[8.93,0.18]].forEach(([r,a])=>v+=a*Math.sin(2*Math.PI*f0*2*r*t)*(0.6+0.4*Math.sin(t*1.7*r))); v*=0.35; }
+    else if(name==='Choir Ahh'){ const ph=(t*f0*(1+0.006*Math.sin(t*5)))%1; v=ph*2-1; lp+=0.12*(v-lp); v=(lp*0.8+Math.sin(2*Math.PI*f0*5.5*t)*0.12+Math.sin(2*Math.PI*f0*9*t)*0.05)*0.6; }
+    else if(name==='Tape Strings'){ const w=1+0.003*Math.sin(t*0.9); for(let k=0;k<4;k++){ const ph=(t*f0*w*(1+(k-1.5)*0.006))%1; v+=(ph*2-1)*0.2; } lp+=0.05*(v-lp); v=lp*1.6; }
+    else if(name==='Metal Rain'){ if(rnd()>0.997) lp=0.6+0.4*Math.abs(rnd()); lp*=0.9986; v=lp*(Math.sin(2*Math.PI*f0*7.1*t)+0.6*Math.sin(2*Math.PI*f0*11.3*t))*0.4+rnd()*0.01; }
+    else { lp+=(0.02+0.03*(0.5+0.5*Math.sin(t*0.8)))*(rnd()-lp); v=lp*1.2; }
+    d[i]=v*Math.min(1,t*20,(3-t)*20); }
+  // normalise every texture to the same RMS so grains from any source sit at a similar level
+  let ss=0; for(let i=0;i<len;i++) ss+=d[i]*d[i]; const g=0.25/Math.max(1e-6,Math.sqrt(ss/len)); let pk=0; for(let i=0;i<len;i++){ d[i]*=g; pk=Math.max(pk,Math.abs(d[i])); } if(pk>0.98) for(let i=0;i<len;i++) d[i]*=0.98/pk;
+  m[name]=b; return b;
+}
+function novaPatchFor(name){ return NOVA_REG[name]||NOVA_PRESETS[0]; }
+function novaClone(p){ return JSON.parse(JSON.stringify(p)); }
+function novaAssign(track,patch,keep){
+  const p=novaClone(patch); track.novaPatch=p; track.instrument='Nova:'+track.id; NOVA_REG[track.instrument]=p;
+  if(!keep&&p.fx){ // preset FX go on the track chain (tagged, so the next preset replaces them)
+    track.effects=(track.effects||[]).filter(e=>!e.nova);
+    const add=(type,over)=>{ const d=STUDIO_FX[type]; track.effects.push({type,params:Object.assign(Object.fromEntries(d.params.map(q=>[q.id,q.def])),over),bypassed:false,nova:true}); };
+    if(p.fx.drive>0.02) add('saturation',{amount:p.fx.drive,warmth:0.5,output:1});
+    if(p.fx.cho>0.02) add('chorus',{mix:p.fx.cho,depth:0.6,rate:0.5});
+    if(p.fx.dly>0.02) add('pingpong',{mix:p.fx.dly,beats:0.75,feedback:0.4});
+    if(p.fx.rev>0.02) add('reverb',{mix:p.fx.rev,decay:1.5+p.fx.rev*5,damping:0.45});
+    if(track._gain){ dawBuildTrackGraph(track); dawRebuildTrackFxChain(track); }
+  }
+  return p;
+}
+// Level-match: render a short test note offline once and scale the patch so every preset sits near the same loudness.
+async function novaAutoLevel(p){
+  if(p.lvl) return p;
+  try{ const atk=Math.max((p.aenv||[0])[0]||0,(p.fenv||[0])[0]||0), hold=Math.min(8,Math.max(2.4,atk+1.5)); // cover slow risers/pads fully
+    const sr=44100, ctx=new OfflineAudioContext(2,Math.ceil(sr*(hold+0.8)),sr), v=dawNovaVoice(Object.assign(novaClone(p),{gain:1}),57,ctx.destination,100,0.01,ctx); v.stop(hold);
+    const rb=await ctx.startRendering(), L=rb.getChannelData(0), Rr=rb.getChannelData(1), d=new Float32Array(L.length); for(let i=0;i<d.length;i++) d[i]=Math.abs(L[i])>Math.abs(Rr[i])?L[i]:Rr[i];
+    let best=0,pk=0; for(let w=0;w+4410<=d.length;w+=4410){ let s=0; for(let i=w;i<w+4410;i++){ s+=d[i]*d[i]; pk=Math.max(pk,Math.abs(d[i])); } best=Math.max(best,Math.sqrt(s/4410)); }
+    if(best>1e-5) p.gain=Math.max(0.4,Math.min(16,0.09/best,0.7/pk)); p.lvl=1; // loudness-matched, peak kept under ~0.7 (−3 dBFS) for headroom
+  }catch(e){} return p;
+}
+// ── the voice ──
+function dawNovaVoice(P,pitch,dest,velocity,t,ctx){
+  const vel=Math.max(0.05,(velocity??100)/127), live=!(ctx instanceof OfflineAudioContext);
+  const [A,D,S,R]=P.aenv||[0.01,0.3,0.8,0.4], f0=dawMidiToFreq(pitch);
+  const sum=ctx.createGain(), oscs=[], extras=[];
+  const layer=(Lr)=>{
+    if(!Lr||Lr.eng==='off'||!(Lr.level>0)) return;
+    const g=ctx.createGain(); g.gain.value=Lr.level; g.connect(sum);
+    const fr=f0*Math.pow(2,(Lr.oct||0)+(Lr.semi||0)/12), n=Math.max(1,Math.min(Lr.eng==='wt'&&Lr.posEnv?2:7,Lr.voices||1));
+    const buses={0:g}; if(n>1&&Lr.spread){ [-1,1].forEach(side=>{ const pn=ctx.createStereoPanner(); pn.pan.value=side*Lr.spread; pn.connect(g); const bg=ctx.createGain(); bg.connect(pn); buses[side]=bg; }); }
+    const busFor=v=>{ const pos=n>1?v/(n-1)*2-1:0; return {pos,bus:buses[pos<-0.01&&buses[-1]?-1:pos>0.01&&buses[1]?1:0]}; };
+    const norm=1/Math.sqrt(n);
+    if(Lr.eng==='analog'||Lr.eng==='harm'){
+      const wave=Lr.eng==='harm'?novaWave(ctx,'h'+JSON.stringify([Lr.count,Lr.tilt,Lr.odd,Lr.peak,Lr.peakGain]),novaHarmAmps(Lr)):null;
+      for(let v=0;v<n;v++){ const {pos,bus}=busFor(v); const o=ctx.createOscillator(); if(wave) o.setPeriodicWave(wave); else o.type=Lr.wave==='pulse'?'square':(Lr.wave||'sawtooth');
+        o.frequency.value=fr; o.detune.value=pos*(Lr.detune||0)+(Math.random()*2-1)*3; const vg=ctx.createGain(); vg.gain.value=norm; o.connect(vg); vg.connect(bus); o.start(t+Math.random()*0.003); oscs.push(o); }
+    } else if(Lr.eng==='wt'){
+      const frames=novaTableFrames(Lr.table||'Basic Shapes'), pos0=Math.max(0,Math.min(1,Lr.pos||0)), sweep=Lr.posEnv||0;
+      for(let v=0;v<n;v++){ const {pos,bus}=busFor(v);
+        const idx=sweep?[0,1,2,3,4,5,6,7]:[Math.floor(pos0*7),Math.min(7,Math.floor(pos0*7)+1)];
+        idx.forEach(fi=>{ const o=ctx.createOscillator(); o.setPeriodicWave(novaWave(ctx,'t'+(Lr.table||'Basic Shapes')+fi,frames[fi])); o.frequency.value=fr; o.detune.value=pos*(Lr.detune||0)+(Math.random()*2-1)*3;
+          const fg=ctx.createGain();
+          if(!sweep){ const x=pos0*7-Math.floor(pos0*7); fg.gain.value=norm*(fi===Math.floor(pos0*7)?1-x:x); }
+          else { const steps=48, dur=Math.max(0.05,(P.fenv||[0,0.6])[1]*1.5+(P.fenv||[0.01])[0]), curve=new Float32Array(steps);
+            for(let s=0;s<steps;s++){ const pp=Math.max(0,Math.min(1,pos0+sweep*(s/(steps-1))))*7; curve[s]=norm*Math.max(0,1-Math.abs(pp-fi)); }
+            fg.gain.setValueCurveAtTime(curve,t,dur); }
+          o.connect(fg); fg.connect(bus); o.start(t); oscs.push(o); }); }
+    } else if(Lr.eng==='samp'){
+      let buf=null,root=60;
+      if(Lr.src&&Lr.src.startsWith('user:')){ const u=NOVA_USER.samples[Lr.src]; if(u){ buf=u.buf; root=u.root||60; } }
+      else { const c=dawSampleCache[Lr.src||'piano']; if(c&&c.state==='ready'){ let best=c.samples[0]; for(const s2 of c.samples) if(Math.abs(s2.midi-pitch)<Math.abs(best.midi-pitch)) best=s2; buf=best.buf; root=best.midi; } else dawLoadSampleLib(Lr.src||'piano'); }
+      if(buf){ for(let v=0;v<Math.min(n,3);v++){ const {pos,bus}=busFor(v); const s=ctx.createBufferSource(); s.buffer=buf; s.playbackRate.value=Math.pow(2,(pitch+12*(Lr.oct||0)+(Lr.semi||0)-root)/12); s.detune.value=pos*(Lr.detune||0);
+        if(Lr.loop){ s.loop=true; s.loopStart=buf.duration*0.25; s.loopEnd=buf.duration*0.9; }
+        const vg=ctx.createGain(); vg.gain.value=norm; s.connect(vg); vg.connect(bus); s.start(t,Math.min(buf.duration*0.9,(Lr.start||0)*buf.duration)); oscs.push(s); } }
+    } else if(Lr.eng==='gran'){
+      const buf=novaTexture(ctx,Lr.src||'Air Pad'), rate=Math.pow(2,(pitch+12*(Lr.oct||0)+(Lr.semi||0)-48)/12), size=Math.max(0.02,Lr.size||0.12), dens=Math.max(2,Lr.dens||16);
+      let next=t, scanPos=Lr.pos??0.3;
+      const grains=(until)=>{ while(next<until){ const s=ctx.createBufferSource(); s.buffer=buf; s.playbackRate.value=rate*Math.pow(2,(Math.random()*2-1)*(Lr.detune||0)/1200);
+          const p=Math.max(0,Math.min(0.95,scanPos+(Math.random()*2-1)*(Lr.spray||0.1))); scanPos+=(Lr.scan||0)*(1/dens);
+          if(scanPos>0.95) scanPos=0.05;
+          const gg=ctx.createGain(); gg.gain.setValueAtTime(0,next); gg.gain.linearRampToValueAtTime(0.5*norm*Math.min(1,8/dens+0.25),next+size/2); gg.gain.linearRampToValueAtTime(0,next+size);
+          const pn=ctx.createStereoPanner(); pn.pan.value=(Math.random()*2-1)*(Lr.spread||0.5); s.connect(gg); gg.connect(pn); pn.connect(g); s.start(next,p*buf.duration,size*rate+0.01); next+=1/dens*(0.75+Math.random()*0.5); } };
+      if(live){ grains(t+0.6); const id=setInterval(()=>{ if(ctx.currentTime>next-0.5) grains(ctx.currentTime+0.8); },150); extras.push({stopGrains(rt){ clearInterval(id); }}); }
+      else extras.push({stopGrains(rt){ grains(rt+R*1.5); }});
+    }
+  };
+  layer(P.A); layer(P.B);
+  if(P.sub>0){ const o=ctx.createOscillator(); o.type='sine'; o.frequency.value=f0/2; const g=ctx.createGain(); g.gain.value=P.sub; o.connect(g); g.connect(sum); o.start(t); oscs.push(o); }
+  if(P.noise>0){ const s=ctx.createBufferSource(); s.buffer=dawNoise(ctx); s.loop=true; const g=ctx.createGain(); g.gain.value=P.noise*0.4; s.connect(g); g.connect(sum); s.start(t,Math.random()); oscs.push(s); }
+  // filter
+  const F=P.filt||{}, f1=ctx.createBiquadFilter(), f2=ctx.createBiquadFilter(); f1.type=F.type||'lowpass'; f2.type=f1.type==='lowpass'||f1.type==='highpass'?f1.type:'allpass'; f1.Q.value=F.q??0.8; f2.Q.value=0.6;
+  const kt=Math.pow(2,((pitch-60)/12)*(F.key??0.3)), base=Math.min(18000,(F.cut??3000)*kt), amt=(F.env||0)*(0.4+0.6*vel), [fa,fd,fs]=P.fenv||[0.005,0.4,0.4,0.5];
+  f1.frequency.setValueAtTime(Math.max(20,base),t);
+  if(amt){ f1.frequency.linearRampToValueAtTime(Math.max(20,Math.min(19000,base+amt)),t+Math.max(0.002,fa)); f1.frequency.setTargetAtTime(Math.max(20,Math.min(19000,base+amt*fs)),t+Math.max(0.002,fa),Math.max(0.01,fd/3)); }
+  f2.frequency.value=Math.min(19000,Math.max(base,base+amt)*1.5);
+  let pre=sum;
+  if(F.drive>0.02){ const sh=ctx.createWaveShaper(); sh.curve=dawTanhCurve(1+F.drive*6); const dg=ctx.createGain(); dg.gain.value=1/(1+F.drive*1.4); sum.connect(sh); sh.connect(dg); pre=dg; }
+  pre.connect(f1); f1.connect(f2);
+  const amp=ctx.createGain(), peak=0.28*Math.pow(vel,1.2)*(P.gain??1);
+  amp.gain.setValueAtTime(0.0001,t); amp.gain.linearRampToValueAtTime(peak,t+Math.max(0.002,A)); amp.gain.setTargetAtTime(Math.max(0.0001,peak*S),t+Math.max(0.002,A),Math.max(0.01,D/3));
+  f2.connect(amp);
+  let outNode=amp;
+  // LFOs
+  [P.lfo1,P.lfo2].forEach(L=>{ if(!L||!L.amt||L.dest==='off') return; const o=ctx.createOscillator(); o.type=L.shape||'sine'; o.frequency.value=L.rate||1; const g=ctx.createGain(); o.connect(g); o.start(t); oscs.push(o);
+    if(L.dest==='pitch'){ g.gain.value=L.amt*50; oscs.forEach(x=>x.detune&&g.connect(x.detune)); }
+    else if(L.dest==='filter'){ g.gain.value=L.amt*base*0.9; g.connect(f1.frequency); }
+    else if(L.dest==='amp'){ const tr=ctx.createGain(); tr.gain.value=1-L.amt/2; g.gain.value=L.amt/2; g.connect(tr.gain); outNode.connect(tr); outNode=tr; }
+    else if(L.dest==='pan'){ const pn=ctx.createStereoPanner(); g.gain.value=L.amt; g.connect(pn.pan); outNode.connect(pn); outNode=pn; } });
+  outNode.connect(dest);
+  const timer=ctx.createBufferSource(); timer.buffer=ctx.createBuffer(1,1,ctx.sampleRate); timer.loop=true; timer.start(t);
+  return{stop(at){ const rt=Math.max(at||ctx.currentTime,t+0.005); dawEnvRelease(amp.gain,rt,R); extras.forEach(e=>e.stopGrains(rt)); const end=rt+R*1.6+0.05;
+    oscs.forEach(o=>{ try{ o.stop(end); }catch(e){} }); try{ timer.stop(end); }catch(e){} dawDisposeOnEnd(timer,[amp,outNode]); }};
+}
+// ── 1,280 presets: 20 categories × 64, generated from category recipes ──
+const NOVA_CATS=['Bass','Sub & 808','Reese & Growl','Lead','Pluck','Keys','Bell & Mallet','Pad','Strings & Ensemble','Brass & Stabs','Choir & Vocal','Arp & Sequence','Cinematic','Drone & Atmos','Granular Texture','FX & Riser','Wobble & EDM','Analog Classic','Hybrid Layer','Lo-Fi & Vintage'];
+const NOVA_ADJ=['Neon','Velvet','Crystal','Midnight','Solar','Liquid','Hollow','Golden','Frozen','Electric','Dusty','Silk','Iron','Glass','Lunar','Ember','Violet','Phantom','Arctic','Cosmic','Warm','Deep','Bright','Analog','Distant','Wide','Broken','Soft','Feral','Prism','Shadow','Aurora'];
+const NOVA_NOUN={'Bass':['Bass','Low End','Pulse','Thump','Engine'],'Sub & 808':['808','Sub','Boom','Rumble','Floor'],'Reese & Growl':['Reese','Growl','Snarl','Beast','Grind'],'Lead':['Lead','Saw Lead','Hook','Solo','Laser'],'Pluck':['Pluck','Pick','Drop','Ping','Spark'],'Keys':['Keys','EP','Piano','Tines','Clav'],'Bell & Mallet':['Bell','Mallet','Chime','Kalimba','Glock'],'Pad':['Pad','Cloud','Haze','Bloom','Halo'],'Strings & Ensemble':['Strings','Ensemble','Section','Bows','Orchestra'],'Brass & Stabs':['Brass','Stab','Horns','Hit','Blast'],'Choir & Vocal':['Choir','Voices','Ahh','Chant','Vox'],'Arp & Sequence':['Arp','Sequence','Ticker','Motion','Runner'],'Cinematic':['Trailer','Epic','Tension','Horizon','Titan'],'Drone & Atmos':['Drone','Atmos','Void','Abyss','Field'],'Granular Texture':['Grains','Texture','Dust','Particles','Swarm'],'FX & Riser':['Riser','Sweep','Impact','Whoosh','Siren'],'Wobble & EDM':['Wobble','Wub','Drop Bass','Stomp','Rave'],'Analog Classic':['Mono','Poly','Vintage','Classic','Juno'],'Hybrid Layer':['Hybrid','Layer','Fusion','Stack','Blend'],'Lo-Fi & Vintage':['Tape','Cassette','Lo-Fi','Worn','Radio']};
+function novaRecipe(cat,r){
+  const R=(a,b)=>a+r()*(b-a), P=arr=>arr[Math.floor(r()*arr.length)], tables=Object.keys(NOVA_TABLES);
+  const L=(eng,o)=>Object.assign({eng,level:0.8,voices:1,detune:0,spread:0,oct:0,semi:0,wave:'sawtooth',table:P(tables),pos:R(0,1),posEnv:0,count:32,tilt:1,odd:0,peak:0,peakGain:2,src:P(NOVA_TEXTURES),size:0.12,dens:16,spray:0.15,scan:0,loop:false,start:0},o);
+  const p={A:L('analog',{}),B:L('off',{level:0}),sub:0,noise:0,filt:{type:'lowpass',cut:2500,q:0.8,env:0,key:0.3,drive:0},aenv:[0.005,0.3,0.8,0.3],fenv:[0.005,0.3,0.3,0.3],lfo1:{rate:5,shape:'sine',dest:'off',amt:0},lfo2:{rate:0.3,shape:'sine',dest:'off',amt:0},fx:{rev:0.15,dly:0,cho:0,drive:0},gain:1};
+  switch(cat){
+    case 'Bass': p.A=L(P(['analog','wt','harm']),{wave:P(['sawtooth','square']),voices:P([1,2]),detune:R(4,14)}); p.sub=R(0.2,0.6); p.filt={type:'lowpass',cut:R(180,700),q:R(1,8),env:R(800,3500),key:0.3,drive:R(0,0.5)}; p.aenv=[0.003,R(0.15,0.5),R(0.5,0.9),R(0.08,0.2)]; p.fenv=[0.002,R(0.08,0.35),R(0,0.3),0.2]; p.fx={rev:0,dly:0,cho:0,drive:R(0,0.3)}; break;
+    case 'Sub & 808': p.A=L('analog',{wave:'sine',level:1}); p.sub=R(0,0.3); p.filt={type:'lowpass',cut:R(300,900),q:0.7,env:0,key:0,drive:R(0.2,0.8)}; p.aenv=[0.003,R(0.4,1.4),R(0,0.4),R(0.2,0.6)]; p.fx={rev:0,dly:0,cho:0,drive:R(0.1,0.4)}; break;
+    case 'Reese & Growl': p.A=L(P(['analog','wt']),{table:P(['Growl','Digital Sweep','Hollow PWM']),voices:P([3,4,5]),detune:R(14,30),spread:R(0.2,0.6),posEnv:P([0,R(0.2,0.6)])}); p.sub=R(0.3,0.6); p.filt={type:'lowpass',cut:R(300,900),q:R(2,8),env:R(400,2000),key:0.2,drive:R(0.3,0.8)}; p.aenv=[0.01,0.3,0.9,0.25]; p.lfo1={rate:R(0.1,0.6),shape:'sine',dest:'filter',amt:R(0.2,0.5)}; p.fx={rev:0.05,dly:0,cho:0,drive:R(0.2,0.5)}; break;
+    case 'Lead': p.A=L(P(['analog','wt']),{voices:P([3,5,7]),detune:R(10,26),spread:R(0.4,0.9),table:P(['Basic Shapes','Digital Sweep','Hollow PWM','Vowel Morph'])}); p.B=L('analog',{wave:'square',oct:-1,level:R(0.2,0.4)}); p.filt={type:'lowpass',cut:R(2000,5500),q:R(1,4),env:R(1000,4000),key:0.4,drive:R(0,0.3)}; p.aenv=[0.004,0.25,0.85,R(0.15,0.4)]; p.lfo1={rate:R(4.5,6.5),shape:'sine',dest:'pitch',amt:R(0.05,0.18)}; p.fx={rev:R(0.1,0.25),dly:R(0.1,0.25),cho:0,drive:0}; break;
+    case 'Pluck': p.A=L(P(['analog','wt','harm']),{wave:P(['sawtooth','triangle','square']),voices:P([1,2,3]),detune:R(4,12),spread:0.6,table:P(['Glass','Basic Shapes','Digital Sweep'])}); p.filt={type:'lowpass',cut:R(400,1200),q:R(1,6),env:R(3000,8000),key:0.6,drive:0}; p.aenv=[0.002,R(0.2,0.6),0,R(0.2,0.5)]; p.fenv=[0.002,R(0.08,0.25),0,0.2]; p.fx={rev:R(0.15,0.35),dly:R(0.1,0.3),cho:0,drive:0}; break;
+    case 'Keys': p.A=L(P(['harm','samp','wt']),{src:P(['piano','piano','organ']),table:'Organ Bank',tilt:R(1.2,2),odd:R(0,0.4),count:24}); p.filt={type:'lowpass',cut:R(2500,7000),q:0.7,env:R(500,2000),key:0.5,drive:0}; p.aenv=[0.003,R(0.6,1.6),R(0.2,0.5),R(0.3,0.7)]; p.lfo1={rate:R(3,6),shape:'sine',dest:P(['amp','pan','off']),amt:R(0.1,0.35)}; p.fx={rev:R(0.12,0.3),dly:0,cho:R(0,0.3),drive:R(0,0.15)}; break;
+    case 'Bell & Mallet': p.A=L(P(['harm','wt','samp']),{peak:P([3,5,7,9]),peakGain:R(2,5),tilt:R(1.4,2.2),table:'Glass',src:P(['xylophone','harp'])}); p.B=L('harm',{oct:1,level:R(0.15,0.35),tilt:1.5,peak:P([4,6])}); p.filt={type:'lowpass',cut:R(4000,9000),q:0.7,env:0,key:0.4,drive:0}; p.aenv=[0.002,R(0.8,2.4),0,R(0.6,1.6)]; p.fx={rev:R(0.2,0.4),dly:R(0,0.2),cho:0,drive:0}; break;
+    case 'Pad': p.A=L(P(['wt','analog','harm']),{voices:P([4,5,7]),detune:R(8,20),spread:R(0.6,1),table:P(['Vowel Morph','Choir','Basic Shapes','Glass']),posEnv:P([0,R(0.2,0.5)])}); p.B=L(P(['analog','gran','off']),{wave:'triangle',oct:1,level:R(0.2,0.45),voices:3,detune:8,spread:0.8}); p.filt={type:'lowpass',cut:R(900,2600),q:R(0.7,2),env:R(500,1800),key:0.3,drive:0}; p.aenv=[R(0.4,1.5),R(0.8,2),R(0.7,0.95),R(1.2,3)]; p.fenv=[R(0.4,1.5),R(1,2.5),0.5,1]; p.lfo1={rate:R(0.08,0.3),shape:'sine',dest:'filter',amt:R(0.15,0.4)}; p.fx={rev:R(0.3,0.55),dly:R(0,0.2),cho:R(0,0.4),drive:0}; break;
+    case 'Strings & Ensemble': p.A=L('analog',{voices:7,detune:R(10,18),spread:R(0.7,1)}); p.B=L(P(['samp','analog']),{src:P(['cello','violin']),loop:true,level:R(0.3,0.6),oct:P([0,1]),voices:2,detune:6}); p.filt={type:'lowpass',cut:R(1800,3500),q:0.7,env:R(400,1200),key:0.4,drive:0}; p.aenv=[R(0.2,0.6),0.6,0.9,R(0.6,1.2)]; p.fenv=[R(0.3,0.8),1,0.6,0.8]; p.lfo1={rate:R(4.5,5.5),shape:'sine',dest:'pitch',amt:R(0.04,0.1)}; p.fx={rev:R(0.25,0.45),dly:0,cho:R(0.1,0.35),drive:0}; break;
+    case 'Brass & Stabs': p.A=L('analog',{voices:P([2,3,5]),detune:R(6,14),spread:0.5}); p.B=L('analog',{wave:'square',semi:P([0,7,12]),level:R(0.2,0.4)}); p.filt={type:'lowpass',cut:R(500,1400),q:R(1,3),env:R(2500,5500),key:0.4,drive:R(0,0.3)}; p.aenv=[R(0.01,0.08),R(0.2,0.4),R(0.3,0.8),R(0.15,0.35)]; p.fenv=[R(0.03,0.12),0.3,0.4,0.3]; p.fx={rev:R(0.12,0.3),dly:0,cho:0,drive:R(0,0.2)}; break;
+    case 'Choir & Vocal': p.A=L(P(['wt','gran','harm']),{table:P(['Choir','Vowel Morph']),src:'Choir Ahh',voices:P([3,5]),detune:R(6,14),spread:0.9,posEnv:P([0,R(0.2,0.6)]),size:R(0.1,0.25),dens:R(12,28)}); p.filt={type:'bandpass',cut:R(900,1800),q:R(0.5,1.5),env:0,key:0.3,drive:0}; p.aenv=[R(0.3,0.9),1,0.9,R(1,2.4)]; p.lfo1={rate:R(4.6,5.4),shape:'sine',dest:'pitch',amt:R(0.05,0.12)}; p.fx={rev:R(0.35,0.6),dly:0,cho:R(0.1,0.3),drive:0}; p.gain=1.6; break;
+    case 'Arp & Sequence': p.A=L(P(['analog','wt']),{wave:P(['square','sawtooth']),voices:P([1,2]),detune:8,table:P(['Digital Sweep','Hollow PWM'])}); p.filt={type:'lowpass',cut:R(500,1500),q:R(3,10),env:R(2000,6000),key:0.5,drive:R(0,0.4)}; p.aenv=[0.002,R(0.1,0.25),R(0,0.3),0.1]; p.fenv=[0.002,R(0.06,0.18),0,0.1]; p.fx={rev:R(0.05,0.2),dly:R(0.2,0.4),cho:0,drive:0}; break;
+    case 'Cinematic': p.A=L(P(['wt','gran']),{table:P(['Growl','Glass','Choir','Digital Sweep']),src:P(['Tape Strings','Ocean Noise','Air Pad']),voices:4,detune:16,spread:1,posEnv:R(0.3,0.9),size:R(0.15,0.35),dens:R(10,24),scan:R(0.1,0.4)}); p.B=L('analog',{oct:-1,level:R(0.3,0.6),voices:3,detune:12,spread:0.8}); p.sub=R(0.1,0.4); p.filt={type:'lowpass',cut:R(600,1800),q:R(1,4),env:R(1500,4000),key:0.2,drive:R(0.1,0.5)}; p.aenv=[R(0.05,1.2),1.5,0.85,R(1.5,3.5)]; p.fenv=[R(0.5,2),2.5,0.4,2]; p.lfo2={rate:R(0.05,0.2),shape:'triangle',dest:'filter',amt:R(0.2,0.5)}; p.fx={rev:R(0.4,0.65),dly:R(0.1,0.3),cho:0,drive:R(0,0.3)}; break;
+    case 'Drone & Atmos': p.A=L(P(['gran','harm','wt']),{src:P(NOVA_TEXTURES),size:R(0.2,0.5),dens:R(6,16),spray:R(0.2,0.5),scan:R(0,0.2),voices:3,detune:10,spread:1,tilt:R(0.8,1.6),table:P(['Glass','Choir'])}); p.B=L('gran',{src:'Ocean Noise',level:R(0.15,0.4),oct:-1}); p.noise=R(0,0.15); p.filt={type:P(['lowpass','bandpass']),cut:R(700,2400),q:R(0.5,2),env:0,key:0.1,drive:0}; p.aenv=[R(1,3),2,0.9,R(2.5,5)]; p.lfo1={rate:R(0.05,0.2),shape:'sine',dest:'filter',amt:R(0.2,0.45)}; p.lfo2={rate:R(0.1,0.3),shape:'sine',dest:'pan',amt:R(0.3,0.7)}; p.fx={rev:R(0.5,0.7),dly:R(0.15,0.35),cho:0,drive:0}; break;
+    case 'Granular Texture': p.A=L('gran',{src:P(NOVA_TEXTURES),size:R(0.04,0.3),dens:R(8,40),spray:R(0.05,0.5),scan:R(0,0.5),detune:R(0,40),spread:R(0.3,1)}); p.filt={type:'lowpass',cut:R(1500,9000),q:0.7,env:0,key:0.2,drive:0}; p.aenv=[R(0.05,1),1,0.9,R(0.8,2.5)]; p.fx={rev:R(0.3,0.6),dly:R(0.1,0.35),cho:0,drive:0}; p.gain=1.5; break;
+    case 'FX & Riser': p.A=L(P(['wt','analog','gran']),{table:P(['Digital Sweep','Growl']),posEnv:R(0.6,1),voices:5,detune:24,spread:1,src:'Ocean Noise',scan:0.6}); p.noise=R(0.2,0.6); p.filt={type:P(['lowpass','bandpass','highpass']),cut:R(200,800),q:R(2,8),env:R(4000,12000),key:0,drive:R(0,0.4)}; p.aenv=[R(0.5,3),2,0.9,R(1,3)]; p.fenv=[R(1.5,4),2,0.9,1]; p.lfo1={rate:R(2,9),shape:'triangle',dest:'amp',amt:R(0,0.4)}; p.fx={rev:R(0.4,0.6),dly:R(0.2,0.4),cho:0,drive:0}; break;
+    case 'Wobble & EDM': p.A=L(P(['wt','analog']),{table:P(['Growl','Digital Sweep','Vowel Morph']),voices:P([2,3]),detune:R(8,18),spread:0.4}); p.sub=R(0.3,0.6); p.filt={type:'lowpass',cut:R(200,600),q:R(4,12),env:R(300,1200),key:0.2,drive:R(0.4,0.9)}; p.aenv=[0.005,0.3,0.95,0.15]; p.lfo1={rate:P([2,3,4,6,8]),shape:P(['sine','triangle','square']),dest:'filter',amt:R(0.6,0.95)}; p.fx={rev:0,dly:0,cho:0,drive:R(0.3,0.6)}; break;
+    case 'Analog Classic': p.A=L('analog',{wave:P(['sawtooth','square','triangle']),voices:P([1,2,4]),detune:R(4,12),spread:R(0,0.6)}); p.B=L('analog',{wave:P(['square','sawtooth']),oct:P([-1,0,1]),detune:R(-10,10),level:R(0.2,0.6)}); p.filt={type:'lowpass',cut:R(600,2500),q:R(1,6),env:R(1000,4000),key:0.4,drive:R(0,0.4)}; p.aenv=[R(0.003,0.3),R(0.2,0.8),R(0.4,0.9),R(0.2,0.8)]; p.lfo1={rate:R(3,6),shape:'triangle',dest:P(['pitch','filter','off']),amt:R(0.05,0.2)}; p.fx={rev:R(0.1,0.3),dly:R(0,0.2),cho:R(0,0.5),drive:0}; break;
+    case 'Hybrid Layer': p.A=L(P(['samp','wt','harm']),{src:P(['piano','harp','cello','guitar-nylon']),table:P(tables)}); p.B=L(P(['gran','analog','wt']),{level:R(0.3,0.6),oct:P([0,1]),voices:3,detune:12,spread:0.8,src:P(NOVA_TEXTURES),table:P(tables)}); p.filt={type:'lowpass',cut:R(1500,6000),q:R(0.7,2),env:R(500,3000),key:0.4,drive:R(0,0.2)}; p.aenv=[R(0.003,0.4),R(0.5,1.5),R(0.4,0.8),R(0.6,1.8)]; p.fx={rev:R(0.25,0.5),dly:R(0.05,0.25),cho:R(0,0.3),drive:0}; break;
+    default: /* Lo-Fi & Vintage */ p.A=L(P(['samp','harm','analog']),{src:P(['piano','organ','harmonium']),wave:'triangle',tilt:R(1.5,2.5)}); p.noise=R(0.03,0.1); p.filt={type:'lowpass',cut:R(900,2800),q:R(0.7,1.5),env:0,key:0.3,drive:R(0.2,0.5)}; p.aenv=[R(0.005,0.05),R(0.5,1.2),R(0.3,0.6),R(0.3,0.7)]; p.lfo1={rate:R(0.3,0.9),shape:'sine',dest:'pitch',amt:R(0.04,0.1)}; p.fx={rev:R(0.1,0.3),dly:0,cho:R(0.1,0.3),drive:R(0.2,0.5)};
+  }
+  if(p.B.eng==='off') p.B.level=0;
+  return p;
+}
+const NOVA_PRESETS=(()=>{ const out=[]; NOVA_CATS.forEach(cat=>{ const r=sbRng('nova-'+cat), nouns=NOVA_NOUN[cat], used=new Set();
+  for(let i=0;i<64;i++){ let nm; do{ nm=NOVA_ADJ[Math.floor(r()*NOVA_ADJ.length)]+' '+nouns[Math.floor(r()*nouns.length)]; }while(used.has(nm)&&used.size<NOVA_ADJ.length*nouns.length); used.add(nm);
+    const p=novaRecipe(cat,r); p.name=nm; p.cat=cat; p.id='n'+out.length; out.push(p); } }); return out; })();
+// ── import your own sample / wavetable ──
+function novaImport(kind,track){
+  const inp=document.createElement('input'); inp.type='file'; inp.accept='audio/*';
+  inp.onchange=async()=>{ const f=inp.files[0]; if(!f) return; try{
+    const buf=await getCtx().decodeAudioData((await f.arrayBuffer()).slice(0)); const name=f.name.replace(/\.[^.]+$/,'').slice(0,24);
+    const P=novaPatchFor(track.instrument);
+    if(kind==='sample'){ const id='user:'+name+'-'+Date.now().toString(36); NOVA_USER.samples[id]={name,buf,root:60}; P.A.eng='samp'; P.A.src=id; P.A.level=P.A.level||0.8; toast('Sample "'+name+'" loaded on layer A (root C4) — also usable as a granular source'); }
+    else { // wavetable: 8 frames of 2048 samples spread across the file → harmonic spectra
+      const d=buf.getChannelData(0), N=2048, frames=[];
+      for(let k=0;k<8;k++){ const o=Math.floor((d.length-N)*k/7); const re=new Float32Array(N),im=new Float32Array(N); for(let i=0;i<N;i++) re[i]=d[Math.max(0,o)+i]||0; dtFFT(re,im);
+        // period of a single-cycle file = N; for longer audio use the strongest low partial as the fundamental
+        let h0=1; if(d.length>N*2){ let best=0; for(let i=2;i<60;i++){ const m=Math.hypot(re[i],im[i]); if(m>best){ best=m; h0=i; } } }
+        const a=new Float32Array(NOVA_H+1); let mx=0; for(let n=1;n<=NOVA_H;n++){ const bin=n*h0; a[n]=bin<N/2?Math.hypot(re[bin],im[bin]):0; mx=Math.max(mx,a[n]); } if(mx) for(let n=1;n<=NOVA_H;n++) a[n]/=mx; frames.push(a); }
+      const tname='★ '+name; NOVA_USER.tables[tname]={frames}; P.A.eng='wt'; P.A.table=tname; toast('Wavetable "'+name+'" built from 8 slices — sweep it with Position'); }
+    renderDawInstrumentTab();
+  }catch(e){ toast('Could not read that audio file'); } };
+  inp.click();
+}
+async function novaSerializeUser(){
+  const used=new Set(); dawProject.tracks.forEach(t=>{ if(String(t.instrument).startsWith('Nova:')){ const p=novaPatchFor(t.instrument); ['A','B'].forEach(k=>{ used.add(p[k].src); used.add(p[k].table); }); } });
+  const out={samples:{},tables:{}};
+  for(const id of Object.keys(NOVA_USER.samples)) if(used.has(id)){ const s=NOVA_USER.samples[id]; out.samples[id]={name:s.name,root:s.root,wav:await dawBlobToBase64(audioBufferToWavBlob(s.buf))}; }
+  for(const id of Object.keys(NOVA_USER.tables)) if(used.has(id)) out.tables[id]={frames:NOVA_USER.tables[id].frames.map(f=>Array.from(f))};
+  return (Object.keys(out.samples).length||Object.keys(out.tables).length)?out:null;
+}
+async function novaRestoreUser(u){
+  for(const [id,s] of Object.entries(u.samples||{})){ const bin=atob(s.wav), arr=new Uint8Array(bin.length); for(let i=0;i<bin.length;i++) arr[i]=bin.charCodeAt(i); NOVA_USER.samples[id]={name:s.name,root:s.root,buf:await getCtx().decodeAudioData(arr.buffer)}; }
+  for(const [id,t] of Object.entries(u.tables||{})) NOVA_USER.tables[id]={frames:t.frames.map(f=>Float32Array.from(f))};
+}
+// ── editor ──
+let novaCat='All',novaQuery='';
+function novaFavs(){ try{ return new Set(JSON.parse(localStorage.getItem('novaFavs')||'[]')); }catch(e){ return new Set(); } }
+function novaUserPresets(){ try{ return JSON.parse(localStorage.getItem('novaUserPresets')||'[]'); }catch(e){ return []; } }
+function novaAllPresets(){ return [...novaUserPresets(),...NOVA_PRESETS]; }
+function novaRenderEditor(track){
+  const ed=document.getElementById('novaEditor'); if(!ed) return;
+  const P=novaPatchFor(track.instrument), favs=novaFavs();
+  const matchQ=p=>!novaQuery||(p.name+' '+p.cat+' '+[p.A.eng,p.B.eng].map(e=>({wt:'wavetable',harm:'harmonics additive',gran:'granular',samp:'sampler sample',analog:'analog'})[e]||'').join(' ')).toLowerCase().includes(novaQuery.toLowerCase());
+  let list=novaAllPresets().filter(p=>(novaCat==='All'||(novaCat==='★ Favourites'?favs.has(p.id):p.cat===novaCat))&&matchQ(p));
+  if(!list.length&&novaQuery) list=novaAllPresets().filter(matchQ); // nothing in this category → search everything
+  const engOpts=[['off','Off'],['analog','Analog'],['wt','Wavetable'],['harm','Harmonics'],['gran','Granular'],['samp','Sampler']];
+  const srcOpts=L=>L.eng==='gran'?[...NOVA_TEXTURES,...Object.keys(NOVA_USER.samples).map(k=>[k,NOVA_USER.samples[k].name])]:[...Object.keys(DAW_SAMPLE_NOTES),...Object.keys(NOVA_USER.samples).map(k=>[k,NOVA_USER.samples[k].name])];
+  const sel=(id,opts,val)=>`<select data-k="${id}">${opts.map(o=>{ const [v,l]=Array.isArray(o)?o:[o,o]; return `<option value="${escapeHtml(v)}"${v===val?' selected':''}>${escapeHtml(l)}</option>`; }).join('')}</select>`;
+  const layerHtml=k=>{ const L=P[k]; return `<div class="nv-card"><div class="nv-h">Layer ${k} ${sel(k+'.eng',engOpts,L.eng)}</div>
+    ${L.eng==='analog'?sel(k+'.wave',['sawtooth','square','triangle','sine','pulse'],L.wave):L.eng==='wt'?sel(k+'.table',[...Object.keys(NOVA_TABLES),...Object.keys(NOVA_USER.tables)],L.table):L.eng==='gran'||L.eng==='samp'?sel(k+'.src',srcOpts(L),L.src):''}
+    <div class="nv-knobs" data-layer="${k}"></div></div>`; };
+  ed.innerHTML=`<div class="nv">
+    <div class="nv-bar"><b class="nv-logo">NOVA</b>
+      <select id="nvCat">${['All','★ Favourites',...(novaUserPresets().length?['My Presets']:[]),...NOVA_CATS].map(c=>`<option${c===novaCat?' selected':''}>${c}</option>`).join('')}</select>
+      <input id="nvSearch" placeholder="Search ${novaAllPresets().length.toLocaleString()} presets…" value="${escapeHtml(novaQuery)}">
+      <button class="nv-b" id="nvPrev">◀</button><select id="nvPreset" class="nv-preset">${list.map(p=>`<option value="${p.id}"${p.id===P.id?' selected':''}>${escapeHtml(p.name)} · ${escapeHtml(p.cat)}</option>`).join('')}</select><button class="nv-b" id="nvNext">▶</button>
+      <button class="nv-b${favs.has(P.id)?' on':''}" id="nvFav" title="Favourite">★</button><button class="nv-b" id="nvRand" title="Random preset in this category">🎲</button><button class="nv-b" id="nvSave">Save as…</button>
+      <button class="nv-b" id="nvImpS">↓ Sample</button><button class="nv-b" id="nvImpW">↓ Wavetable</button></div>
+    <div class="nv-name">${escapeHtml(P.name||'Init')} <span>${escapeHtml(P.cat||'')} · ${list.length.toLocaleString()} shown</span></div>
+    <div class="nv-macros" id="nvMacros"></div>
+    <div class="nv-grid">${layerHtml('A')}${layerHtml('B')}
+      <div class="nv-card"><div class="nv-h">Filter ${sel('filt.type',['lowpass','highpass','bandpass','notch'],P.filt.type)}</div><div class="nv-knobs" id="nvFilt"></div></div>
+      <div class="nv-card"><div class="nv-h">Envelopes</div><div class="nv-knobs" id="nvEnv"></div></div>
+      <div class="nv-card"><div class="nv-h">LFO 1 ${sel('lfo1.dest',['off','pitch','filter','amp','pan'],P.lfo1.dest)} ${sel('lfo1.shape',['sine','triangle','square','sawtooth'],P.lfo1.shape)}</div><div class="nv-knobs" id="nvL1"></div>
+        <div class="nv-h" style="margin-top:6px">LFO 2 ${sel('lfo2.dest',['off','pitch','filter','amp','pan'],P.lfo2.dest)} ${sel('lfo2.shape',['sine','triangle','square','sawtooth'],P.lfo2.shape)}</div><div class="nv-knobs" id="nvL2"></div></div>
+      <div class="nv-card"><div class="nv-h">Mix &amp; FX</div><div class="nv-knobs" id="nvMix"></div></div>
+    </div></div>`;
+  const get=path=>path.split('.').reduce((o,k)=>o?.[k],P), set=(path,v)=>{ const ks=path.split('.'), last=ks.pop(); const o=ks.reduce((x,k)=>x[k]=x[k]||{},P); o[last]=v; };
+  const knob=(wrap,path,label,min,max,unit)=>{ const w=typeof wrap==='string'?ed.querySelector(wrap):wrap; if(!w) return; const v=Array.isArray(get(path.replace(/\[\d\]$/,'')))?get(path.replace(/\[(\d)\]$/,'')).at(Number(path.match(/\[(\d)\]$/)[1])):get(path);
+    w.appendChild(dawMakeKnob({label,min,max,def:min,unit:unit||''},v??min,val=>{ const m=path.match(/^(.*)\[(\d)\]$/); if(m) get(m[1])[Number(m[2])]=val; else set(path,val); })); };
+  ['A','B'].forEach(k=>{ const L=P[k], w=ed.querySelector(`[data-layer="${k}"]`); if(L.eng==='off') return;
+    knob(w,k+'.level','Level',0,1); knob(w,k+'.oct','Octave',-2,2); knob(w,k+'.semi','Semi',-12,12);
+    if(L.eng==='wt'){ knob(w,k+'.pos','Position',0,1); knob(w,k+'.posEnv','Pos Sweep',-1,1); }
+    if(L.eng==='harm'){ knob(w,k+'.count','Partials',2,64); knob(w,k+'.tilt','Tilt',0.3,2.5); knob(w,k+'.odd','Odd/Even',0,1); knob(w,k+'.peak','Formant',0,24); }
+    if(L.eng==='gran'){ knob(w,k+'.size','Grain',0.02,0.5,'s'); knob(w,k+'.dens','Density',2,60); knob(w,k+'.spray','Spray',0,0.6); knob(w,k+'.scan','Scan',0,1); knob(w,k+'.pos','Start',0,0.95); }
+    if(L.eng==='samp'){ knob(w,k+'.start','Start',0,0.9); }
+    if(L.eng!=='gran'){ knob(w,k+'.voices','Unison',1,7); knob(w,k+'.detune','Detune',0,40,'ct'); } knob(w,k+'.spread','Width',0,1); });
+  knob('#nvFilt','filt.cut','Cutoff',40,16000,'Hz'); knob('#nvFilt','filt.q','Reso',0.3,18); knob('#nvFilt','filt.env','Env Amt',0,12000,'Hz'); knob('#nvFilt','filt.key','Keytrack',0,1); knob('#nvFilt','filt.drive','Drive',0,1);
+  ['A','D','S','R'].forEach((l,i)=>knob('#nvEnv','aenv['+i+']','Amp '+l,i===2?0:0.001,i===2?1:i===3?6:3)); ['A','D','S'].forEach((l,i)=>knob('#nvEnv','fenv['+i+']','Flt '+l,i===2?0:0.001,i===2?1:3));
+  knob('#nvL1','lfo1.rate','Rate',0.05,12,'Hz'); knob('#nvL1','lfo1.amt','Amount',0,1); knob('#nvL2','lfo2.rate','Rate',0.05,12,'Hz'); knob('#nvL2','lfo2.amt','Amount',0,1);
+  knob('#nvMix','sub','Sub',0,1); knob('#nvMix','noise','Noise',0,1); knob('#nvMix','gain','Volume',0.2,2);
+  ['rev','dly','cho','drive'].forEach((k,i)=>knob('#nvMix','fx.'+k,['Reverb','Delay','Chorus','Drive'][i],0,1));
+  // macros: one-knob moves across several parameters (scaled from the preset's own values)
+  const base=novaClone(P), mwrap=ed.querySelector('#nvMacros');
+  [['Brightness',v=>{ P.filt.cut=Math.min(16000,base.filt.cut*Math.pow(2,(v-0.5)*4)); }],['Movement',v=>{ P.lfo1.amt=Math.min(1,(base.lfo1.amt||0)+v*0.6); if(P.lfo1.dest==='off'){ P.lfo1.dest='filter'; P.lfo1.rate=P.lfo1.rate||0.5; } }],
+   ['Space',v=>{ P.fx.rev=v*0.7; P.fx.dly=v*0.4; novaAssign(track,P,false); NOVA_REG[track.instrument]=P; }],['Character',v=>{ P.filt.drive=v; ['A','B'].forEach(k=>{ if(P[k].eng!=='gran') P[k].detune=(base[k].detune||0)+v*20; }); }]].forEach(([l,fn],i)=>{
+    const v0=[0.5,0,base.fx.rev/0.7||0,base.filt.drive||0][i]; mwrap.appendChild(dawMakeKnob({label:l,min:0,max:1,def:0,unit:''},Math.min(1,v0),fn)); });
+  // bindings
+  ed.querySelectorAll('select[data-k]').forEach(s=>s.onchange=()=>{ set(s.dataset.k,s.value); if(s.dataset.k.endsWith('.eng')&&s.value!=='off'&&!(get(s.dataset.k.replace('eng','level'))>0)) set(s.dataset.k.replace('eng','level'),0.6); if(s.dataset.k.endsWith('.src')&&!String(s.value).startsWith('user:')&&get(s.dataset.k.replace('src','eng'))==='samp') dawLoadSampleLib(s.value); novaRenderEditor(track); });
+  const load=async id=>{ const p=novaAllPresets().find(x=>x.id===id); if(!p) return; const np=novaAssign(track,p); dawPreloadForTracks([{instrument:track.instrument,clips:[{kind:'midi'}]}]); await novaAutoLevel(np); novaRenderEditor(track); const v=dawStartVoice(track.instrument,60,dawTrackOutputNode(track),96); setTimeout(()=>v.stop(),650); };
+  ed.querySelector('#nvPreset').onchange=e=>load(e.target.value);
+  const step=d=>{ const i=list.findIndex(p=>p.id===P.id); const n=list[(i+d+list.length)%list.length]; if(n) load(n.id); };
+  ed.querySelector('#nvPrev').onclick=()=>step(-1); ed.querySelector('#nvNext').onclick=()=>step(1);
+  ed.querySelector('#nvRand').onclick=()=>{ const n=list[Math.floor(Math.random()*list.length)]; if(n) load(n.id); };
+  ed.querySelector('#nvCat').onchange=e=>{ novaCat=e.target.value; novaRenderEditor(track); };
+  const sb=ed.querySelector('#nvSearch'); sb.oninput=()=>{ novaQuery=sb.value; clearTimeout(sb._t); sb._t=setTimeout(()=>{ novaRenderEditor(track); const n=document.getElementById('nvSearch'); if(n){ n.focus(); n.setSelectionRange(n.value.length,n.value.length); } },250); }; sb.onkeydown=e=>e.stopPropagation();
+  ed.querySelector('#nvFav').onclick=()=>{ const f=novaFavs(); f.has(P.id)?f.delete(P.id):f.add(P.id); try{ localStorage.setItem('novaFavs',JSON.stringify([...f])); }catch(e){} novaRenderEditor(track); };
+  ed.querySelector('#nvSave').onclick=()=>{ const nm=prompt('Name your preset',(P.name||'My Sound')+' (edit)'); if(!nm) return; const u=novaUserPresets(); const p=novaClone(P); p.name=nm; p.cat='My Presets'; p.id='u'+Date.now(); u.unshift(p); try{ localStorage.setItem('novaUserPresets',JSON.stringify(u)); }catch(e){ toast('Could not save — storage full'); return; } P.id=p.id; P.name=nm; P.cat='My Presets'; novaCat='My Presets'; novaRenderEditor(track); toast('Saved "'+nm+'" to My Presets'); };
+  ed.querySelector('#nvImpS').onclick=()=>novaImport('sample',track); ed.querySelector('#nvImpW').onclick=()=>novaImport('wavetable',track);
 }
 
 // ── Aurora page heroes: the Home-style title block on every tool page ──
