@@ -161,6 +161,15 @@ All sounds are synthesized entirely in the browser using the **Web Audio API** �
 
 Drums (Kick, Snare, Hi-Hat, Clap, Tom, Perc) all use separate physical models — not samples.
 
+### Studio sound engine
+
+The **Studio** page has its own engine:
+
+- **Sampled instruments** — real recorded multisamples (Grand Piano, Steel / Nylon / Electric Guitar, Bass Guitar, Upright Bass, Cello, Violin, French Horn, Trumpet, Trombone, Saxophone, Clarinet, Flute, Church Organ, Harmonium, Harp, Xylophone), velocity-sensitive, downloaded the first time they're used. With no internet connection each one falls back to a synthesized version.
+- **Ultra synth** — stacked unison oscillators with stereo spread and analog drift, sub and noise, 24 dB/oct filter with envelope and key tracking, LFO, drive (Lead, Pad, Strings, Retro, Glass Pluck, Techno Stab, Choir, Ambient Shimmer, Sub / Analog / Reese / Acid bass).
+- **Drum kits** — Studio, 808, 909, Techno and Lo-Fi, all synthesized.
+- **Mastering** — master-bus presets (Clean, Warm, Vocal forward, Loud, Club) with EQ, glue compression, stereo width, limiter and a hard ceiling; ITU-R BS.1770 loudness (LUFS) measurement, optional −14 LUFS normalisation, 24-bit WAV or dithered 16-bit.
+
 ---
 
 ## 🚀 Getting Started
@@ -282,6 +291,8 @@ Everything is self-contained. No build step, no npm, no framework.
 
 This project is for educational and portfolio purposes.
 Song lyrics and chord arrangements are used for learning — all original compositions belong to their respective artists and publishers.
+
+**Third-party audio:** the Studio's sampled instruments come from [tonejs-instruments](https://github.com/nbrosowsky/tonejs-instruments) by Nicholaus Brosowsky, licensed [CC-BY 3.0](https://creativecommons.org/licenses/by/3.0/). They are loaded from a pinned commit via the jsDelivr CDN and are not modified.
 
 ---
 

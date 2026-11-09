@@ -665,6 +665,7 @@ body.hm-open .hm-drawer{transform:none}
 .hm-empty{color:var(--mu,#888);font-size:12px;padding:18px 10px}
 .hm-foot{border-top:1px solid var(--glass-border);padding:9px 14px;font-size:10.5px;color:var(--mu,#888);display:flex;gap:10px;align-items:center}
 @media (max-width:640px){ body.shell-v2 .song-title-nav{max-width:110px} .sh-page{display:none} }
+#page-daw .dawx-inststat{font-size:10px;color:var(--tx-3);margin-left:6px;white-space:nowrap}
 /* ── Channel EQ (Tier 8) ── */
 #page-daw .fxc.wide{width:420px;flex:0 0 420px}
 #page-daw .ceq{display:flex;flex-direction:column;gap:6px}
@@ -13910,9 +13911,14 @@ function renderDawTrackList(){
 
 // ── real per-track audio graph: gain (vol/mute/solo) → panner → analyser → master ──
 let dawMasterGain=null;
+let dawMasterOut=null; // master bus: dawMasterGain → mastering chain (Tier 9) → dawMasterOut → app analyser/speakers
 function dawEnsureMaster(){
   const ctx=getCtx();
-  if(!dawMasterGain){ dawMasterGain=ctx.createGain();dawMasterGain.gain.value=0.9;dawMasterGain.connect(analyser); }
+  if(!dawMasterGain){
+    dawMasterGain=ctx.createGain();dawMasterGain.gain.value=0.9;
+    dawMasterOut=ctx.createGain();dawMasterOut.connect(analyser);
+    if(typeof dawApplyMasterPreset==='function') dawApplyMasterPreset(dawProject.masterPreset||'Clean'); else dawMasterGain.connect(dawMasterOut);
+  }
   return dawMasterGain;
 }
 function dawBuildTrackGraph(track){
@@ -13939,9 +13945,10 @@ function dawTrackOutputNode(track){ dawBuildTrackGraph(track); return track._gai
 
 // (Tier 1's original bootstrap note-tone lived here — the scheduler now calls the real
 // per-instrument dawStartVoice from Tier 2 instead, see dawScheduleClipEvents.)
-function dawDrumHit(type,startTime,destNode,ctxOverride){
+function dawDrumHit(type,startTime,destNode,ctxOverride,kit){
   const ctx=ctxOverride||getCtx();
   const dest=destNode||analyser;
+  if(typeof dawProDrumHit==='function') return dawProDrumHit(type,startTime,dest,ctx,kit||'Studio'); // Tier 9 kits
   if(type==='kick'){
     const o=ctx.createOscillator(),g=ctx.createGain();
     o.connect(g);g.connect(dest);
@@ -13974,6 +13981,7 @@ const dawEngine={
     this.segmentStartBeat=this.startBeat;
     this.isPlaying=true;
     if(typeof dawStopLiveAudio==='function') dawStopLiveAudio();
+    if(typeof dawPreloadForTracks==='function') dawPreloadForTracks(dawProject.tracks); // fetch any sampled instruments in the background
     dawProject.tracks.forEach(dawBuildTrackGraph);
     this.tick();
   },
@@ -14031,7 +14039,7 @@ function dawScheduleClipEvents(track,clip,fromBeat,toBeat){
           const noteBeat=clipStart+i*(clip.lengthBeats/steps);
           if(noteBeat<fromBeat||noteBeat>=toBeat) return;
           const startTime=dawEngine.startCtxTime+((noteBeat-dawEngine.startBeat)*60/dawProject.bpm);
-          dawDrumHit(drum,startTime,dawTrackOutputNode(track));
+          dawDrumHit(drum,startTime,dawTrackOutputNode(track),null,track.drumKit);
         });
       });
     } else if(clip.kind==='audio'){
@@ -14496,19 +14504,57 @@ function dawOpenSynthPads(){ dawOpenPanel(); dawSwitchPanelTab('pads'); }
 // with printed computer-key letters, Sustain/Octave/Auto-chords, a Chords
 // pad grid, the Patterns Beatmaker, and the 3×3 synth-pad grid.
 // ══════════════════════════════════════════════════════════════════════════
+// Instruments. 'sample' = real recorded multisamples (tonejs-instruments, CC-BY 3.0, loaded on
+// first use from a pinned CDN commit) with a synth fallback; 'ultra' = layered unison synth;
+// 'ep' = two-operator tine electric piano. Older names are kept so saved projects still load.
+const DAW_FALLBACK={
+  piano:{engine:'fm',params:{attack:0.002,decay:0.9,sustain:0.25,release:1.1,mod:2.0,index:3}},
+  pluck:{engine:'ks',params:{damping:0.4,brightness:0.85}},
+  nylon:{engine:'ks',params:{damping:0.55,brightness:0.7}},
+  bass:{engine:'ks',params:{damping:0.7,brightness:0.4}},
+  bowed:{engine:'ensemble',params:{voices:5,detune:8,attack:0.25,release:0.8}},
+  wind:{engine:'sub',params:{wave:'triangle',cutoff:2600,q:1,attack:0.04,release:0.25}},
+  organ:{engine:'additive',params:{drawbars:[8,8,8,4,2,0,0,0,0]}},
+};
 const STUDIO_INSTRUMENTS=[
-  {name:'Grand Piano',engine:'fm',params:{attack:0.002,decay:0.9,sustain:0.25,release:1.1,mod:2.0,index:3}},
-  {name:'Electric Piano',engine:'fm',params:{attack:0.004,decay:0.7,sustain:0.35,release:0.8,mod:3.0,index:2}},
-  {name:'Retro Synth 84',engine:'sub',params:{wave:'square',cutoff:1200,q:8,attack:0.01,release:0.3}},
-  {name:'Lead Synth',engine:'sub',params:{wave:'sawtooth',cutoff:2400,q:5,attack:0.005,release:0.25}},
-  {name:'Pad Synth',engine:'sub',params:{wave:'sine',cutoff:900,q:2,attack:0.5,release:1.4}},
-  {name:'Nylon Guitar',engine:'ks',params:{damping:0.55,brightness:0.7}},
-  {name:'Steel Guitar',engine:'ks',params:{damping:0.35,brightness:0.9}},
-  {name:'Bass Guitar',engine:'ks',params:{damping:0.7,brightness:0.4,octave:-2}},
-  {name:'Sub Bass',engine:'sub',params:{wave:'sine',cutoff:400,q:1,attack:0.01,release:0.2,octave:-2}},
-  {name:'Strings',engine:'ensemble',params:{voices:5,detune:8,attack:0.35,release:1.0}},
-  {name:'Hammond Organ',engine:'additive',params:{drawbars:[8,8,8,4,2,0,0,0,0]}},
-  {name:'Bell',engine:'fm',params:{attack:0.001,decay:2.2,sustain:0.0,release:2.0,mod:7.0,index:5}},
+  // Keys
+  {name:'Grand Piano',cat:'Keys',engine:'sample',lib:'piano',release:1.2,fallback:DAW_FALLBACK.piano},
+  {name:'Electric Piano',cat:'Keys',engine:'ep',params:{ratio:1,index:1.6,tine:14,decay:1.6,release:0.5,trem:4.5}},
+  {name:'Hammond Organ',cat:'Keys',engine:'additive',params:{drawbars:[8,8,8,4,2,0,0,0,0]}},
+  {name:'Church Organ',cat:'Keys',engine:'sample',lib:'organ',release:0.6,fallback:DAW_FALLBACK.organ},
+  {name:'Harmonium',cat:'Keys',engine:'sample',lib:'harmonium',release:0.4,fallback:DAW_FALLBACK.organ},
+  {name:'Harp',cat:'Keys',engine:'sample',lib:'harp',release:1.5,fallback:DAW_FALLBACK.pluck},
+  {name:'Xylophone',cat:'Keys',engine:'sample',lib:'xylophone',release:0.8,fallback:DAW_FALLBACK.pluck},
+  {name:'Bell',cat:'Keys',engine:'ep',params:{ratio:3.5,index:2.2,tine:7,decay:3.2,release:1.8,trem:0.6}},
+  // Guitars
+  {name:'Steel Guitar',cat:'Guitars',engine:'sample',lib:'guitar-acoustic',release:0.9,fallback:DAW_FALLBACK.pluck},
+  {name:'Nylon Guitar',cat:'Guitars',engine:'sample',lib:'guitar-nylon',release:0.9,fallback:DAW_FALLBACK.nylon},
+  {name:'Electric Guitar',cat:'Guitars',engine:'sample',lib:'guitar-electric',release:0.6,fallback:DAW_FALLBACK.pluck},
+  // Bass
+  {name:'Bass Guitar',cat:'Bass',engine:'sample',lib:'bass-electric',release:0.35,fallback:DAW_FALLBACK.bass},
+  {name:'Upright Bass',cat:'Bass',engine:'sample',lib:'contrabass',release:0.5,fallback:DAW_FALLBACK.bass},
+  {name:'Sub Bass',cat:'Bass',engine:'ultra',params:{osc:[{type:'sine',level:1}],sub:0,cutoff:900,q:0.5,fenv:0,amp:[0.004,0.1,1,0.12],drive:0.25}},
+  {name:'Analog Bass',cat:'Bass',engine:'ultra',params:{osc:[{type:'sawtooth',level:0.6},{type:'square',level:0.4,oct:-1}],cutoff:380,q:6,fenv:2200,fdecay:0.22,fsus:0.15,amp:[0.003,0.3,0.8,0.12],drive:0.35,keytrack:0.4}},
+  {name:'Reese Bass',cat:'Bass',engine:'ultra',params:{osc:[{type:'sawtooth',voices:4,detune:22,spread:0.3,level:0.9}],sub:0.5,cutoff:650,q:2,fenv:500,fdecay:0.6,fsus:0.5,amp:[0.01,0.2,0.9,0.2],drive:0.3,lfo:{rate:0.3,filter:250}}},
+  {name:'Acid Bass',cat:'Bass',engine:'ultra',params:{osc:[{type:'sawtooth',level:1}],cutoff:300,q:18,fenv:3200,fdecay:0.16,fsus:0.05,amp:[0.002,0.2,0.7,0.08],drive:0.5,keytrack:0.3}},
+  // Strings & orchestra
+  {name:'Strings',cat:'Orchestra',engine:'ultra',params:{osc:[{type:'sawtooth',voices:7,detune:14,spread:0.9,level:0.8},{type:'sawtooth',voices:3,detune:8,spread:0.6,level:0.35,oct:1}],cutoff:2600,q:0.7,fenv:900,fattack:0.5,fdecay:1,fsus:0.6,amp:[0.35,0.4,0.9,0.9],lfo:{rate:5,pitch:6,delay:0.4}}},
+  {name:'Cello',cat:'Orchestra',engine:'sample',lib:'cello',release:0.6,fallback:DAW_FALLBACK.bowed},
+  {name:'Violin',cat:'Orchestra',engine:'sample',lib:'violin',release:0.6,fallback:DAW_FALLBACK.bowed},
+  {name:'French Horn',cat:'Orchestra',engine:'sample',lib:'french-horn',release:0.5,fallback:DAW_FALLBACK.wind},
+  {name:'Trumpet',cat:'Orchestra',engine:'sample',lib:'trumpet',release:0.35,fallback:DAW_FALLBACK.wind},
+  {name:'Trombone',cat:'Orchestra',engine:'sample',lib:'trombone',release:0.4,fallback:DAW_FALLBACK.wind},
+  {name:'Saxophone',cat:'Orchestra',engine:'sample',lib:'saxophone',release:0.35,fallback:DAW_FALLBACK.wind},
+  {name:'Clarinet',cat:'Orchestra',engine:'sample',lib:'clarinet',release:0.35,fallback:DAW_FALLBACK.wind},
+  {name:'Flute',cat:'Orchestra',engine:'sample',lib:'flute',release:0.35,fallback:DAW_FALLBACK.wind},
+  // Synths
+  {name:'Lead Synth',cat:'Synths',engine:'ultra',params:{osc:[{type:'sawtooth',voices:7,detune:24,spread:0.85,level:0.85},{type:'square',level:0.25,oct:-1}],cutoff:3800,q:2,fenv:2500,fdecay:0.35,fsus:0.55,amp:[0.004,0.2,0.85,0.25],lfo:{rate:5.5,pitch:8,delay:0.35},drive:0.15}},
+  {name:'Pad Synth',cat:'Synths',engine:'ultra',params:{osc:[{type:'sawtooth',voices:5,detune:16,spread:1,level:0.55},{type:'triangle',voices:3,detune:8,spread:0.8,level:0.5,oct:1}],cutoff:1400,q:1.2,fenv:1600,fattack:1.2,fdecay:2,fsus:0.5,amp:[0.9,1,0.85,2.2],lfo:{rate:0.18,filter:500}}},
+  {name:'Retro Synth 84',cat:'Synths',engine:'ultra',params:{osc:[{type:'square',voices:2,detune:7,spread:0.5,level:0.7},{type:'sawtooth',level:0.3}],cutoff:1500,q:7,fenv:2400,fdecay:0.25,fsus:0.3,amp:[0.005,0.25,0.7,0.3],lfo:{rate:5,pitch:5,delay:0.3}}},
+  {name:'Glass Pluck',cat:'Synths',engine:'ultra',params:{osc:[{type:'triangle',voices:3,detune:6,spread:0.7,level:0.7},{type:'sine',level:0.45,oct:2}],cutoff:900,q:4,fenv:6500,fdecay:0.18,fsus:0,amp:[0.002,0.6,0.0,0.4],keytrack:0.6}},
+  {name:'Techno Stab',cat:'Synths',engine:'ultra',params:{osc:[{type:'sawtooth',voices:5,detune:18,spread:0.8,level:0.8},{type:'square',level:0.3,semi:7}],cutoff:700,q:6,fenv:4200,fdecay:0.14,fsus:0.05,amp:[0.002,0.22,0.0,0.2],drive:0.3}},
+  {name:'Choir Pad',cat:'Synths',engine:'ultra',params:{osc:[{type:'sawtooth',voices:6,detune:12,spread:1,level:0.6}],formant:true,cutoff:3000,q:0.7,amp:[0.6,0.8,0.9,1.6],lfo:{rate:4.8,pitch:7,delay:0.5}}},
+  {name:'Ambient Shimmer',cat:'Synths',engine:'ultra',params:{osc:[{type:'sine',voices:4,detune:9,spread:1,level:0.6},{type:'triangle',voices:2,detune:5,spread:1,level:0.35,oct:1},{type:'sine',level:0.18,oct:2,semi:7}],noise:0.03,cutoff:5000,q:0.5,amp:[1.4,1.5,0.8,3.5],lfo:{rate:0.12,amp:0.25}}},
 ];
 function dawMidiToFreq(m){ return 440*Math.pow(2,(m-69)/12); }
 // Starts one real Web Audio voice for the given instrument/pitch, returns {stop(atTime)} so
@@ -14516,7 +14562,12 @@ function dawMidiToFreq(m){ return 440*Math.pow(2,(m-69)/12); }
 // stop() early on a real keyup (live keyboard playing) — same engine, two calling styles.
 function dawStartVoice(instrumentName,pitch,destNode,velocity,startTime,ctxOverride){
   const ctx=ctxOverride||getCtx();
-  const inst=STUDIO_INSTRUMENTS.find(i=>i.name===instrumentName)||STUDIO_INSTRUMENTS[0];
+  let inst=STUDIO_INSTRUMENTS.find(i=>i.name===instrumentName)||STUDIO_INSTRUMENTS[0];
+  // Tier 9 engines: recorded samples and the layered "Ultra" synth. A sampled instrument
+  // whose samples haven't arrived yet (first use, or offline) plays its synth fallback.
+  if(inst.engine==='sample'){ const v=dawSampleVoice(inst,pitch,destNode,velocity,startTime||ctx.currentTime,ctx); if(v) return v; inst=inst.fallback; }
+  if(inst.engine==='ultra') return dawUltraVoice(inst,pitch,destNode,velocity,startTime||ctx.currentTime,ctx);
+  if(inst.engine==='ep') return dawEPVoice(inst,pitch,destNode,velocity,startTime||ctx.currentTime,ctx);
   const freq=dawMidiToFreq(pitch)*Math.pow(2,inst.params.octave||0);
   const vel=Math.max(0.05,(velocity??100)/127);
   const t=startTime||ctx.currentTime;
@@ -14578,7 +14629,7 @@ function dawStartVoice(instrumentName,pitch,destNode,velocity,startTime,ctxOverr
       drawbars.forEach((level,i)=>{
         if(!level) return;
         const o=ctx.createOscillator();o.type='sine';o.frequency.setValueAtTime(freq*harmonics[i],t);
-        const g=ctx.createGain();g.gain.value=(level/8)*0.3;
+        const g=ctx.createGain();g.gain.value=(level/8)*0.11; // balanced against the other instruments (a full chord stays under 0 dBFS)
         o.connect(g);g.connect(env);o.start(t);oscs.push(o);
       });
       env.connect(out);
@@ -14609,12 +14660,17 @@ function renderDawInstrumentTab(){
   if(track&&!STUDIO_INSTRUMENTS.some(i=>i.name===track.instrument)) track.instrument='Grand Piano';
   const instName=track?track.instrument:'Grand Piano';
   dawCurrentInstrumentIndex=Math.max(0,STUDIO_INSTRUMENTS.findIndex(i=>i.name===instName));
+  const cats=[...new Set(STUDIO_INSTRUMENTS.map(i=>i.cat||'Other'))];
+  const instOptions=cats.map(c=>`<optgroup label="${escapeHtml(c)}">${STUDIO_INSTRUMENTS.filter(i=>(i.cat||'Other')===c).map(i=>`<option${i.name===instName?' selected':''}>${escapeHtml(i.name)}</option>`).join('')}</optgroup>`).join('');
+  const isDrums=track&&track.type==='drums';
   body.innerHTML=`<div class="krow">
     <div class="instsel">
       <button class="arw" onclick="dawCycleInstrument(-1)">◀</button>
-      <span id="dawInstName">${escapeHtml(instName)}</span>
+      <select id="dawInstSelect" class="tinput" style="min-width:150px" onchange="dawSetInstrument(this.value)">${instOptions}</select>
       <button class="arw" onclick="dawCycleInstrument(1)">▶</button>
     </div>
+    <span id="dawInstName" class="dawx-inststat">${dawInstrumentStatus(instName)}</span>
+    ${isDrums?`<span class="lbl" style="margin-left:8px">KIT</span><select class="tinput" style="width:auto" onchange="dawSetDrumKit(this.value)">${Object.keys(DAW_DRUM_KITS).map(k=>`<option${(track.drumKit||'Studio')===k?' selected':''}>${k}</option>`).join('')}</select>`:''}
     <div class="spacer"></div>
     <button class="tog on">Keyboard</button>
     <button class="tog" onclick="toast('Instrument controls panel coming soon')">Controls</button>
@@ -14628,15 +14684,16 @@ function renderDawInstrumentTab(){
     </div>
     <button class="tog${dawAutoChordsOn?' on':''}" id="dawAutoChordsBtn" onclick="dawToggleAutoChords()">Auto-chords</button>
   </div>
-  <div class="kb" id="dawKeyboardWrap"></div>`;
+  <div class="kb" id="dawKeyboardWrap"></div>
+  <div style="font-size:9.5px;color:var(--tx-3);padding:6px 2px 0">Sampled instruments: <a href="https://github.com/nbrosowsky/tonejs-instruments" target="_blank" rel="noopener" style="color:inherit">tonejs-instruments</a> by Nicholaus Brosowsky, CC-BY 3.0 — loaded the first time you use them; synth fallback while offline.</div>`;
   dawBuildKeyboardDOM();
+  const cur=STUDIO_INSTRUMENTS.find(i=>i.name===instName);
+  if(cur&&cur.engine==='sample') dawLoadSampleLib(cur.lib).then(()=>{ const s=document.getElementById('dawInstName'); if(s) s.innerHTML=dawInstrumentStatus(instName); });
 }
 function dawCycleInstrument(dir){
   const track=dawCurrentTrackForPanel();
   dawCurrentInstrumentIndex=(dawCurrentInstrumentIndex+dir+STUDIO_INSTRUMENTS.length)%STUDIO_INSTRUMENTS.length;
-  const name=STUDIO_INSTRUMENTS[dawCurrentInstrumentIndex].name;
-  if(track) track.instrument=name;
-  const label=document.getElementById('dawInstName'); if(label) label.textContent=name;
+  dawSetInstrument(STUDIO_INSTRUMENTS[dawCurrentInstrumentIndex].name);
 }
 function dawToggleSustain(){ dawSustainOn=!dawSustainOn; const b=document.getElementById('dawSustainBtn'); if(b) b.classList.toggle('on',dawSustainOn); if(!dawSustainOn) dawReleaseAllSustained(); }
 function dawShiftOctave(delta){ dawKeyboardOctaveShift=Math.max(-2,Math.min(2,dawKeyboardOctaveShift+delta)); const l=document.getElementById('dawOctaveLabel'); if(l) l.textContent='Octave '+(4+dawKeyboardOctaveShift); dawBuildKeyboardDOM(); }
@@ -14859,7 +14916,7 @@ function dawToggleBeatPreview(){
     if(!dawBeatPlaying) return;
     const pattern=dawBeatPatterns[dawBeatPatternIndex];
     const i=dawBeatStepIndex%pattern.length;
-    Object.entries(pattern.steps).forEach(([voice,hits])=>{ if(hits[i]) dawDrumHit(voice,getCtx().currentTime,dawEnsureMaster()); });
+    Object.entries(pattern.steps).forEach(([voice,hits])=>{ if(hits[i]) dawDrumHit(voice,getCtx().currentTime,dawEnsureMaster(),null,dawCurrentTrackForPanel()?.drumKit); });
     document.querySelectorAll('#dawBmGrid .st').forEach(el=>el.classList.remove('current'));
     document.querySelectorAll(`#dawBmGrid .st[data-step="${i}"]`).forEach(el=>el.classList.add('current'));
     dawBeatStepIndex++;
@@ -14985,7 +15042,29 @@ const STUDIO_FX={
   reverb:{name:'Reverb',cats:['Enhance','Vocals','Guitar','Movement'],presets:['Small Room','Big Plate','Hall','Cathedral','Spring','Chamber'],
     params:[{id:'decay',label:'Decay',min:0.2,max:8,def:2.5,unit:'s'},{id:'preDelay',label:'Pre',min:0,max:0.2,def:0.02,unit:'s'},{id:'damping',label:'Damping',min:0,max:1,def:0.5,unit:''},{id:'mix',label:'Mix',min:0,max:1,def:0.3,unit:''}],
     build(ctx,p){
-      function makeIR(decay,damping){ const len=Math.max(1,Math.floor(ctx.sampleRate*decay)),buf=ctx.createBuffer(2,len,ctx.sampleRate); for(let c=0;c<2;c++){ const d=buf.getChannelData(c); for(let i=0;i<len;i++) d[i]=(Math.random()*2-1)*Math.pow(1-i/len,1+damping*3); } return buf; }
+      // Realistic IR: sparse early reflections, then a dense decorrelated stereo tail whose
+      // high end decays faster than its low end (a one-pole lowpass that closes over time),
+      // so the space sounds like a room instead of white-noise hiss. RT60 = decay seconds.
+      function makeIR(decay,damping){
+        const sr=ctx.sampleRate,len=Math.max(1,Math.floor(sr*decay*1.1)),buf=ctx.createBuffer(2,len,sr);
+        const k=Math.log(1000)/(decay*sr); // amplitude falls 60 dB at t = decay
+        for(let c=0;c<2;c++){
+          const d=buf.getChannelData(c); let lp=0, seed=c?0x2545F491:0x9E3779B9;
+          const rnd=()=>{ seed^=seed<<13; seed^=seed>>>17; seed^=seed<<5; return ((seed>>>0)/4294967296)*2-1; };
+          for(let i=0;i<len;i++){
+            const t=i/len, cut=Math.max(0.03,0.92-damping*0.85*Math.sqrt(t)); // brightness closes with time
+            lp+=cut*(rnd()-lp);
+            const fadeIn=Math.min(1,i/(sr*0.012)); // tail builds up after the early reflections
+            d[i]=lp*Math.exp(-k*i)*fadeIn*0.6;
+          }
+          const er=[0.0071,0.0113,0.0169,0.0211,0.0263,0.0317,0.0389,0.0461];
+          er.forEach((s,j)=>{ const at=Math.floor((s+(c?0.0017*j:0))*sr); if(at<len) d[at]+=(j%2?-1:1)*0.55*Math.pow(0.82,j); });
+        }
+        // normalise energy so longer/brighter rooms don't jump in level
+        let e=0; for(let c=0;c<2;c++){ const d=buf.getChannelData(c); for(let i=0;i<len;i++) e+=d[i]*d[i]; }
+        const g=1/Math.sqrt(e/2+1e-9)*0.9; for(let c=0;c<2;c++){ const d=buf.getChannelData(c); for(let i=0;i<len;i++) d[i]*=g; }
+        return buf;
+      }
       const convolver=ctx.createConvolver();convolver.buffer=makeIR(p.decay,p.damping);
       const preDelay=ctx.createDelay(1);preDelay.delayTime.value=p.preDelay;
       const input=ctx.createGain(),output=ctx.createGain(),dry=ctx.createGain(),wet=ctx.createGain();
@@ -15623,21 +15702,26 @@ async function dawExportWAV(){
   if(!dawProject.tracks.length){ toast('Add at least one track first'); return; }
   toast('Rendering WAV…');
   try{
-    const rendered=await dawRenderTracksOffline(dawProject.tracks,true);
-    const blob=audioBufferToWavBlob(rendered);
-    dlBlob(blob,(dawProject.name||'project')+'.wav');
-    toast('WAV exported — '+(dawProject.name||'project')+'.wav');
+    let rendered=await dawRenderTracksOffline(dawProject.tracks,true);
+    const fin=dawFinalizeMaster(rendered);
+    rendered=fin.buffer;
+    dlBlob(dawWavBlob(rendered),(dawProject.name||'project')+'.wav');
+    toast('WAV exported — '+fin.lufs.toFixed(1)+' LUFS, peak '+fin.peakDb.toFixed(1)+' dBFS, '+(dawSettings.wavBits||24)+'-bit'+(fin.note?' · '+fin.note:''));
   }catch(e){ console.error(e); toast('WAV export failed — '+e.message); }
 }
 // Offline render of a set of tracks through their real gain/pan/FX chains.
 // respectMuteSolo=false is used for stem export (each stem renders at its own fader level).
 async function dawRenderTracksOffline(tracks,respectMuteSolo){
+    if(typeof dawPreloadForTracks==='function') await dawPreloadForTracks(tracks); // sampled instruments must be in memory before an offline render
     const allEnds=dawProject.tracks.flatMap(t=>t.clips.map(c=>c.startBeat+c.lengthBeats*(c.loopCount||1)));
     const maxBeat=Math.max(4,...(allEnds.length?allEnds:[4]));
     const durationSec=(maxBeat*60/dawProject.bpm)+2;
     const sr=44100;
     const offline=new OfflineAudioContext(2,Math.ceil(sr*durationSec),sr);
-    const offlineMaster=offline.createGain();offlineMaster.gain.value=respectMuteSolo&&dawMasterGain?dawMasterGain.gain.value:0.9;offlineMaster.connect(offline.destination);
+    const offlineMaster=offline.createGain();offlineMaster.gain.value=respectMuteSolo&&dawMasterGain?dawMasterGain.gain.value:0.9;
+    // the full mix goes through the same mastering chain you hear; stems stay unmastered (that's what other DAWs expect)
+    if(respectMuteSolo&&typeof dawBuildMasterChain==='function') dawBuildMasterChain(offline,dawProject.masterPreset||'Clean',offlineMaster,offline.destination);
+    else offlineMaster.connect(offline.destination);
     const anySolo=dawProject.tracks.some(t=>t.soloed);
     tracks.forEach(track=>{
       const gain=offline.createGain();
@@ -15670,7 +15754,7 @@ async function dawRenderTracksOffline(tracks,respectMuteSolo){
               (hits||[]).forEach((on,i)=>{
                 if(!on) return;
                 const stepTime=startTime+(i*(clip.lengthBeats/16))*60/dawProject.bpm;
-                dawDrumHit(drum,stepTime,gain,offline);
+                dawDrumHit(drum,stepTime,gain,offline,track.drumKit);
               });
             });
           } else if(clip.kind==='audio'&&clip.payload){
@@ -15769,9 +15853,9 @@ async function dawSaveProject(){
         clipsOut.push({id:clip.id,startBeat:clip.startBeat,lengthBeats:clip.lengthBeats,kind:clip.kind,payload,name:clip.name,colorOverride:clip.colorOverride,muted:clip.muted,loopCount:clip.loopCount,
           gain:clip.gain,fadeIn:clip.fadeIn,fadeOut:clip.fadeOut,offsetSec:clip.offsetSec,activeTake:clip.activeTake,takes:takesOut});
       }
-      tracksOut.push({id:track.id,type:track.type,name:track.name,color:track.color,muted:track.muted,soloed:track.soloed,volume:track.volume,pan:track.pan,instrument:track.instrument,effects:track.effects,vocalChain:track.vocalChain||null,height:track.height,clips:clipsOut});
+      tracksOut.push({id:track.id,type:track.type,name:track.name,color:track.color,muted:track.muted,soloed:track.soloed,volume:track.volume,pan:track.pan,instrument:track.instrument,effects:track.effects,vocalChain:track.vocalChain||null,drumKit:track.drumKit||null,height:track.height,clips:clipsOut});
     }
-    const out={name:dawProject.name,bpm:dawProject.bpm,key:dawProject.key,timeSig:dawProject.timeSig,loopStart:dawProject.loopStart,loopEnd:dawProject.loopEnd,loopEnabled:dawProject.loopEnabled,tracks:tracksOut};
+    const out={name:dawProject.name,bpm:dawProject.bpm,key:dawProject.key,timeSig:dawProject.timeSig,loopStart:dawProject.loopStart,loopEnd:dawProject.loopEnd,loopEnabled:dawProject.loopEnabled,masterPreset:dawProject.masterPreset||'Clean',tracks:tracksOut};
     dl(JSON.stringify(out),'application/json',(dawProject.name||'project')+'.songbook.json');
     toast('Project saved');
   }catch(e){ console.error(e); toast('Save failed — '+e.message); }
@@ -15783,11 +15867,12 @@ function dawLoadProjectFile(inputEl){
     try{
       const data=JSON.parse(reader.result);
       dawStop();
-      dawProject={name:data.name||'Untitled Project',bpm:data.bpm||120,key:data.key||'C',timeSig:data.timeSig||[4,4],loopStart:data.loopStart||0,loopEnd:data.loopEnd||16,loopEnabled:!!data.loopEnabled,tracks:[]};
+      dawProject={name:data.name||'Untitled Project',bpm:data.bpm||120,key:data.key||'C',timeSig:data.timeSig||[4,4],loopStart:data.loopStart||0,loopEnd:data.loopEnd||16,loopEnabled:!!data.loopEnabled,masterPreset:data.masterPreset||'Clean',tracks:[]};
+      if(typeof dawApplyMasterPreset==='function') dawApplyMasterPreset(dawProject.masterPreset);
       const ctx=getCtx();
       for(const t of (data.tracks||[])){
         const track=new DawTrack(t.type,t.name);
-        Object.assign(track,{id:t.id||track.id,color:t.color||track.color,muted:!!t.muted,soloed:!!t.soloed,volume:t.volume??0.8,pan:t.pan??0,instrument:t.instrument||'Grand Piano',effects:t.effects||[],vocalChain:t.vocalChain||null,height:t.height||72});
+        Object.assign(track,{id:t.id||track.id,color:t.color||track.color,muted:!!t.muted,soloed:!!t.soloed,volume:t.volume??0.8,pan:t.pan??0,instrument:t.instrument||'Grand Piano',effects:t.effects||[],vocalChain:t.vocalChain||null,drumKit:t.drumKit||null,height:t.height||72});
         for(const c of (t.clips||[])){
           let payload=c.payload,takes=null;
           const decodeB64=async b64=>{ const bin=atob(b64); const arr=new Uint8Array(bin.length); for(let i=0;i<bin.length;i++) arr[i]=bin.charCodeAt(i); return await ctx.decodeAudioData(arr.buffer.slice(0)); };
@@ -16370,10 +16455,13 @@ function renderDawMixerTab(){
   body.innerHTML=`<div class="mx">${dawProject.tracks.map(strip).join('')}
     <div class="mx-s master" data-tid="__master">
       <div class="mx-top" style="background:var(--brand)"></div>
-      <div class="mx-n">Master</div><div class="mx-fx">Stereo out</div>
-      <div style="height:16px"></div>
+      <div class="mx-n">Master</div>
+      <select class="mx-sel" id="dawMxMasterPreset" title="Mastering chain">${Object.keys(DAW_MASTER_PRESETS).map(n=>`<option${(dawProject.masterPreset||'Clean')===n?' selected':''}>${n}</option>`).join('')}</select>
       <div class="mx-mid"><input type="range" class="mx-fader" min="0" max="150" value="${Math.round(dawMasterGain.gain.value*100)}"><div class="mx-m"><b></b></div></div>
       <div class="mx-db">${dawGainToDb(dawMasterGain.gain.value)} dB</div>
+      <div class="mx-db" id="dawMxLufs" title="Momentary loudness (approx.)">— LUFS</div>
+      <label class="mx-fx" style="cursor:pointer"><input type="checkbox" id="dawMxBits"${(dawSettings.wavBits||24)===24?' checked':''}> 24-bit</label>
+      <label class="mx-fx" style="cursor:pointer" title="Normalise exported mix to −14 LUFS (Spotify / YouTube / Apple Music)"><input type="checkbox" id="dawMxNorm"${dawSettings.normalizeExport?' checked':''}> −14 LUFS</label>
       <button class="vx-chip" id="dawMxStems" style="font-size:9.5px;padding:3px 6px">Export stems</button>
     </div></div>
     ${dawProject.tracks.length?'':'<div class="vx-note" style="padding:8px">No tracks yet — add a track or a vocal stack.</div>'}`;
@@ -16382,6 +16470,9 @@ function renderDawMixerTab(){
     if(tid==='__master'){
       fader.oninput=()=>{ dawMasterGain.gain.value=Number(fader.value)/100; dbEl.textContent=dawGainToDb(dawMasterGain.gain.value)+' dB'; };
       el.querySelector('#dawMxStems').onclick=dawExportStems;
+      el.querySelector('#dawMxMasterPreset').onchange=e=>{ dawApplyMasterPreset(e.target.value); toast('Master: '+e.target.value); };
+      el.querySelector('#dawMxBits').onchange=e=>{ dawSettings.wavBits=e.target.checked?24:16; dawSaveSettings(); };
+      el.querySelector('#dawMxNorm').onchange=e=>{ dawSettings.normalizeExport=e.target.checked; dawSaveSettings(); };
       return;
     }
     const t=dawProject.tracks.find(x=>x.id===tid); if(!t) return;
@@ -16410,6 +16501,8 @@ function dawMixerMeterLoop(){
       an.getByteTimeDomainData(buf); let pk=0; for(let i=0;i<buf.length;i++){ const v=Math.abs(buf[i]-128)/128; if(v>pk) pk=v; }
       const prev=Number(bar.dataset.v||0), v=Math.max(pk,prev*0.9); bar.dataset.v=v; bar.style.height=Math.min(100,v*110)+'%';
     });
+    const lu=document.getElementById('dawMxLufs');
+    if(lu&&typeof dawLiveLufs==='function'){ const l=dawLiveLufs(); lu.textContent=(l!=null&&isFinite(l)&&l>-60)?l.toFixed(1)+' LUFS':'— LUFS'; lu.style.color=l>-9?'#ef4444':l>-16?'#4ade80':''; }
     dawMixerRAF=requestAnimationFrame(tick);
   };
   dawMixerRAF=requestAnimationFrame(tick);
@@ -16425,7 +16518,7 @@ async function dawExportStems(){
       const t=tracks[i];
       const rendered=await dawRenderTracksOffline([t],false);
       const safe=(t.name||('Track '+(i+1))).replace(/[\\/:*?"<>|]+/g,'_');
-      dlBlob(audioBufferToWavBlob(rendered),(dawProject.name||'project')+' - '+String(i+1).padStart(2,'0')+' '+safe+'.wav');
+      dlBlob(dawWavBlob(rendered),(dawProject.name||'project')+' - '+String(i+1).padStart(2,'0')+' '+safe+'.wav');
       await new Promise(r=>setTimeout(r,400));
     }
     toast('Exported '+tracks.length+' stems (all the same length, so they line up in any DAW)');
@@ -16655,14 +16748,14 @@ async function dawExportBundle(){
   const tracks=dawProject.tracks.filter(t=>t.clips.some(c=>!c.muted));
   if(!tracks.length){ toast('Nothing to export yet — add or record something first'); return; }
   const proj=dawSafeName(dawProject.name), folder=proj+' ('+dawProject.bpm+' BPM, '+dawProject.key+')/';
-  const files=[], wavBytes=async buf=>new Uint8Array(await audioBufferToWavBlob(buf).arrayBuffer());
+  const files=[], wavBytes=async buf=>new Uint8Array(await dawWavBlob(buf).arrayBuffer());
   try{
     for(let i=0;i<tracks.length;i++){
       toast('Rendering stem '+(i+1)+' of '+tracks.length+'…'); await dawYield();
       files.push({name:folder+'Stems/'+String(i+1).padStart(2,'0')+' '+dawSafeName(tracks[i].name)+'.wav',data:await wavBytes(await dawRenderTracksOffline([tracks[i]],false))});
     }
     toast('Rendering full mix…'); await dawYield();
-    files.push({name:folder+proj+' - Full Mix.wav',data:await wavBytes(await dawRenderTracksOffline(dawProject.tracks,true))});
+    files.push({name:folder+proj+' - Full Mix.wav',data:await wavBytes(dawFinalizeMaster(await dawRenderTracksOffline(dawProject.tracks,true)).buffer)});
     const midiTracks=tracks.filter(t=>t.clips.some(c=>c.kind==='midi'||c.kind==='pattern'));
     if(midiTracks.length){
       files.push({name:folder+proj+' - All MIDI.mid',data:dawBuildMidiFile(midiTracks)});
@@ -16673,7 +16766,7 @@ async function dawExportBundle(){
       proj+' — exported from Songbook Ultra Studio',
       '',
       'Tempo: '+bpm+' BPM   Key: '+key+'   Time signature: '+sig,
-      'Audio: 44.1 kHz / 16-bit WAV. Every stem starts at bar 1 (0:00) and is exactly the same length,',
+      'Audio: 44.1 kHz / '+(dawSettings.wavBits||24)+'-bit WAV. Every stem starts at bar 1 (0:00) and is exactly the same length,',
       'so they line up perfectly when placed at the very start of the timeline.',
       '',
       'Stems/      one WAV per track, rendered with its effects and fader level',
@@ -16789,6 +16882,372 @@ function dawImportDroppedFiles(e){
   dawImportFiles(files,{startBeat:files.length>1?Math.round(startBeat/dawProject.timeSig[0])*dawProject.timeSig[0]:startBeat,trackId:single&&track?track.id:null});
 }
 
+// ══════════════════════════════════════════════════════════════════════════
+// TIER 9 — Sound engine: recorded multisamples, the layered "Ultra" synth, a tine
+// electric piano, synthesized drum kits, a mastering chain, BS.1770 loudness and
+// 24-bit / dithered 16-bit WAV.
+// ══════════════════════════════════════════════════════════════════════════
+
+// ── sampled instruments (tonejs-instruments, CC-BY 3.0, pinned commit) ──
+const DAW_SAMPLE_BASE='https://cdn.jsdelivr.net/gh/nbrosowsky/tonejs-instruments@622c2f1c32c8cfce4158ddc3eb26e518ddef37e5/samples/';
+const DAW_SAMPLE_NOTES={
+  'piano':'A1,C2,Ds2,Fs2,A2,C3,Ds3,Fs3,A3,C4,Ds4,Fs4,A4,C5,Ds5,Fs5,A5,C6,Ds6,Fs6,A6,C7',
+  'bass-electric':'E1,G1,As1,Cs2,E2,G2,As2,Cs3,E3,G3,As3,Cs4,E4,G4',
+  'contrabass':'Fs1,G1,As1,C2,D2,E2,Fs2,Gs2,A2,Cs3,E3,Gs3,B3',
+  'guitar-acoustic':'D2,F2,Gs2,B2,D3,F3,Gs3,B3,D4,F4,Gs4,B4,D5',
+  'guitar-nylon':'B1,D2,E2,Fs2,Gs2,A2,B2,Cs3,D3,E3,Fs3,G3,A3,B3,Cs4,Ds4,E4,Fs4,Gs4,A4,B4,Cs5,D5,E5,Fs5,G5,Gs5,A5',
+  'guitar-electric':'E2,Fs2,A2,C3,Ds3,Fs3,A3,C4,Ds4,Fs4,A4,C5,Ds5,Fs5,A5,C6',
+  'cello':'C2,D2,E2,F2,G2,A2,B2,C3,D3,E3,F3,G3,A3,B3,C4,D4,E4,F4,G4,A4,B4,C5',
+  'violin':'G3,A3,C4,E4,G4,A4,C5,E5,G5,A5,C6,E6,G6,A6,C7',
+  'french-horn':'A1,C2,Ds2,G2,D3,F3,A3,C4,D5,F5',
+  'trumpet':'F3,A3,C4,Ds4,F4,G4,As4,D5,F5,A5,C6',
+  'trombone':'As1,Cs2,Ds2,F2,Gs2,As2,C3,D3,Ds3,F3,Gs3,As3,C4,Cs4,D4,Ds4,F4',
+  'saxophone':'Cs3,D3,E3,F3,G3,As3,B3,C4,D4,E4,F4,G4,A4,B4,C5,D5,E5,F5,G5,A5',
+  'clarinet':'D3,F3,As3,D4,F4,As4,D5,F5,As5,D6',
+  'flute':'C4,E4,A4,C5,E5,A5,C6,E6,A6,C7',
+  'organ':'C1,Ds1,Fs1,A1,C2,Ds2,Fs2,A2,C3,Ds3,Fs3,A3,C4,Ds4,Fs4,A4,C5,Ds5,Fs5,A5,C6',
+  'harmonium':'C2,Ds2,Fs2,A2,C3,Ds3,Fs3,A3,C4,Ds4,Gs4,C5',
+  'harp':'E1,G1,B1,D2,F2,A2,C3,E3,G3,B3,D4,F4,A4,C5,E5,G5,B5,D6,F6,A6,D7',
+  'xylophone':'G4,C5,G5,C6,G6,C7,G7,C8',
+};
+function dawNoteNameToMidi(nm){ const m=/^([A-G])(s?)(\d)$/.exec(nm); if(!m) return null; return (Number(m[3])+1)*12+{C:0,D:2,E:4,F:5,G:7,A:9,B:11}[m[1]]+(m[2]?1:0); }
+const dawSampleCache={};
+let dawSampleWarned=false;
+function dawLoadSampleLib(lib){
+  const c=dawSampleCache[lib]=dawSampleCache[lib]||{state:'idle',samples:[],promise:null};
+  if(c.promise) return c.promise;
+  const names=(DAW_SAMPLE_NOTES[lib]||'').split(',').filter(Boolean);
+  c.state='loading';
+  const ctx=getCtx();
+  c.promise=Promise.allSettled(names.map(async nm=>{
+    const r=await fetch(DAW_SAMPLE_BASE+lib+'/'+nm+'.mp3'); if(!r.ok) throw new Error(r.status);
+    const buf=await ctx.decodeAudioData(await r.arrayBuffer());
+    return {midi:dawNoteNameToMidi(nm),buf};
+  })).then(res=>{
+    c.samples=res.filter(x=>x.status==='fulfilled'&&x.value.midi!=null).map(x=>x.value).sort((a,b)=>a.midi-b.midi);
+    c.state=c.samples.length?'ready':'failed';
+    if(c.state==='failed'){ c.promise=null; if(!dawSampleWarned){ dawSampleWarned=true; toast('Couldn\'t download instrument samples (offline?) — using the synth version for now'); } }
+    return c;
+  });
+  return c.promise;
+}
+function dawPreloadForTracks(tracks){
+  const libs=new Set();
+  (tracks||[]).forEach(t=>{ const i=STUDIO_INSTRUMENTS.find(x=>x.name===t.instrument); if(i&&i.engine==='sample'&&t.clips.some(c=>c.kind==='midi')) libs.add(i.lib); });
+  return Promise.all([...libs].map(dawLoadSampleLib));
+}
+function dawEnvRelease(param,rt,release){
+  if(param.cancelAndHoldAtTime) param.cancelAndHoldAtTime(rt); else param.cancelScheduledValues(rt);
+  param.setTargetAtTime(0.0001,rt,Math.max(0.01,release/4));
+}
+function dawSampleVoice(inst,pitch,dest,velocity,t,ctx){
+  const c=dawSampleCache[inst.lib];
+  if(!c||c.state!=='ready'){ dawLoadSampleLib(inst.lib); return null; }
+  let best=c.samples[0];
+  for(const s of c.samples) if(Math.abs(s.midi-pitch)<Math.abs(best.midi-pitch)) best=s;
+  const vel=Math.max(0.05,(velocity??100)/127);
+  const src=ctx.createBufferSource(); src.buffer=best.buf; src.playbackRate.value=Math.pow(2,(pitch-best.midi)/12);
+  const tone=ctx.createBiquadFilter(); tone.type='lowpass'; tone.frequency.value=2200+vel*vel*17000; tone.Q.value=0.5; // softer = darker, like a real instrument
+  const env=ctx.createGain(); env.gain.setValueAtTime(0.0001,t); env.gain.linearRampToValueAtTime(0.6*Math.pow(vel,1.4),t+0.004);
+  src.connect(tone); tone.connect(env); env.connect(dest); src.start(t);
+  const rel=inst.release||0.5;
+  return{stop(at){ const rt=Math.max(at||ctx.currentTime,t+0.005); dawEnvRelease(env.gain,rt,rel); try{ src.stop(rt+rel*1.6+0.05); }catch(e){} }};
+}
+
+// ── shared noise buffer per audio context ──
+const dawNoiseBufs=new WeakMap();
+function dawNoise(ctx){
+  let b=dawNoiseBufs.get(ctx);
+  if(!b){ b=ctx.createBuffer(1,ctx.sampleRate*2,ctx.sampleRate); const d=b.getChannelData(0); for(let i=0;i<d.length;i++) d[i]=Math.random()*2-1; dawNoiseBufs.set(ctx,b); }
+  return b;
+}
+const dawCurveCache=new Map();
+function dawTanhCurve(k){ k=Math.round(k*100)/100; if(dawCurveCache.has(k)) return dawCurveCache.get(k); const n=2048,c=new Float32Array(n),norm=Math.tanh(k); for(let i=0;i<n;i++){ const x=i/(n-1)*2-1; c[i]=Math.tanh(k*x)/norm; } dawCurveCache.set(k,c); return c; }
+
+// ── "Ultra" synth voice: stacked unison layers, sub, noise, 24 dB filter with envelope + keytracking, LFO, drive ──
+function dawUltraVoice(inst,pitch,dest,velocity,t,ctx){
+  const P=inst.params||{}, vel=Math.max(0.05,(velocity??100)/127);
+  const base=dawMidiToFreq(pitch+12*(P.octave||0));
+  const [A,D,S,R]=P.amp||[0.01,0.2,0.8,0.3];
+  const sum=ctx.createGain(), nodes=[];
+  (P.osc||[{type:'sawtooth',level:1}]).forEach(L=>{
+    const n=Math.max(1,L.voices||1), f=base*Math.pow(2,(L.oct||0)+(L.semi||0)/12);
+    for(let v=0;v<n;v++){
+      const pos=n>1?v/(n-1)*2-1:0;
+      const o=ctx.createOscillator(); o.type=L.type||'sawtooth'; o.frequency.value=f;
+      o.detune.value=pos*(L.detune||0)+(Math.random()*2-1)*2.5; // analog drift
+      const g=ctx.createGain(); g.gain.value=(L.level??1)/Math.sqrt(n);
+      o.connect(g);
+      if(n>1&&L.spread){ const p=ctx.createStereoPanner(); p.pan.value=pos*L.spread; g.connect(p); p.connect(sum); } else g.connect(sum);
+      o.start(t+Math.random()*0.003); nodes.push(o);
+    }
+  });
+  if(P.sub){ const o=ctx.createOscillator(); o.type='sine'; o.frequency.value=base/2; const g=ctx.createGain(); g.gain.value=P.sub; o.connect(g); g.connect(sum); o.start(t); nodes.push(o); }
+  if(P.noise){ const s=ctx.createBufferSource(); s.buffer=dawNoise(ctx); s.loop=true; const g=ctx.createGain(); g.gain.value=P.noise; s.connect(g); g.connect(sum); s.start(t,Math.random()); nodes.push(s); }
+  let pre=sum;
+  if(P.drive){ const sh=ctx.createWaveShaper(); sh.curve=dawTanhCurve(1+P.drive*6); sh.oversample='2x'; const dg=ctx.createGain(); dg.gain.value=1/(1+P.drive*1.5); sum.connect(sh); sh.connect(dg); pre=dg; }
+  let post;
+  const filters=[];
+  if(P.formant){ // vowel "ah": three formant bands in parallel
+    post=ctx.createGain();
+    [[800,1],[1150,0.55],[2900,0.25]].forEach(([fr,gn])=>{ const b=ctx.createBiquadFilter(); b.type='bandpass'; b.frequency.value=fr*Math.pow(2,(pitch-60)/48); b.Q.value=7; const g=ctx.createGain(); g.gain.value=gn*8; pre.connect(b); b.connect(g); g.connect(post); });
+  } else {
+    const kt=Math.pow(2,((pitch-60)/12)*(P.keytrack||0));
+    const fBase=Math.min(18000,(P.cutoff||2000)*kt), amt=(P.fenv||0)*(0.4+0.6*vel);
+    const f1=ctx.createBiquadFilter(),f2=ctx.createBiquadFilter();
+    f1.type=f2.type='lowpass'; f1.Q.value=P.q||0.7; f2.Q.value=0.5;
+    [f1,f2].forEach(f=>{
+      f.frequency.setValueAtTime(fBase,t);
+      if(amt){ const fa=P.fattack||0.003; f.frequency.linearRampToValueAtTime(Math.min(19000,fBase+amt),t+fa); f.frequency.setTargetAtTime(Math.min(19000,fBase+amt*(P.fsus??0)),t+fa,(P.fdecay||0.3)/3); }
+    });
+    pre.connect(f1); f1.connect(f2); post=f2; filters.push(f1,f2);
+  }
+  const amp=ctx.createGain(), peak=0.3*Math.pow(vel,1.2);
+  amp.gain.setValueAtTime(0.0001,t); amp.gain.linearRampToValueAtTime(peak,t+Math.max(0.002,A)); amp.gain.setTargetAtTime(Math.max(0.0001,peak*S),t+Math.max(0.002,A),Math.max(0.01,D/3));
+  post.connect(amp); amp.connect(dest);
+  if(P.lfo){
+    const L=P.lfo, lfo=ctx.createOscillator(); lfo.frequency.value=L.rate||5;
+    const depthDelay=L.delay||0;
+    if(L.pitch){ const g=ctx.createGain(); g.gain.setValueAtTime(0,t); g.gain.linearRampToValueAtTime(L.pitch,t+depthDelay+0.3); lfo.connect(g); nodes.forEach(o=>o.detune&&g.connect(o.detune)); }
+    if(L.filter&&filters.length){ const g=ctx.createGain(); g.gain.value=L.filter; lfo.connect(g); filters.forEach(f=>g.connect(f.frequency)); }
+    if(L.amp){ const trem=ctx.createGain(); trem.gain.value=1-L.amp/2; const g=ctx.createGain(); g.gain.value=L.amp/2; lfo.connect(g); g.connect(trem.gain); amp.disconnect(); amp.connect(trem); trem.connect(dest); }
+    lfo.start(t); nodes.push(lfo);
+  }
+  return{stop(at){ const rt=Math.max(at||ctx.currentTime,t+0.005); dawEnvRelease(amp.gain,rt,R); nodes.forEach(o=>{ try{ o.stop(rt+R*1.6+0.05); }catch(e){} }); }};
+}
+// ── tine electric piano: FM bell attack that mellows, stereo tremolo ──
+function dawEPVoice(inst,pitch,dest,velocity,t,ctx){
+  const P=inst.params, vel=Math.max(0.05,(velocity??100)/127), f=dawMidiToFreq(pitch);
+  const car=ctx.createOscillator(); car.frequency.value=f;
+  const mod=ctx.createOscillator(); mod.frequency.value=f*(P.ratio||1);
+  const mg=ctx.createGain(); mg.gain.setValueAtTime(f*(P.index||1.6)*(0.4+vel),t); mg.gain.setTargetAtTime(f*0.3,t,0.25);
+  mod.connect(mg); mg.connect(car.frequency);
+  const tine=ctx.createOscillator(); tine.frequency.value=f*(P.tine||14); const tg=ctx.createGain(); tg.gain.setValueAtTime(0.12*vel,t); tg.gain.setTargetAtTime(0.0001,t,0.03); tine.connect(tg);
+  const env=ctx.createGain(), peak=0.32*Math.pow(vel,1.3);
+  env.gain.setValueAtTime(0.0001,t); env.gain.linearRampToValueAtTime(peak,t+0.003); env.gain.setTargetAtTime(peak*0.25,t+0.003,(P.decay||1.6)/2.5);
+  car.connect(env); tg.connect(env);
+  const pL=ctx.createStereoPanner(),lfo=ctx.createOscillator(),lg=ctx.createGain(); lfo.frequency.value=P.trem||4.5; lg.gain.value=0.35; lfo.connect(lg); lg.connect(pL.pan);
+  env.connect(pL); pL.connect(dest);
+  [car,mod,tine,lfo].forEach(o=>o.start(t));
+  const R=P.release||0.5;
+  return{stop(at){ const rt=Math.max(at||ctx.currentTime,t+0.005); dawEnvRelease(env.gain,rt,R); [car,mod,tine,lfo].forEach(o=>{ try{ o.stop(rt+R*1.6+0.05); }catch(e){} }); }};
+}
+function dawInstrumentStatus(name){
+  const i=STUDIO_INSTRUMENTS.find(x=>x.name===name); if(!i) return '';
+  if(i.engine==='sample'){ const s=(dawSampleCache[i.lib]||{}).state||'idle'; return s==='ready'?'<span style="color:#4ade80">● Sampled</span>':s==='loading'?'◌ Loading samples…':s==='failed'?'○ Synth fallback (offline)':'◌ Sampled — loads on first use'; }
+  return i.engine==='ultra'?'◆ Ultra synth':'◆ Synth';
+}
+function dawSetInstrument(name){
+  const track=dawCurrentTrackForPanel(); if(track) track.instrument=name;
+  dawCurrentInstrumentIndex=Math.max(0,STUDIO_INSTRUMENTS.findIndex(i=>i.name===name));
+  const sel=document.getElementById('dawInstSelect'); if(sel) sel.value=name;
+  const st=document.getElementById('dawInstName'); if(st) st.innerHTML=dawInstrumentStatus(name);
+  const inst=STUDIO_INSTRUMENTS[dawCurrentInstrumentIndex];
+  const preview=()=>{ const dest=track?dawTrackOutputNode(track):dawEnsureMaster(); const v=dawStartVoice(name,60,dest,96); setTimeout(()=>v.stop(),450); };
+  if(inst.engine==='sample') dawLoadSampleLib(inst.lib).then(()=>{ const s=document.getElementById('dawInstName'); if(s) s.innerHTML=dawInstrumentStatus(name); preview(); });
+  else preview();
+}
+function dawSetDrumKit(kit){
+  const track=dawCurrentTrackForPanel(); if(!track) return;
+  track.drumKit=kit; const dest=dawTrackOutputNode(track), t=getCtx().currentTime+0.02, spb=60/dawProject.bpm/2;
+  ['kick','hat','snare','hat','kick','kick','snare','openhat'].forEach((d,i)=>dawDrumHit(d,t+i*spb,dest,null,kit)); // audition the kit
+}
+
+// ── drum kits (pure synthesis — no third-party samples) ──
+const DAW_DRUM_KITS={
+  'Studio':{kick:{f0:110,f1:52,pd:0.06,len:0.45,click:0.35,drive:0.15},snare:{t1:190,t2:330,td:0.09,nd:0.2,nf:2400,tone:0.45,noise:0.75},hat:{c:0.05,o:0.38,metal:0.45},clap:{d:0.22},tom:{f0:170,f1:105,d:0.45},cym:{d:1.6},lofi:false},
+  '808':{kick:{f0:140,f1:46,pd:0.09,len:1.1,click:0.08,drive:0.1},snare:{t1:240,t2:480,td:0.12,nd:0.16,nf:3500,tone:0.7,noise:0.5},hat:{c:0.045,o:0.42,metal:1},clap:{d:0.28},tom:{f0:150,f1:95,d:0.6},cym:{d:1.8},lofi:false},
+  '909':{kick:{f0:210,f1:55,pd:0.04,len:0.38,click:0.6,drive:0.45},snare:{t1:200,t2:360,td:0.07,nd:0.22,nf:4500,tone:0.35,noise:0.95},hat:{c:0.04,o:0.33,metal:0.7},clap:{d:0.25},tom:{f0:190,f1:120,d:0.35},cym:{d:1.4},lofi:false},
+  'Techno':{kick:{f0:170,f1:48,pd:0.05,len:0.5,click:0.45,drive:0.75},snare:{t1:210,t2:320,td:0.06,nd:0.14,nf:3000,tone:0.4,noise:0.8},hat:{c:0.03,o:0.26,metal:0.85},clap:{d:0.3},tom:{f0:160,f1:90,d:0.3},cym:{d:1.1},lofi:false},
+  'Lo-Fi':{kick:{f0:95,f1:50,pd:0.07,len:0.4,click:0.15,drive:0.3},snare:{t1:180,t2:300,td:0.08,nd:0.18,nf:2000,tone:0.5,noise:0.6},hat:{c:0.05,o:0.3,metal:0.4},clap:{d:0.2},tom:{f0:150,f1:100,d:0.4},cym:{d:1.2},lofi:true},
+};
+function dawProDrumHit(type,t,dest,ctx,kitName){
+  const K=DAW_DRUM_KITS[kitName]||DAW_DRUM_KITS.Studio;
+  let out=dest;
+  if(K.lofi){ const lp=ctx.createBiquadFilter(); lp.type='lowpass'; lp.frequency.value=3800; const sh=ctx.createWaveShaper(); sh.curve=dawTanhCurve(2.2); lp.connect(sh); sh.connect(dest); out=lp; }
+  const noiseSrc=(when,dur)=>{ const s=ctx.createBufferSource(); s.buffer=dawNoise(ctx); s.start(when,Math.random()*1.5,dur+0.05); return s; };
+  const envGain=(peak,attack,decay)=>{ const g=ctx.createGain(); g.gain.setValueAtTime(0.0001,t); g.gain.exponentialRampToValueAtTime(peak,t+attack); g.gain.exponentialRampToValueAtTime(0.0001,t+attack+decay); return g; };
+  const metal=(base,dur,peak,hp)=>{ // six detuned squares at inharmonic ratios = classic analog hat/cymbal metal
+    const sum=ctx.createGain(); sum.gain.value=0.75; // squares lose most energy in the 7–10 kHz band-pass, so start hot
+    [2,3,4.16,5.43,6.79,8.21].forEach(r=>{ const o=ctx.createOscillator(); o.type='square'; o.frequency.value=base*r; o.connect(sum); o.start(t); o.stop(t+dur+0.05); });
+    const bp=ctx.createBiquadFilter(); bp.type='bandpass'; bp.frequency.value=10000; bp.Q.value=0.8;
+    const h=ctx.createBiquadFilter(); h.type='highpass'; h.frequency.value=hp;
+    const g=envGain(peak,0.001,dur); sum.connect(bp); bp.connect(h); h.connect(g); g.connect(out);
+  };
+  switch(type){
+    case 'kick':{
+      const k=K.kick, o=ctx.createOscillator(); o.type='sine';
+      o.frequency.setValueAtTime(k.f0,t); o.frequency.exponentialRampToValueAtTime(k.f1,t+k.pd); o.frequency.exponentialRampToValueAtTime(k.f1*0.9,t+k.len);
+      const g=envGain(1,0.002,k.len);
+      let node=o;
+      if(k.drive){ const sh=ctx.createWaveShaper(); sh.curve=dawTanhCurve(1+k.drive*4); o.connect(sh); node=sh; }
+      node.connect(g); g.connect(out); o.start(t); o.stop(t+k.len+0.05);
+      if(k.click){ const n=noiseSrc(t,0.01); const hp=ctx.createBiquadFilter(); hp.type='highpass'; hp.frequency.value=2500; const cg=envGain(k.click,0.0005,0.008); n.connect(hp); hp.connect(cg); cg.connect(out); }
+      break;
+    }
+    case 'snare':{
+      const s=K.snare;
+      [s.t1,s.t2].forEach((f,i)=>{ const o=ctx.createOscillator(); o.type='triangle'; o.frequency.setValueAtTime(f*1.15,t); o.frequency.exponentialRampToValueAtTime(f,t+0.02); const g=envGain(0.6*s.tone*(i?0.5:1),0.001,s.td); o.connect(g); g.connect(out); o.start(t); o.stop(t+s.td+0.05); });
+      const n=noiseSrc(t,s.nd); const hp=ctx.createBiquadFilter(); hp.type='highpass'; hp.frequency.value=900;
+      const pk=ctx.createBiquadFilter(); pk.type='peaking'; pk.frequency.value=s.nf; pk.Q.value=0.8; pk.gain.value=6;
+      const g=envGain(0.5*s.noise,0.001,s.nd); n.connect(hp); hp.connect(pk); pk.connect(g); g.connect(out);
+      break;
+    }
+    case 'clap':{
+      const n=noiseSrc(t,K.clap.d+0.05), bp=ctx.createBiquadFilter(); bp.type='bandpass'; bp.frequency.value=1150; bp.Q.value=1.1;
+      const g=ctx.createGain(); g.gain.setValueAtTime(0.0001,t);
+      [0,0.011,0.022].forEach(o=>{ g.gain.setValueAtTime(0.9,t+o); g.gain.exponentialRampToValueAtTime(0.08,t+o+0.009); });
+      g.gain.setValueAtTime(0.75,t+0.031); g.gain.exponentialRampToValueAtTime(0.0001,t+0.031+K.clap.d);
+      n.connect(bp); bp.connect(g); g.connect(out);
+      break;
+    }
+    case 'hat': case 'openhat':{
+      const dur=type==='hat'?K.hat.c:K.hat.o;
+      metal(40,dur,0.55*K.hat.metal+0.05,7000);
+      if(K.hat.metal<1){ const n=noiseSrc(t,dur), hp=ctx.createBiquadFilter(); hp.type='highpass'; hp.frequency.value=8000; const g=envGain(0.4*(1-K.hat.metal),0.001,dur); n.connect(hp); hp.connect(g); g.connect(out); }
+      break;
+    }
+    case 'cymbal':{
+      metal(51,K.cym.d,0.16,5500);
+      const n=noiseSrc(t,K.cym.d), hp=ctx.createBiquadFilter(); hp.type='highpass'; hp.frequency.value=6000; const g=envGain(0.25,0.002,K.cym.d); n.connect(hp); hp.connect(g); g.connect(out);
+      break;
+    }
+    case 'rim':{
+      const o=ctx.createOscillator(); o.type='triangle'; o.frequency.value=1750; const g=envGain(0.5,0.0005,0.03); o.connect(g); g.connect(out); o.start(t); o.stop(t+0.06);
+      const n=noiseSrc(t,0.02), bp=ctx.createBiquadFilter(); bp.type='bandpass'; bp.frequency.value=4000; const ng=envGain(0.35,0.0005,0.015); n.connect(bp); bp.connect(ng); ng.connect(out);
+      break;
+    }
+    case 'tom':{
+      const k=K.tom, o=ctx.createOscillator(); o.type='sine'; o.frequency.setValueAtTime(k.f0,t); o.frequency.exponentialRampToValueAtTime(k.f1,t+k.d*0.6);
+      const g=envGain(0.85,0.002,k.d); o.connect(g); g.connect(out); o.start(t); o.stop(t+k.d+0.05);
+      const n=noiseSrc(t,0.05), lp=ctx.createBiquadFilter(); lp.type='lowpass'; lp.frequency.value=2500; const ng=envGain(0.15,0.001,0.04); n.connect(lp); lp.connect(ng); ng.connect(out);
+      break;
+    }
+  }
+}
+
+// ── mastering chain (live master bus AND the offline full-mix render) ──
+const DAW_MASTER_PRESETS={
+  'Off':null,
+  // 'drive' is level-calibrated (BS.1770, on a full drums/bass/piano/strings test mix that reads −17 LUFS unmastered):
+  // Clean ≈ −15, Warm / Vocal forward ≈ −13, Loud ≈ −10, Club ≈ −9 LUFS — every peak held at the ceiling.
+  'Clean':{low:0,lowMid:0,presence:0,high:0.5,thr:-12,ratio:1.5,att:0.03,rel:0.3,width:1,drive:-2.2,ceiling:-1},
+  'Warm':{low:1.5,lowMid:-1,presence:0,high:0,thr:-16,ratio:2,att:0.02,rel:0.25,width:1.05,drive:-0.5,ceiling:-1},
+  'Vocal forward':{low:-0.5,lowMid:-1.5,presence:2,high:1,thr:-16,ratio:2.5,att:0.015,rel:0.2,width:1,drive:-0.5,ceiling:-1},
+  'Loud (streaming)':{low:1,lowMid:-1.5,presence:0.5,high:1.5,thr:-20,ratio:3,att:0.01,rel:0.15,width:1.1,drive:2.6,ceiling:-1},
+  'Club':{low:3,lowMid:-2,presence:0,high:1,thr:-20,ratio:4,att:0.005,rel:0.12,width:1.15,drive:3.6,ceiling:-0.8},
+};
+function dawBuildMasterChain(ctx,name,input,output){
+  const P=DAW_MASTER_PRESETS[name];
+  if(!P){ input.connect(output); return [input]; }
+  const nodes=[];
+  const bq=(type,f,g,q)=>{ const b=ctx.createBiquadFilter(); b.type=type; b.frequency.value=f; b.gain.value=g; if(q) b.Q.value=q; nodes.push(b); return b; };
+  const chain=[bq('lowshelf',110,P.low),bq('peaking',300,P.lowMid,0.8),bq('peaking',3200,P.presence||0,0.9),bq('highshelf',10000,P.high)];
+  const comp=ctx.createDynamicsCompressor(); comp.threshold.value=P.thr; comp.ratio.value=P.ratio; comp.attack.value=P.att; comp.release.value=P.rel; comp.knee.value=6; nodes.push(comp); chain.push(comp);
+  const makeup=ctx.createGain(); makeup.gain.value=1; nodes.push(makeup); chain.push(makeup); // DynamicsCompressor already applies its own makeup gain; presets are level-calibrated via 'drive'
+  for(let i=0;i<chain.length-1;i++) chain[i].connect(chain[i+1]);
+  input.connect(chain[0]);
+  let last=makeup;
+  if(P.width&&P.width!==1){ // mid/side width matrix
+    const w=P.width, sp=ctx.createChannelSplitter(2), mg=ctx.createChannelMerger(2);
+    const m=(a,b,src,dst,ch)=>{ const g=ctx.createGain(); g.gain.value=a; sp.connect(g,src); g.connect(mg,0,dst); nodes.push(g); };
+    last.connect(sp); m(0.5*(1+w),0,0,0); m(0.5*(1-w),0,1,0); m(0.5*(1-w),0,0,1); m(0.5*(1+w),0,1,1);
+    nodes.push(sp,mg); last=mg;
+  }
+  const drive=ctx.createGain(); drive.gain.value=Math.pow(10,(P.drive||0)/20);
+  const lim=ctx.createDynamicsCompressor(); lim.threshold.value=-3; lim.knee.value=0; lim.ratio.value=20; lim.attack.value=0.002; lim.release.value=0.08;
+  const clip=ctx.createWaveShaper(); clip.curve=dawTanhCurve(1.15); clip.oversample='4x'; // musical soft-clip for anything the limiter lets through
+  const hard=ctx.createWaveShaper(); hard.curve=new Float32Array([-1,1]); hard.oversample='none'; // exact ±1 clamp: oversampling filters can overshoot, this can't
+  const ceil=ctx.createGain(); ceil.gain.value=Math.pow(10,P.ceiling/20);
+  last.connect(drive); drive.connect(lim); lim.connect(clip); clip.connect(hard); hard.connect(ceil); ceil.connect(output);
+  nodes.push(drive,lim,clip,hard,ceil);
+  return nodes;
+}
+let dawMasterNodes=[],dawLufsAnalyser=null;
+function dawApplyMasterPreset(name){
+  if(!DAW_MASTER_PRESETS.hasOwnProperty(name)) name='Clean';
+  dawProject.masterPreset=name;
+  if(!dawMasterGain||!dawMasterOut) return;
+  try{ dawMasterGain.disconnect(); }catch(e){}
+  dawMasterNodes.forEach(n=>{ try{ n.disconnect(); }catch(e){} });
+  dawMasterNodes=dawBuildMasterChain(getCtx(),name,dawMasterGain,dawMasterOut);
+  if(!dawLufsAnalyser){ // K-weighted tap for the live loudness readout
+    const ctx=getCtx(), s1=ctx.createBiquadFilter(), s2=ctx.createBiquadFilter();
+    s1.type='highshelf'; s1.frequency.value=1500; s1.gain.value=4; s2.type='highpass'; s2.frequency.value=38; s2.Q.value=0.5;
+    dawLufsAnalyser=ctx.createAnalyser(); dawLufsAnalyser.fftSize=2048;
+    dawMasterOut.connect(s1); s1.connect(s2); s2.connect(dawLufsAnalyser);
+  }
+}
+const dawLufsHist=[];
+function dawLiveLufs(){
+  if(!dawLufsAnalyser) return null;
+  const d=new Float32Array(dawLufsAnalyser.fftSize); dawLufsAnalyser.getFloatTimeDomainData(d);
+  let s=0; for(let i=0;i<d.length;i++) s+=d[i]*d[i];
+  dawLufsHist.push(s/d.length); if(dawLufsHist.length>9) dawLufsHist.shift(); // ≈400 ms momentary window
+  const ms=dawLufsHist.reduce((a,b)=>a+b,0)/dawLufsHist.length;
+  return ms>1e-10?-0.691+10*Math.log10(ms)+3.01:-Infinity; // analyser is the L/R average: +3 dB ≈ the two-channel sum for centred material
+}
+// ITU-R BS.1770-4 integrated loudness (K-weighting, 400 ms blocks, 75% overlap, -70 LUFS absolute + -10 LU relative gates)
+function dawMeasureLoudness(buf){
+  const sr=buf.sampleRate,nc=buf.numberOfChannels,n=buf.length;
+  let K=Math.tan(Math.PI*1681.974450955533/sr),Vh=Math.pow(10,3.999843853973347/20),Vb=Math.pow(Vh,0.4996667741545416),Q=0.7071752369554196;
+  let a0=1+K/Q+K*K; const s1={b0:(Vh+Vb*K/Q+K*K)/a0,b1:2*(K*K-Vh)/a0,b2:(Vh-Vb*K/Q+K*K)/a0,a1:2*(K*K-1)/a0,a2:(1-K/Q+K*K)/a0};
+  K=Math.tan(Math.PI*38.13547087602444/sr); Q=0.5003270373238773; a0=1+K/Q+K*K;
+  const s2={b0:1,b1:-2,b2:1,a1:2*(K*K-1)/a0,a2:(1-K/Q+K*K)/a0};
+  const block=Math.round(0.4*sr),step=Math.round(0.1*sr),nb=Math.max(0,Math.floor((n-block)/step)+1);
+  const z=new Float64Array(nb); let peak=0;
+  for(let c=0;c<nc;c++){
+    const x=buf.getChannelData(c), y=new Float32Array(n);
+    let x1=0,x2=0,y1=0,y2=0,u1=0,u2=0,w1=0,w2=0;
+    for(let i=0;i<n;i++){
+      const xi=x[i]; const a=Math.abs(xi); if(a>peak) peak=a;
+      const v=s1.b0*xi+s1.b1*x1+s1.b2*x2-s1.a1*y1-s1.a2*y2; x2=x1;x1=xi;y2=y1;y1=v;
+      const w=s2.b0*v+s2.b1*u1+s2.b2*u2-s2.a1*w1-s2.a2*w2; u2=u1;u1=v;w2=w1;w1=w; y[i]=w;
+    }
+    const cs=new Float64Array(n+1); for(let i=0;i<n;i++) cs[i+1]=cs[i]+y[i]*y[i];
+    for(let j=0;j<nb;j++) z[j]+=(cs[j*step+block]-cs[j*step])/block;
+  }
+  const L=v=>-0.691+10*Math.log10(v);
+  const abs=[...z].filter(v=>L(v)>-70);
+  if(!abs.length) return {lufs:-Infinity,peak};
+  const rel=L(abs.reduce((a,b)=>a+b,0)/abs.length)-10;
+  const gated=abs.filter(v=>L(v)>rel);
+  return {lufs:L(gated.reduce((a,b)=>a+b,0)/gated.length),peak};
+}
+// Optional loudness normalisation of the final mix (never pushes peaks over the ceiling).
+function dawFinalizeMaster(buf){
+  let m=dawMeasureLoudness(buf), note='';
+  if(dawSettings.normalizeExport&&isFinite(m.lufs)){
+    const target=dawSettings.lufsTarget||-14, ceilLin=Math.pow(10,-1/20);
+    let gDb=target-m.lufs; const maxDb=20*Math.log10(ceilLin/Math.max(1e-9,m.peak));
+    if(gDb>maxDb){ gDb=maxDb; note='peak ceiling reached — try the "Loud" master preset to go louder'; }
+    const g=Math.pow(10,gDb/20), out=new AudioBuffer({numberOfChannels:buf.numberOfChannels,length:buf.length,sampleRate:buf.sampleRate});
+    for(let c=0;c<buf.numberOfChannels;c++){ const s=buf.getChannelData(c),d=new Float32Array(s.length); for(let i=0;i<s.length;i++) d[i]=s[i]*g; out.copyToChannel(d,c); }
+    buf=out; m=dawMeasureLoudness(buf);
+    if(!note) note='normalised to '+target+' LUFS';
+  }
+  return {buffer:buf,lufs:m.lufs,peakDb:20*Math.log10(Math.max(1e-9,m.peak)),note};
+}
+// WAV writer: 24-bit PCM, or 16-bit with TPDF dither (what mastering engineers use when reducing bit depth).
+function dawEncodeWav(buf,bits){
+  bits=bits===16?16:24;
+  const nc=buf.numberOfChannels,n=buf.length,bps=bits/8,block=nc*bps,size=n*block,sr=buf.sampleRate;
+  const ab=new ArrayBuffer(44+size),dv=new DataView(ab),u8=new Uint8Array(ab);
+  const w=(o,s)=>{ for(let i=0;i<s.length;i++) u8[o+i]=s.charCodeAt(i); };
+  w(0,'RIFF'); dv.setUint32(4,36+size,true); w(8,'WAVE'); w(12,'fmt '); dv.setUint32(16,16,true); dv.setUint16(20,1,true);
+  dv.setUint16(22,nc,true); dv.setUint32(24,sr,true); dv.setUint32(28,sr*block,true); dv.setUint16(32,block,true); dv.setUint16(34,bits,true);
+  w(36,'data'); dv.setUint32(40,size,true);
+  const ch=[]; for(let c=0;c<nc;c++) ch.push(buf.getChannelData(c));
+  let o=44;
+  for(let i=0;i<n;i++) for(let c=0;c<nc;c++){
+    const s=Math.max(-1,Math.min(1,ch[c][i]));
+    if(bits===16){ const v=Math.max(-32768,Math.min(32767,Math.round(s*32767+(Math.random()-Math.random())))); dv.setInt16(o,v,true); o+=2; }
+    else { let v=Math.max(-8388608,Math.min(8388607,Math.round(s*8388607))); if(v<0) v+=0x1000000; u8[o]=v&255; u8[o+1]=(v>>8)&255; u8[o+2]=(v>>16)&255; o+=3; }
+  }
+  return ab;
+}
+function dawWavBlob(buf){ return new Blob([dawEncodeWav(buf,dawSettings.wavBits||24)],{type:'audio/wav'}); }
+
 // ── App shell: one ☰ menu for every page and action ──
 const SHELL_PAGE_NAMES={sheet:'Sheet',create:'Create',piano:'Piano',roll:'Piano Roll',drum:'Drums',learn:'Learn',metro:'Metronome',classic:'Guitar',listen:'Listen',daw:'Studio',dj:'DJ Studio',studio:'Classic Studio',struct:'Structure',tools:'Tools'};
 let shellPage='sheet',hmKb=-1,hmFlat=[];
@@ -16825,6 +17284,8 @@ function hmItems(){
       {icon:'🎤',label:'Record vocal',run:shellInStudio(()=>dawToggleRecordArmGlobal())},
       {icon:'🎙',label:'Add vocal stack (6 stems)',run:shellInStudio(()=>dawAddVocalStack())},
       {icon:'🎚',label:'Mixer',run:shellInStudio(()=>{ dawOpenPanel(); dawSwitchPanelTab('mixer'); })},
+      {icon:'✺',label:'Mastering & loudness',keys:'master lufs limiter loud streaming',run:shellInStudio(()=>{ dawOpenPanel(); dawSwitchPanelTab('mixer'); })},
+      {icon:'🎹',label:'Instruments (30+ sampled & synth)',keys:'piano guitar strings synth sound',run:shellInStudio(()=>{ const t=dawProject.tracks.find(x=>x.id===dawView.selectedTrackId)||dawProject.tracks.find(x=>x.type!=='vocals'&&x.type!=='drums')||dawAddTrackOfType('keys'); dawOpenInstrumentPanelForTrack(t.id); dawSwitchPanelTab('instrument'); })},
       {icon:'〰',label:'Channel EQ on selected track',keys:'equalizer eq',run:shellInStudio(()=>dawAddChannelEQ())},
       {icon:'↓',label:'Import audio, stems or MIDI',keys:'suno logic garageband wav mp3 mid',run:shellInStudio(()=>dawImportAudio())},
       {icon:'💾',label:'Save project',run:shellInStudio(()=>dawSaveProject())},
