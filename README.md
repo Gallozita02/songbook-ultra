@@ -93,12 +93,12 @@ Built by **Carla Mateus** as part of her portfolio and AI Operations studies at 
 - **Tap tempo** — tap a button in rhythm to auto-detect BPM
 
 ### 🔍 Song Detector
-- Slide-up panel with live spectrum visualizer
-- Real-time instrument detection (Guitar / Piano / Bass / Drums) with animated confidence meters
-- Live chord detection from microphone (same chroma-based matching as Listen Mode)
-- Song matching — weights recently-played chords higher than ones played once early on, and checks that the matched chords appear in the same order the song actually uses them, not just that the same chords occur somewhere
-- Match cards explain *why* they matched ("detected G, B, C, Cm — 4/4 chords present") and glow green/amber/purple by confidence tier
-- "Send to Writing Partner" hands the detected progression straight to the Writing Partner tab to keep building on it
+A full page (☰ → Song Detector) with three modes:
+- **Live** — play or sing near the mic: live chords, chord history, a frequency-balance meter (lows / low-mids / high-mids / highs) and matching songs from the library
+- **Key-independent matching** — every library song is tried in all 12 keys, so a song played in another key or with a capo still matches ("2 semitones higher than the original, or capo 2")
+- **File / Studio** — drop an audio file or pick a Studio clip: tempo, key and a bar-by-bar chord chart (bass-note aware, split bars when the harmony changes mid-bar), play-along highlighting, transpose, matching songs, **Open in Sheet** and **Rebuild in Studio** (your audio as a reference track + detected chords + a groove)
+- **Identify online** (optional) — recognise any song with your own AudD API token; a short clip is sent only when you press Identify
+- "Send to Writing Partner" hands the detected progression to the Writing Partner
 
 ### 🔧 Tools Page
 - **Visual Tuner** — real YIN pitch detection, semicircular needle gauge, note + cents readout, selectable reference pitch (432–444 Hz), guitar string reference row

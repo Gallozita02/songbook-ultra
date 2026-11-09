@@ -2130,6 +2130,66 @@ body.shell-v2 .center{background:
 
 #page-sheet input.sh-title,#page-sheet input.sh-meta,#page-sheet input.sh-title:focus,#page-sheet input.sh-meta:focus{background:transparent!important;border:none!important;box-shadow:none!important}
 #page-sheet .sh-title{font-family:var(--sans)!important;font-weight:800!important;letter-spacing:-.03em}
+
+/* ══════════════ SONG DETECTOR page (Tier 17) ══════════════ */
+#page-detect{background:transparent!important;font-family:var(--sans);overflow:auto}
+.dt{max-width:1180px;margin:0 auto;padding:6px 28px 48px;display:flex;flex-direction:column;gap:16px;color:#f6f3ff}
+.dt-tabs{display:inline-flex;align-self:flex-start;gap:4px;padding:4px;border-radius:999px;background:rgba(17,14,34,.72);border:1px solid rgba(167,139,250,.16)}
+.dt-tabs button{border:none;background:none;color:#a39cc0;font:inherit;font-size:13px;font-weight:700;padding:9px 18px;border-radius:999px;cursor:pointer}
+.dt-tabs button.on{background:linear-gradient(135deg,#7c3aed,#ec4899);color:#fff;box-shadow:0 6px 18px rgba(124,58,237,.35)}
+.dt-sec{display:flex;flex-direction:column;gap:14px}
+.dt-livehead{display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;background:rgba(17,14,34,.72);border:1px solid rgba(167,139,250,.14);border-radius:18px;padding:16px 18px;color:#c9c2e6;font-size:14px}
+.dt-livehead b{color:#fff}
+.dt-btn{border:none;border-radius:999px;padding:10px 18px;font:inherit;font-size:13px;font-weight:800;color:#fff;cursor:pointer;background:linear-gradient(135deg,#7c3aed,#ec4899);box-shadow:0 6px 18px rgba(124,58,237,.3);text-decoration:none;display:inline-flex;align-items:center;gap:6px}
+.dt-btn.ghost{background:rgba(255,255,255,.05);border:1px solid rgba(167,139,250,.22);box-shadow:none;color:#e9e4ff}
+.dt-btn:hover{filter:brightness(1.08)}
+/* live detector body, restyled */
+#page-detect .detector-body{display:grid;grid-template-columns:1fr 1.1fr;gap:16px}
+#page-detect .detector-left,#page-detect .detector-right{background:rgba(17,14,34,.72);border:1px solid rgba(167,139,250,.14);border-radius:18px;padding:18px}
+#page-detect .detector-section-label{font-size:10.5px;font-weight:800;letter-spacing:.14em;color:#a39cc0}
+#page-detect .detector-spectrum{width:100%;height:90px;border-radius:12px;background:#0b0918}
+#page-detect .detector-chord-display{font-size:64px;font-weight:800;letter-spacing:-.03em;background:linear-gradient(90deg,#a78bfa,#f472b6 60%,#5eead4);-webkit-background-clip:text;background-clip:text;color:transparent;line-height:1.1;margin:4px 0}
+#page-detect .inst-meter-bar-wrap{background:#0b0918;border-radius:999px;height:8px}
+#page-detect .inst-meter-bar{background:linear-gradient(90deg,#7c3aed,#ec4899)!important;border-radius:999px;height:8px}
+#page-detect .song-match-card{background:rgba(255,255,255,.03)!important;border:1px solid rgba(167,139,250,.18)!important;border-radius:14px!important}
+@media (max-width:820px){ #page-detect .detector-body{grid-template-columns:1fr} }
+/* file analysis */
+.dt-drop{display:flex;flex-wrap:wrap;align-items:center;gap:12px;padding:22px;border:2px dashed rgba(167,139,250,.3);border-radius:18px;background:rgba(17,14,34,.55);transition:border-color .15s,background .15s}
+.dt-drop.over{border-color:#ec4899;background:rgba(236,72,153,.08)}
+.dt-drop b{font-size:15px}.dt-drop>span{color:#a39cc0;font-size:13px}
+.dt-or{margin-left:auto;color:#a39cc0;font-size:12px}
+.dt-drop select{background:#0b0918;border:1px solid rgba(167,139,250,.2);color:#f6f3ff;border-radius:10px;padding:8px;font:inherit;font-size:12px;max-width:260px}
+.dt-prog{height:36px;border-radius:12px;background:rgba(17,14,34,.72);position:relative;overflow:hidden;border:1px solid rgba(167,139,250,.14)}
+.dt-prog div{position:absolute;inset:0 auto 0 0;width:0;background:linear-gradient(90deg,rgba(124,58,237,.6),rgba(236,72,153,.6));transition:width .2s}
+.dt-prog span{position:relative;line-height:36px;padding:0 14px;font-size:12.5px;font-weight:600}
+.dt-sum{display:flex;flex-wrap:wrap;gap:10px}
+.dt-pill{background:rgba(17,14,34,.72);border:1px solid rgba(167,139,250,.14);border-radius:14px;padding:10px 14px;display:flex;flex-direction:column;gap:2px;min-width:110px}
+.dt-pill small{font-size:10px;font-weight:800;letter-spacing:.14em;color:#a39cc0}
+.dt-pill b{font-size:16px}
+.dt-actions{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.dt-chart{display:grid;grid-template-columns:repeat(auto-fill,minmax(92px,1fr));gap:8px;max-height:380px;overflow:auto;padding:2px}
+.dt-bar{position:relative;background:rgba(17,14,34,.72);border:1px solid rgba(167,139,250,.14);border-radius:12px;padding:18px 10px 10px;display:flex;gap:6px;justify-content:center;cursor:pointer;transition:border-color .15s,box-shadow .15s}
+.dt-bar small{position:absolute;left:8px;top:5px;font-size:9.5px;color:#6f6890;font-family:var(--mono)}
+.dt-bar span{font-weight:800;font-size:16px;color:#5eead4}
+.dt-bar:hover{border-color:rgba(236,72,153,.5)}
+.dt-bar.on{border-color:#ec4899;box-shadow:0 0 0 1px #ec4899,0 0 22px rgba(236,72,153,.35)}
+.dt-h{font-size:12px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:#a39cc0;margin-top:6px}
+.dt-matches .song-match-card{background:rgba(17,14,34,.72)!important;border:1px solid rgba(167,139,250,.16)!important;border-radius:14px!important;margin-bottom:8px}
+.dt-note{color:#8f88b0;font-size:12px;line-height:1.5}
+/* identify */
+.dt-idcard{max-width:640px;background:rgba(17,14,34,.72);border:1px solid rgba(167,139,250,.14);border-radius:18px;padding:20px;display:flex;flex-direction:column;gap:12px}
+.dt-lbl{display:flex;flex-direction:column;gap:6px;font-size:11px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:#a39cc0}
+.dt-lbl input{background:#0b0918;border:1px solid rgba(167,139,250,.2);color:#f6f3ff;border-radius:10px;padding:10px 12px;font:inherit;font-size:13px;letter-spacing:0;text-transform:none}
+.dt-chk{display:flex;gap:8px;align-items:center;font-size:12.5px;color:#c9c2e6}
+.dt-chk input{accent-color:#a78bfa}
+.dt-idhit{display:flex;flex-direction:column;gap:10px;background:linear-gradient(135deg,rgba(124,58,237,.18),rgba(236,72,153,.12));border:1px solid rgba(236,72,153,.35);border-radius:14px;padding:14px}
+.dt-idhit small{font-size:10px;font-weight:800;letter-spacing:.14em;color:#f9a8d4}
+.dt-idhit b{display:block;font-size:20px}.dt-idhit span{color:#c9c2e6;font-size:13px}
+
+.dt-sec[hidden],.dt-prog[hidden],#dtResult[hidden]{display:none!important}
+#page-detect .detector-left,#page-detect .detector-right{width:auto!important;max-width:none!important;min-width:0!important;flex:none!important}
+#page-detect .detector-body{width:100%!important;max-width:none!important;padding:0!important;height:auto!important;overflow:visible!important}
+body.pg-detect .sh-transport{display:none!important}
 </style>
 </head>
 <body class="shell-v2">
@@ -2673,6 +2733,8 @@ body.shell-v2 .center{background:
   </div>
 </div>
 
+<!-- SONG DETECTOR page — built by dtInit() -->
+<div class="page" id="page-detect"></div>
 <!-- BEAT PADS (MPC-style) — built by mpcInit() -->
 <div class="page" id="page-mpc"></div>
 <!-- PIANO ROLL -->
@@ -3346,18 +3408,18 @@ body.shell-v2 .center{background:
       <div class="detector-section-label">LIVE SPECTRUM</div>
       <canvas id="detectorSpectrumCanvas" class="detector-spectrum"></canvas>
 
-      <div class="detector-section-label" style="margin-top:14px">INSTRUMENT</div>
+      <div class="detector-section-label" style="margin-top:14px">FREQUENCY BALANCE <span style="opacity:.6;letter-spacing:0;text-transform:none">— where the sound's energy is</span></div>
       <div class="instrument-meters">
-        <div class="inst-meter-row"><span class="inst-meter-name">Guitar</span>
+        <div class="inst-meter-row"><span class="inst-meter-name" title="20–250 Hz: bass, kick drum">Lows</span>
           <div class="inst-meter-bar-wrap"><div class="inst-meter-bar" id="meter-guitar"></div></div>
           <span class="inst-meter-pct" id="meter-pct-guitar">0%</span></div>
-        <div class="inst-meter-row"><span class="inst-meter-name">Piano</span>
+        <div class="inst-meter-row"><span class="inst-meter-name" title="250 Hz–1 kHz: body of voices and instruments">Low-mids</span>
           <div class="inst-meter-bar-wrap"><div class="inst-meter-bar piano" id="meter-piano"></div></div>
           <span class="inst-meter-pct" id="meter-pct-piano">0%</span></div>
-        <div class="inst-meter-row"><span class="inst-meter-icon">🎵</span><span class="inst-meter-name">Bass</span>
+        <div class="inst-meter-row"><span class="inst-meter-name" title="1–4 kHz: presence, vocals, guitar bite">High-mids</span>
           <div class="inst-meter-bar-wrap"><div class="inst-meter-bar bass" id="meter-bass"></div></div>
           <span class="inst-meter-pct" id="meter-pct-bass">0%</span></div>
-        <div class="inst-meter-row"><span class="inst-meter-name">Drums</span>
+        <div class="inst-meter-row"><span class="inst-meter-name" title="4–16 kHz: air, cymbals, sibilance">Highs</span>
           <div class="inst-meter-bar-wrap"><div class="inst-meter-bar drums" id="meter-drums"></div></div>
           <span class="inst-meter-pct" id="meter-pct-drums">0%</span></div>
       </div>
@@ -8828,7 +8890,7 @@ function showPage(name,btn){
   if(name!=='studio'){ if(typeof stopStudioMixLoops==='function') stopStudioMixLoops(); if(typeof stopStudioLoopPreview==='function' && studioLoopPreviewId) stopStudioLoopPreview(); }
   if(typeof tunerRunning!=='undefined' && tunerRunning && name!=='tools') stopTuner();
   if(typeof toolsMediaRecorder!=='undefined' && toolsMediaRecorder && toolsMediaRecorder.state==='recording' && name!=='tools') stopToolsRecording();
-  if(typeof detectorActive!=='undefined' && detectorActive && name!=='listen') stopDetector();
+  if(typeof detectorActive!=='undefined' && detectorActive && name!=='listen' && name!=='detect') stopDetector();
   if(name!=='dj' && typeof stopAllDJ==='function') stopAllDJ();
   if(name!=='daw' && typeof dawStop==='function'){ dawStop(); if(typeof dawStopLoopPreview==='function') dawStopLoopPreview(); }
   if(typeof createPlaying!=='undefined' && createPlaying && name!=='create') stopCreatePlayback();
@@ -8856,6 +8918,8 @@ function showPage(name,btn){
   });
   if(name==='mpc'&&typeof mpcInit==='function') mpcInit();
   if(name==='home'&&typeof homeInit==='function') homeInit();
+  if(name==='detect'&&typeof dtInit==='function') dtInit();
+  if(name!=='detect'&&typeof dtStopPreview==='function') dtStopPreview();
   if(name!=='mpc'&&typeof mpcStopAll==='function') mpcStopAll();
   if(typeof shellOnPage==='function') shellOnPage(name);
 }
@@ -10654,10 +10718,7 @@ let detectorRAF=null;
 let detectedChordHistory=[]; // detected chord NAMES, oldest first, capped — not raw pitches
 let detectorPitchTracker=createPitchTracker(); // own tracker instance — independent of Listen mode's
 
-function openDetector(){
-  const p=document.getElementById('detectorPanel');
-  if(p) p.classList.add('on');
-}
+function openDetector(){ showPage('detect',null); } // the detector is a full page now (Tier 17)
 function closeDetector(){
   const p=document.getElementById('detectorPanel');
   if(p) p.classList.remove('on');
@@ -10743,12 +10804,11 @@ function runDetection(){
   const totalEnergy=lowEnergy+midEnergy+highEnergy;
   if(totalEnergy<10) return; // silence
 
-  const guitarScore=midEnergy*0.6+highEnergy*0.3+lowEnergy*0.1;
-  const pianoScore=midEnergy*0.4+highEnergy*0.4+lowEnergy*0.2;
-  const bassScore=lowEnergy*0.8+midEnergy*0.2;
-  const drumsScore=highEnergy*0.5+lowEnergy*0.3+midEnergy*0.2;
-  const total=(guitarScore+pianoScore+bassScore+drumsScore)||1;
-  updateInstrumentMeters({guitar:guitarScore/total,piano:pianoScore/total,bass:bassScore/total,drums:drumsScore/total});
+  // Honest frequency balance (the old "instrument" meters were guesses from these same bands).
+  // Band edges in bins from the real sample rate: lows 20–250 Hz, low-mids 250–1k, high-mids 1–4k, highs 4–16k.
+  const hz=getCtx().sampleRate/detectorAnalyser.fftSize, band=(f0,f1)=>{ const a=Math.max(1,Math.round(f0/hz)),b=Math.min(freqData.length-1,Math.round(f1/hz)); let e=0; for(let i=a;i<=b;i++){ const v=Math.pow(10,(detectorAnalyser.minDecibels+freqData[i]/255*(detectorAnalyser.maxDecibels-detectorAnalyser.minDecibels))/20); e+=v*v; } return e; };
+  const bands=[band(20,250),band(250,1000),band(1000,4000),band(4000,16000)], bt=bands.reduce((x,y)=>x+y,0)||1;
+  updateInstrumentMeters({guitar:bands[0]/bt,piano:bands[1]/bt,bass:bands[2]/bt,drums:bands[3]/bt});
 
   // Chord detection: same chroma-first + monophonic-fallback pipeline as the Piano page's Listen
   // mode (see computeChroma/matchChordFromChroma/tryDetectChordFromAccumulator above) — chroma
@@ -10812,50 +10872,51 @@ function renderDetectorHistoryChips(){
 // detected once early on and never again, since the player has likely moved past it; (2) order
 // bonus — the matched chords must appear as a subsequence in the SAME relative order the song
 // actually uses them (G→B→C→Cm vs Cm→C→B→G score differently even with identical chord sets).
-function matchSongs(progression){
+// Key-independent song matching: the played progression is tried in all 12 transpositions against
+// every library song, so a song played in another key (or with a capo) still matches. Per
+// transposition the scoring is unchanged: recent chords weigh more (linear recency weight), and
+// matched chords appearing in the song's own order earn a bonus.
+function matchSongs(progression,containerId){
+  const prog=(progression||[]).map(c=>typeof dtNormChord==='function'?dtNormChord(c):c).filter(Boolean);
   const results=[];
   Object.entries(FULL_SONGS).forEach(([key,song])=>{
     const songChords=[];
     song.sections.forEach(sec=>(sec.lines||[]).forEach(line=>(line.chords||[]).forEach(c=>{
-      const name=typeof c==='string'?c:c.name;
+      const name=dtNormChord(typeof c==='string'?c:c.name);
       if(name && !songChords.includes(name)) songChords.push(name);
     })));
-    if(!songChords.length) return;
-
-    let weightedHit=0,weightedTotal=0,matchedCount=0;
-    progression.forEach((c,i)=>{
-      const w=i+1; // linear recency weight — the most-recently-played chord (last in the array) counts most
-      weightedTotal+=w;
-      if(songChords.includes(c)){ weightedHit+=w; matchedCount++; }
-    });
-    let confidence=weightedTotal?weightedHit/weightedTotal:0;
-
-    const matchedSeq=progression.filter(c=>songChords.includes(c));
-    let lastIdx=-1,inOrder=true;
-    matchedSeq.forEach(c=>{
-      const idx=songChords.indexOf(c);
-      if(idx<lastIdx) inOrder=false;
-      lastIdx=Math.max(lastIdx,idx);
-    });
-    if(inOrder && matchedSeq.length>=2) confidence=Math.min(1,confidence*1.15);
-
-    if(confidence>0.3 && matchedCount>0){
-      results.push({key,song,confidence,matchedCount,total:progression.length,matchedChords:[...new Set(matchedSeq)]});
+    if(!songChords.length||!prog.length) return;
+    let best=null;
+    for(let t=0;t<12;t++){
+      const p2=prog.map(c=>dtTransposeChord(c,t));
+      let weightedHit=0,weightedTotal=0,matchedCount=0;
+      p2.forEach((c,i)=>{ const w=i+1; weightedTotal+=w; if(songChords.includes(c)){ weightedHit+=w; matchedCount++; } });
+      let confidence=weightedTotal?weightedHit/weightedTotal:0;
+      const matchedSeq=p2.filter(c=>songChords.includes(c));
+      let lastIdx=-1,inOrder=true;
+      matchedSeq.forEach(c=>{ const idx=songChords.indexOf(c); if(idx<lastIdx) inOrder=false; lastIdx=Math.max(lastIdx,idx); });
+      if(inOrder&&matchedSeq.length>=2) confidence=Math.min(1,confidence*1.15);
+      if(t!==0) confidence*=0.985; // on a tie, prefer the original key
+      if(!best||confidence>best.confidence) best={confidence,matchedCount,shift:t,matchedChords:[...new Set(prog.filter((c,i)=>songChords.includes(p2[i])))]};
     }
+    if(best&&best.confidence>0.3&&best.matchedCount>0) results.push({key,song,confidence:best.confidence,matchedCount:best.matchedCount,total:prog.length,matchedChords:best.matchedChords,shift:best.shift});
   });
   results.sort((a,b)=>b.confidence-a.confidence);
-  renderSongMatches(results.slice(0,3));
+  renderSongMatches(results.slice(0,3),containerId);
+  return results;
 }
-function renderSongMatches(matches){
-  const container=document.getElementById('songMatchResults');
+function renderSongMatches(matches,containerId){
+  const container=document.getElementById(containerId||'songMatchResults');
   if(!container) return;
   if(!matches.length){
     container.innerHTML='<div style="color:var(--mu);font-size:12px;padding:12px">No match found yet — keep playing</div>';
     return;
   }
-  container.innerHTML=matches.map(({key,song,confidence,matchedCount,total,matchedChords})=>{
+  container.innerHTML=matches.map(({key,song,confidence,matchedCount,total,matchedChords,shift})=>{
     const tier=confidence>0.8?'high':confidence>=0.5?'medium':'low';
-    const why=`Matched ${escapeHtml(song.title)} — detected ${matchedChords.map(c=>escapeHtml(c)).join(', ')} (${matchedCount}/${total} chords present)${tier==='low'?' — possible match':''}`;
+    // shift t means: played chords + t semitones = the song's chords, i.e. you're t semitones below the original
+    const keyNote=!shift?'in the original key':shift<=6?shift+' semitone'+(shift>1?'s':'')+' lower than the original':(12-shift)+' semitone'+(12-shift>1?'s':'')+' higher than the original (or capo '+(12-shift)+')';
+    const why=`Matched ${escapeHtml(song.title)} — detected ${matchedChords.map(c=>escapeHtml(c)).join(', ')} (${matchedCount}/${total} chords present), ${keyNote}${tier==='low'?' — possible match':''}`;
     return `
     <div class="song-match-card conf-${tier}">
       <div class="song-match-title">${escapeHtml(song.title)}</div>
@@ -18961,6 +19022,266 @@ function djSetMode(mode){
   if(live) llInit(); else llStopAll();
 }
 
+// ══════════════════════════════════════════════════════════════════════════
+// TIER 17 — Song Detector page: Live (mic), File / Studio analysis (tempo,
+// beat grid, key, bar-by-bar chord chart → Sheet / Studio / matching) and
+// optional online identification with the user's own AudD key.
+// ══════════════════════════════════════════════════════════════════════════
+const DT_ROOTS={C:0,'C#':1,Db:1,D:2,'D#':3,Eb:3,E:4,Fb:4,'E#':5,F:5,'F#':6,Gb:6,G:7,'G#':8,Ab:8,A:9,'A#':10,Bb:10,B:11,Cb:11,'B#':0};
+function dtParseChord(name){
+  const m=/^\s*([A-G])([#b♯♭]?)(.*)$/.exec(String(name||'')); if(!m) return null;
+  const acc=m[2].replace('♯','#').replace('♭','b');
+  let suf=m[3].replace(/\/.*$/,'').trim(); // ignore slash bass
+  suf=suf.replace(/^(maj|M)(?!7|9)/,'').replace(/^min/,'m').replace(/^-/,'m');
+  return {root:DT_ROOTS[m[1]+acc]??DT_ROOTS[m[1]],suffix:suf};
+}
+function dtNormChord(name){ const c=dtParseChord(name); return c?NOTES[c.root]+c.suffix:null; }
+function dtTransposeChord(name,n){ const c=dtParseChord(name); return c?NOTES[((c.root+n)%12+12)%12]+c.suffix:name; }
+function dtChordPitches(name){ // triad/7th voicing around C4 for rebuilding in Studio
+  const c=dtParseChord(name); if(!c) return [];
+  const s=c.suffix, minor=/^m(?!aj)/.test(s), dim=/dim|°/.test(s), aug=/aug|\+/.test(s), sus2=/sus2/.test(s), sus4=/sus4?$|sus4/.test(s)&&!sus2;
+  const third=sus2?2:sus4?5:minor||dim?3:4, fifth=dim?6:aug?8:7;
+  const iv=[0,third,fifth]; if(/maj7/.test(s)) iv.push(11); else if(/7/.test(s)) iv.push(dim?9:10);
+  const base=48+c.root+(c.root>7?-12:0)+12; return iv.map(x=>base+x);
+}
+// ── radix-2 FFT (in place) ──
+function dtFFT(re,im){
+  const n=re.length;
+  for(let i=1,j=0;i<n;i++){ let bit=n>>1; for(;j&bit;bit>>=1) j^=bit; j^=bit; if(i<j){ let t=re[i];re[i]=re[j];re[j]=t; t=im[i];im[i]=im[j];im[j]=t; } }
+  for(let len=2;len<=n;len<<=1){ const ang=-2*Math.PI/len, wr=Math.cos(ang), wi=Math.sin(ang);
+    for(let i=0;i<n;i+=len){ let cr=1,ci=0; for(let k=0;k<len/2;k++){ const a=i+k,b=a+len/2, xr=re[b]*cr-im[b]*ci, xi=re[b]*ci+im[b]*cr; re[b]=re[a]-xr; im[b]=im[a]-xi; re[a]+=xr; im[a]+=xi; const t=cr*wr-ci*wi; ci=cr*wi+ci*wr; cr=t; } } }
+}
+const DT_KS_MAJ=[6.35,2.23,3.48,2.33,4.38,4.09,2.52,5.19,2.39,3.66,2.29,2.88], DT_KS_MIN=[6.33,2.68,3.52,5.38,2.60,3.53,2.54,4.75,3.98,2.69,3.34,3.17];
+// Full offline analysis of an AudioBuffer → {bpm, key, beats, bars:[{t,chords}], duration}
+async function dtAnalyze(buf,onProgress){
+  const srIn=buf.sampleRate, dec=Math.max(1,Math.round(srIn/22050)), sr=srIn/dec, n=Math.floor(buf.length/dec);
+  const mono=new Float32Array(n);
+  for(let c=0;c<buf.numberOfChannels;c++){ const d=buf.getChannelData(c); for(let i=0;i<n;i++){ let s=0; for(let k=0;k<dec;k++) s+=d[i*dec+k]||0; mono[i]+=s/dec/buf.numberOfChannels; } }
+  // 1) onset envelope (log-energy rise, ~11.6 ms hop) → tempo by autocorrelation
+  const eh=256, ne=Math.floor(n/eh), env=new Float32Array(ne);
+  let prev=0; for(let i=0;i<ne;i++){ let e=0; for(let k=0;k<eh;k++){ const v=mono[i*eh+k]; e+=v*v; } const l=Math.log(1e-6+e); env[i]=Math.max(0,l-prev); prev=l; }
+  const fps=sr/eh, lagMin=Math.floor(fps*60/180), lagMax=Math.ceil(fps*60/60);
+  let bestLag=lagMin,bestScore=-1;
+  for(let lag=lagMin;lag<=lagMax;lag++){ let s=0; for(let i=lag;i<ne;i++) s+=env[i]*env[i-lag]; const bpm=60*fps/lag, w=Math.exp(-0.5*Math.pow(Math.log2(bpm/120)/0.9,2)); s*=w; if(s>bestScore){ bestScore=s; bestLag=lag; } }
+  // refine with parabolic interpolation
+  const ac=lag=>{ let s=0; for(let i=lag;i<ne;i++) s+=env[i]*env[i-lag]; return s; };
+  const a0=ac(bestLag-1),a1=ac(bestLag),a2=ac(bestLag+1), den=a0-2*a1+a2, shift=den?0.5*(a0-a2)/den:0;
+  const period=bestLag+Math.max(-0.5,Math.min(0.5,shift)), bpm=Math.round(60*fps/period*10)/10;
+  // beat phase: offset maximising onset energy on the grid
+  let bestOff=0,bestSum=-1; for(let off=0;off<period;off++){ let s=0; for(let t=off;t<ne;t+=period) s+=env[Math.round(t)]||0; if(s>bestSum){ bestSum=s; bestOff=off; } }
+  const beats=[]; for(let t=bestOff;t<ne;t+=period) beats.push(t/fps);
+  onProgress&&onProgress(0.2); await dawYield();
+  // 2) chroma frames (FFT 4096 @ ~22 kHz ≈ 5.4 Hz resolution, hop 2048)
+  const N=4096,hop=2048,win=new Float32Array(N); for(let i=0;i<N;i++) win[i]=0.5-0.5*Math.cos(2*Math.PI*i/(N-1));
+  const pcOf=new Int8Array(N/2).fill(-1), wOf=new Float32Array(N/2);
+  for(let k=1;k<N/2;k++){ const f=k*sr/N; if(f<65||f>2100) continue; const m=69+12*Math.log2(f/440); pcOf[k]=((Math.round(m)%12)+12)%12; wOf[k]=1-Math.min(1,Math.abs(m-Math.round(m))*1.6); }
+  const nf=Math.max(0,Math.floor((n-N)/hop)+1), frames=new Array(nf), re=new Float32Array(N), im=new Float32Array(N), total=new Float64Array(12);
+  for(let f=0;f<nf;f++){
+    const o=f*hop; for(let i=0;i<N;i++){ re[i]=mono[o+i]*win[i]; im[i]=0; }
+    dtFFT(re,im);
+    const ch=new Float32Array(12), bs=new Float32Array(12); let en=0;
+    for(let k=1;k<N/2;k++){ const pc=pcOf[k]; if(pc<0) continue; const mag=Math.sqrt(re[k]*re[k]+im[k]*im[k]); ch[pc]+=Math.log(1+mag)*wOf[k]; if(k*sr/N<260) bs[pc]+=mag*wOf[k]; en+=mag; }
+    frames[f]={t:(o+N/2)/sr,ch,bs,en}; for(let i=0;i<12;i++) total[i]+=ch[i];
+    if(f%150===0){ onProgress&&onProgress(0.2+0.6*f/Math.max(1,nf)); await dawYield(); }
+  }
+  // 3) key (Krumhansl–Schmuckler)
+  const corr=(prof,r)=>{ let mx=0,my=0; for(let i=0;i<12;i++){ mx+=total[(i+r)%12]; my+=prof[i]; } mx/=12; my/=12; let sxy=0,sxx=0,syy=0; for(let i=0;i<12;i++){ const x=total[(i+r)%12]-mx,y=prof[i]-my; sxy+=x*y; sxx+=x*x; syy+=y*y; } return sxy/Math.sqrt(sxx*syy||1); };
+  let key='C',kbest=-2; for(let r=0;r<12;r++){ const a=corr(DT_KS_MAJ,r),b=corr(DT_KS_MIN,r); if(a>kbest){ kbest=a; key=NOTES[r]; } if(b>kbest){ kbest=b; key=NOTES[r]+'m'; } }
+  // 4) beat-synchronous chords (24 major/minor triad templates), smoothed over neighbouring beats
+  const tmpl=[]; for(let r=0;r<12;r++){ [[0,4,7,''],[0,3,7,'m']].forEach(([a,b,c,q])=>{ const v=new Float32Array(12); v[(r+a)%12]=1; v[(r+b)%12]=0.85; v[(r+c)%12]=0.9; tmpl.push({name:NOTES[r]+q,v}); }); }
+  const maxEn=frames.reduce((m,f)=>Math.max(m,f.en),0)||1;
+  const beatScores=beats.map((bt,i)=>{
+    const t1=beats[i+1]??bt+period/fps, fr=frames.filter(f=>f.t>=bt&&f.t<t1);
+    const ch=new Float32Array(12), bs=new Float32Array(12); let en=0; fr.forEach(f=>{ for(let k=0;k<12;k++){ ch[k]+=f.ch[k]; bs[k]+=f.bs[k]; } en+=f.en; });
+    const bmax=Math.max(...bs)||1;
+    if(!fr.length||en/fr.length<maxEn*0.04) return null; // silence → no chord
+    const mean=ch.reduce((a,b)=>a+b,0)/12; const x=ch.map(v=>Math.max(0,v-mean*0.9)); const nx=Math.sqrt(x.reduce((a,b)=>a+b*b,0))||1;
+    return tmpl.map((T,ti)=>{ let d=0,nt=0; for(let k=0;k<12;k++){ d+=x[k]*T.v[k]; nt+=T.v[k]*T.v[k]; } return d/(nx*Math.sqrt(nt))+0.22*(bs[Math.floor(ti/2)]/bmax); }); // the bass note usually names the chord (C vs Em, A vs E)
+  });
+  const beatChords=beatScores.map((sc,i)=>{
+    if(!sc) return null; const sum=new Float32Array(24);
+    for(let j=Math.max(0,i-1);j<=Math.min(beatScores.length-1,i+1);j++){ const s2=beatScores[j]; if(s2) for(let k=0;k<24;k++) sum[k]+=s2[k]*(j===i?1:0.35); } // neighbours only steady the choice; they mustn't drag a chord across a change
+    let bi=0; for(let k=1;k<24;k++) if(sum[k]>sum[bi]) bi=k; return tmpl[bi].name;
+  });
+  // 5) bar lines: of the 4 possible beat offsets, use the one where chord changes most often fall
+  //    on a bar start (busy off-beat hats can fool the onset phase, harmony rarely lies about bar 1)
+  let o0=0,oBest=-1; for(let o=0;o<4;o++){ let hit=0; for(let i=1;i<beatChords.length;i++){ if(beatChords[i]&&beatChords[i-1]&&beatChords[i]!==beatChords[i-1]) hit+=((i-o)%4===0)?1:((i-o)%2===0?0.25:-0.2); } if(hit>oBest){ oBest=hit; o0=o; } }
+  // bars (4/4): one chord, or two when the harmony clearly changes mid-bar
+  const bars=[]; for(let b=o0;b+3<beatChords.length;b+=4){
+    const q=beatChords.slice(b,b+4), h1=q.slice(0,2).filter(Boolean), h2=q.slice(2).filter(Boolean);
+    const mode=a=>{ const c={}; a.forEach(x=>c[x]=(c[x]||0)+1); return Object.entries(c).sort((x,y)=>y[1]-x[1])[0]?.[0]||null; };
+    const all=mode(q.filter(Boolean)), m1=mode(h1), m2=mode(h2);
+    let chords=!all?['N.C.']:(m1&&m2&&m1!==m2&&h1.length===2&&h2.length===2)?[m1,m2]:[all];
+    const prevLast=bars.length?bars[bars.length-1].chords.slice(-1)[0]:null;
+    if(chords.length===2&&chords[0]===prevLast) chords=[chords[1]]; // the last bar's chord ringing on (pads, strings, sustain) — not a real change
+    bars.push({t:beats[b],chords});
+  }
+  onProgress&&onProgress(1);
+  // key: nudge toward the first/last chord (songs usually start and end at home), then spell in flats for flat keys
+  while(bars.length&&bars[bars.length-1].chords[0]==='N.C.') bars.pop();
+  // mirror of the ring-on rule: a second half that equals the next bar's chord is that chord's onset leaking back across the bar line
+  for(let i=0;i+1<bars.length;i++){ const c=bars[i].chords; if(c.length===2&&c[1]===bars[i+1].chords[0]) bars[i].chords=[c[0]]; }
+  // key from the chords themselves: the key whose diatonic chords cover most bars wins, with a bonus
+  // for starting and ending on its tonic (beats pure pitch statistics, which confuse I with V)
+  const used=bars.flatMap(b=>b.chords).filter(c=>c!=='N.C.'), fc=used[0], lc=used[used.length-1];
+  let kb=-1e9,key2=key; for(let r=0;r<12;r++){ [[DT_KS_MAJ,'',[[0,''],[2,'m'],[4,'m'],[5,''],[7,''],[9,'m']]],[DT_KS_MIN,'m',[[0,'m'],[3,''],[5,'m'],[7,'m'],[7,''],[8,''],[10,'']]]].forEach(([prof,q,dia])=>{
+    const k=NOTES[r]+q, set=dia.map(([iv,qq])=>NOTES[(r+iv)%12]+qq);
+    let sc=used.filter(c=>set.includes(c)).length/Math.max(1,used.length)*3+corr(prof,r)*0.5; if(fc===k) sc+=0.6; if(lc===k) sc+=0.4; if(sc>kb){ kb=sc; key2=k; } }); }
+  const flat=/^(F|A#|D#|G#|C#|Dm|Gm|Cm|Fm|A#m|D#m)$/.test(key2);
+  const spell=c=>flat&&c!=='N.C.'?c.replace(/^([A-G])#/,(m,x)=>({C:'Db',D:'Eb',F:'Gb',G:'Ab',A:'Bb'})[x]):c;
+  bars.forEach(b=>b.chords=b.chords.map(spell));
+  return {bpm,key:spell(key2),beats,bars,duration:buf.duration,firstBeat:beats[o0]||beats[0]||0};
+}
+// ── page ──
+const dt={built:false,tab:'live',buf:null,name:'',res:null,src:null,raf:null,sheetArm:false};
+function dtStopPreview(){ if(dt.src){ try{ dt.src.stop(); }catch(e){} dt.src=null; } cancelAnimationFrame(dt.raf); document.querySelectorAll('#dtChart .dt-bar.on').forEach(e=>e.classList.remove('on')); const b=document.getElementById('dtPlay'); if(b) b.textContent='▶ Play with chart'; }
+function dtInit(){
+  const page=document.getElementById('page-detect'); if(!page) return;
+  if(!dt.built){
+    dt.built=true;
+    const shell=document.createElement('div'); shell.className='dt';
+    shell.innerHTML=`<div class="dt-tabs"><button data-dt="live">● Live</button><button data-dt="file">↓ File / Studio</button><button data-dt="id">◎ Identify online</button></div>
+      <section class="dt-sec" data-sec="live"><div class="dt-livehead"><div><b>Play or sing near your mic.</b> Chords appear live, and matching songs from the library show up — in any key.</div><span id="dtLiveBtnSlot"></span></div><div id="dtLiveHost"></div></section>
+      <section class="dt-sec" data-sec="file">
+        <div class="dt-drop" id="dtDrop"><b>Drop a song or recording here</b><span>or</span><button class="dt-btn" id="dtPick">Choose a file</button><input type="file" id="dtFile" accept="audio/*" hidden>
+          <span class="dt-or">or analyse a Studio clip</span><select id="dtClip"></select><button class="dt-btn ghost" id="dtClipGo">Analyse clip</button></div>
+        <div class="dt-prog" id="dtProg" hidden><div></div><span></span></div>
+        <div id="dtResult" hidden>
+          <div class="dt-sum" id="dtSum"></div>
+          <div class="dt-actions"><button class="dt-btn" id="dtPlay">▶ Play with chart</button><button class="dt-btn ghost" id="dtToSheet">Open in Sheet</button><button class="dt-btn ghost" id="dtToStudio">Rebuild in Studio</button><button class="dt-btn ghost" id="dtTranspose">Transpose −1</button><button class="dt-btn ghost" id="dtTransposeUp">+1</button></div>
+          <div class="dt-chart" id="dtChart"></div>
+          <div class="dt-h">Songs in your library with these chords</div><div id="dtFileMatches" class="dt-matches"></div>
+          <div class="dt-note">Chord detection reads major and minor triads from the harmony; busy mixes, heavy distortion or very free tempos can confuse it. Treat it as a strong first draft — click Open in Sheet to correct it.</div>
+        </div>
+      </section>
+      <section class="dt-sec" data-sec="id">
+        <div class="dt-idcard">
+          <div class="dt-h" style="margin-top:0">Identify any song (online)</div>
+          <p class="dt-note">Uses <b>AudD</b> music recognition with <b>your own API token</b> (get one at audd.io — they bill per request after a free allowance). A short clip of the audio is sent to AudD only when you press Identify. Nothing is sent without a token.</p>
+          <label class="dt-lbl">Your AudD API token<input type="password" id="dtToken" placeholder="paste your token" autocomplete="off"></label>
+          <label class="dt-chk"><input type="checkbox" id="dtRemember"> Remember the token on this device</label>
+          <div class="dt-actions"><button class="dt-btn" id="dtIdMic">● Listen 10 s & identify</button><button class="dt-btn ghost" id="dtIdFile">Identify the loaded file</button></div>
+          <div id="dtIdResult"></div>
+        </div>
+      </section>`;
+    page.appendChild(shell);
+    // move the existing live detector UI (its engine keeps working through the same element ids)
+    const body=document.querySelector('#detectorPanel .detector-body'), btn=document.getElementById('detectorStartBtn');
+    if(body) document.getElementById('dtLiveHost').appendChild(body);
+    if(btn){ btn.className='dt-btn'; btn.textContent=detectorActive?'■ Stop':'● Start listening'; document.getElementById('dtLiveBtnSlot').appendChild(btn); btn.onclick=()=>{ if(detectorActive){ stopDetector(); btn.textContent='● Start listening'; } else startDetector().then(()=>{ btn.textContent='■ Stop'; }); }; }
+    const sw=document.querySelector('#page-detect .detector-right .nbtn'); // writing-partner button stays
+    shell.querySelectorAll('.dt-tabs button').forEach(b=>b.onclick=()=>{ dt.tab=b.dataset.dt; dtTabs(); });
+    const $=id=>document.getElementById(id);
+    $('dtPick').onclick=()=>$('dtFile').click();
+    $('dtFile').onchange=e=>{ const f=e.target.files[0]; e.target.value=''; if(f) dtLoadFile(f); };
+    const drop=$('dtDrop'); drop.ondragover=e=>{ e.preventDefault(); drop.classList.add('over'); }; drop.ondragleave=()=>drop.classList.remove('over');
+    drop.ondrop=e=>{ e.preventDefault(); drop.classList.remove('over'); const f=e.dataTransfer.files[0]; if(f) dtLoadFile(f); };
+    $('dtClipGo').onclick=()=>{ const v=$('dtClip').value; if(!v){ toast('No audio clips in Studio yet'); return; } const [tid,cid]=v.split('|'); const t=dawProject.tracks.find(x=>x.id===tid), c=t&&t.clips.find(x=>x.id===cid); if(c) dtRun(dtClipBuffer(c),c.name||t.name); };
+    $('dtPlay').onclick=dtTogglePreview; $('dtToSheet').onclick=dtToSheet; $('dtToStudio').onclick=dtToStudio;
+    $('dtTranspose').onclick=()=>dtShift(-1); $('dtTransposeUp').onclick=()=>dtShift(1);
+    try{ const tk=localStorage.getItem('dtAuddToken'); if(tk){ $('dtToken').value=tk; $('dtRemember').checked=true; } }catch(e){}
+    $('dtRemember').onchange=()=>{ try{ if($('dtRemember').checked) localStorage.setItem('dtAuddToken',$('dtToken').value); else localStorage.removeItem('dtAuddToken'); }catch(e){} };
+    $('dtToken').onchange=()=>$('dtRemember').onchange();
+    $('dtIdMic').onclick=dtIdentifyMic; $('dtIdFile').onclick=()=>{ if(!dt.buf){ toast('Load a file in the File / Studio tab first'); return; } dtIdentify(dtWavClip(dt.buf,0,20)); };
+  }
+  // refresh Studio clip list
+  const sel=document.getElementById('dtClip'); const opts=[]; dawProject.tracks.forEach(t=>t.clips.forEach(c=>{ if(c.kind==='audio'&&c.payload) opts.push(`<option value="${t.id}|${c.id}">${escapeHtml((t.name||'Track')+' — '+(c.name||'clip'))}</option>`); }));
+  sel.innerHTML=opts.length?opts.join(''):'<option value="">No audio clips in Studio</option>';
+  dtTabs();
+}
+function dtTabs(){ document.querySelectorAll('#page-detect .dt-tabs button').forEach(b=>b.classList.toggle('on',b.dataset.dt===dt.tab)); document.querySelectorAll('#page-detect .dt-sec').forEach(s=>s.hidden=s.dataset.sec!==dt.tab); }
+function dtClipBuffer(c){ const sr=c.payload.sampleRate, st=Math.floor((c.offsetSec||0)*sr), len=Math.min(c.payload.length-st,Math.floor(dawClipPlayableSec(c)*sr)); const out=getCtx().createBuffer(c.payload.numberOfChannels,Math.max(1,len),sr); for(let ch=0;ch<c.payload.numberOfChannels;ch++) out.copyToChannel(c.payload.getChannelData(ch).subarray(st,st+len),ch); return out; }
+async function dtLoadFile(f){ try{ const b=await getCtx().decodeAudioData((await f.arrayBuffer()).slice(0)); dtRun(b,f.name.replace(/\.[^.]+$/,'')); }catch(e){ toast('Could not read that audio file — try WAV or MP3'); } }
+async function dtRun(buf,name){
+  dtStopPreview(); dt.buf=buf; dt.name=name; dt.res=null;
+  const prog=document.getElementById('dtProg'), bar=prog.firstElementChild, lab=prog.lastElementChild;
+  prog.hidden=false; document.getElementById('dtResult').hidden=true;
+  const t0=performance.now();
+  dt.res=await dtAnalyze(buf,p=>{ bar.style.width=Math.round(p*100)+'%'; lab.textContent='Analysing '+name+'… '+Math.round(p*100)+'%'; });
+  prog.hidden=true; dtRender(); toast('Analysed in '+((performance.now()-t0)/1000).toFixed(1)+' s');
+}
+function dtProgression(){ const out=[]; (dt.res?.bars||[]).forEach(b=>b.chords.forEach(c=>{ if(c!=='N.C.'&&out[out.length-1]!==c) out.push(c); })); return out; }
+function dtRender(){
+  const r=dt.res; if(!r) return;
+  document.getElementById('dtResult').hidden=false;
+  const uniq=[...new Set(dtProgression())];
+  document.getElementById('dtSum').innerHTML=`<div class="dt-pill"><small>SONG</small><b>${escapeHtml(dt.name)}</b></div><div class="dt-pill"><small>KEY</small><b>${escapeHtml(r.key.replace(/m$/,' minor').replace(/^([A-G]#?)$/,'$1 major'))}</b></div><div class="dt-pill"><small>TEMPO</small><b>${r.bpm} BPM</b></div><div class="dt-pill"><small>LENGTH</small><b>${Math.floor(r.duration/60)}:${String(Math.round(r.duration%60)).padStart(2,'0')}</b></div><div class="dt-pill"><small>CHORDS</small><b>${uniq.slice(0,8).map(escapeHtml).join(' · ')}${uniq.length>8?' …':''}</b></div>`;
+  document.getElementById('dtChart').innerHTML=r.bars.map((b,i)=>`<div class="dt-bar" data-i="${i}"><small>${i+1}</small>${b.chords.map(c=>`<span>${escapeHtml(c)}</span>`).join('')}</div>`).join('');
+  document.querySelectorAll('#dtChart .dt-bar').forEach(el=>el.onclick=()=>dtTogglePreview(Number(el.dataset.i)));
+  matchSongs(dtProgression().slice(0,10),'dtFileMatches');
+}
+function dtShift(n){ if(!dt.res) return; dt.res.bars.forEach(b=>b.chords=b.chords.map(c=>c==='N.C.'?c:dtTransposeChord(c,n))); dt.res.key=dtTransposeChord(dt.res.key,n); dtRender(); }
+function dtTogglePreview(fromBar){
+  if(dt.src&&fromBar==null){ dtStopPreview(); return; }
+  dtStopPreview(); if(!dt.buf||!dt.res) return;
+  const ctx=getCtx(); if(ctx.state==='suspended') ctx.resume();
+  const off=typeof fromBar==='number'?dt.res.bars[fromBar].t:0;
+  const s=ctx.createBufferSource(); s.buffer=dt.buf; s.connect(dawEnsureMaster()); const t0=ctx.currentTime+0.05; s.start(t0,off); dt.src=s;
+  document.getElementById('dtPlay').textContent='■ Stop';
+  s.onended=()=>{ if(dt.src===s) dtStopPreview(); };
+  const els=[...document.querySelectorAll('#dtChart .dt-bar')]; let last=-1;
+  const tick=()=>{ const pos=off+ctx.currentTime-t0; let i=-1; for(let k=0;k<dt.res.bars.length;k++){ if(dt.res.bars[k].t<=pos) i=k; else break; }
+    if(i!==last){ if(els[last]) els[last].classList.remove('on'); if(els[i]){ els[i].classList.add('on'); els[i].scrollIntoView({block:'nearest'}); } last=i; }
+    dt.raf=requestAnimationFrame(tick); };
+  tick();
+}
+function dtToSheet(){
+  if(!dt.res) return;
+  if(!dt.sheetArm){ dt.sheetArm=true; toast('This replaces the song open on the Sheet page — click "Open in Sheet" again to confirm'); setTimeout(()=>dt.sheetArm=false,5000); return; }
+  dt.sheetArm=false;
+  const bars=dt.res.bars, lines=[];
+  for(let i=0;i<bars.length;i+=4){ const chords=[]; bars.slice(i,i+4).forEach(b=>b.chords.forEach(c=>chords.push({name:c==='N.C.'?'N.C.':c,beats:4/b.chords.length}))); lines.push({chords,lyric:''}); }
+  const sections=[]; for(let i=0;i<lines.length;i+=4) sections.push({type:'verse',lines:lines.slice(i,i+4)});
+  applySongData({title:dt.name,meta:'Detected — '+dt.res.key+', '+dt.res.bpm+' BPM',sections});
+  if(typeof autosaveSong==='function') autosaveSong();
+  showPage('sheet',null); toast('Chord chart opened in Sheet — click any chord to fix it');
+}
+function dtToStudio(){
+  if(!dt.res) return;
+  const r=dt.res; dawSetBpm(Math.round(r.bpm)); dawSetKey(r.key);
+  const ref=new DawTrack('sample','Reference — '+dt.name.slice(0,18)); ref.volume=0.6;
+  const rc=new DawClip(0,(dt.buf.duration-r.firstBeat)*r.bpm/60,'audio',dt.buf); rc.offsetSec=r.firstBeat; rc.name=dt.name; ref.clips.push(rc); // first detected downbeat lands on bar 1
+  const keys=new DawTrack('keys','Detected Chords'); keys.instrument='Grand Piano';
+  const notes=[]; r.bars.forEach((b,i)=>{ const span=4/b.chords.length; b.chords.forEach((c,k)=>{ if(c==='N.C.') return; dtChordPitches(c).forEach(p=>notes.push({pitch:p,start:i*4+k*span,dur:span-0.05,velocity:84})); }); });
+  const kc=new DawClip(0,r.bars.length*4,'midi',notes); kc.name='Detected chords'; keys.clips.push(kc);
+  const dr=new DawTrack('drums','Drums'); dr.drumKit='Studio';
+  for(let i=0;i<r.bars.length;i++){ const st=dawNewBeatSteps(16); [0,8].forEach(x=>st.kick[x]=1); [4,12].forEach(x=>st.snare[x]=1); for(let x=0;x<16;x+=2) st.hat[x]=1; const c=new DawClip(i*4,4,'pattern',st); c.name='Groove'; dr.clips.push(c); }
+  dr.volume=0.6;
+  [ref,keys,dr].forEach(t=>{ dawProject.tracks.push(t); dawBuildTrackGraph(t); });
+  dawPreloadForTracks(dawProject.tracks);
+  showPage('daw',null); renderDawTrackList(); renderDawTimeline(); updateDawKeyBpmLabel();
+  toast('Rebuilt in Studio at '+Math.round(r.bpm)+' BPM in '+r.key+': your audio (reference), detected chords and a groove');
+}
+// ── online identification (AudD, user's own token) ──
+function dtWavClip(buf,startSec,lenSec){ // mono 22 kHz 16-bit WAV of a section — small enough to upload
+  const sr=22050, ctxSr=buf.sampleRate, s0=Math.floor(startSec*ctxSr), n=Math.min(Math.floor(lenSec*sr),Math.floor((buf.length-s0)*sr/ctxSr));
+  const mono=new Float32Array(n); for(let i=0;i<n;i++){ const j=s0+Math.floor(i*ctxSr/sr); let v=0; for(let c=0;c<buf.numberOfChannels;c++) v+=buf.getChannelData(c)[j]||0; mono[i]=v/buf.numberOfChannels; }
+  const b=new AudioBuffer({numberOfChannels:1,length:Math.max(1,n),sampleRate:sr}); b.copyToChannel(mono,0);
+  return new Blob([dawEncodeWav(b,16)],{type:'audio/wav'});
+}
+async function dtIdentifyMic(){
+  if(!document.getElementById('dtToken').value.trim()){ toast('Paste your AudD API token first'); return; }
+  let stream; try{ stream=await navigator.mediaDevices.getUserMedia({audio:true}); }catch(e){ toast('Microphone blocked'); return; }
+  const rec=new MediaRecorder(stream), chunks=[]; rec.ondataavailable=e=>e.data.size&&chunks.push(e.data);
+  const out=document.getElementById('dtIdResult'); out.innerHTML='<div class="dt-note">Listening… 10 s</div>';
+  rec.onstop=()=>{ stream.getTracks().forEach(t=>t.stop()); dtIdentify(new Blob(chunks,{type:rec.mimeType||'audio/webm'})); };
+  rec.start(); setTimeout(()=>rec.state==='recording'&&rec.stop(),10000);
+}
+async function dtIdentify(blob){
+  const token=document.getElementById('dtToken').value.trim(), out=document.getElementById('dtIdResult');
+  if(!token){ toast('Paste your AudD API token first'); return; }
+  out.innerHTML='<div class="dt-note">Identifying…</div>';
+  try{
+    const fd=new FormData(); fd.append('api_token',token); fd.append('file',blob,'clip'+(blob.type.includes('wav')?'.wav':'.webm')); fd.append('return','apple_music,spotify');
+    const res=await fetch('https://api.audd.io/',{method:'POST',body:fd}); const j=await res.json();
+    if(j.status!=='success'){ out.innerHTML='<div class="dt-note">AudD error: '+escapeHtml(j.error?.error_message||'request failed')+'</div>'; return; }
+    if(!j.result){ out.innerHTML='<div class="dt-note">No match. Try a louder, clearer 10 seconds (the chorus works best).</div>'; return; }
+    const r=j.result, lib=Object.entries(FULL_SONGS).find(([k,s])=>s.title.toLowerCase()===String(r.title).toLowerCase());
+    out.innerHTML=`<div class="dt-idhit"><div><small>FOUND</small><b>${escapeHtml(r.title)}</b><span>${escapeHtml(r.artist)}${r.album?' · '+escapeHtml(r.album):''}${r.release_date?' · '+escapeHtml(r.release_date.slice(0,4)):''}</span></div>
+      <div class="dt-actions">${r.song_link?`<a class="dt-btn ghost" href="${escapeHtml(r.song_link)}" target="_blank" rel="noopener">Listen ↗</a>`:''}${lib?`<button class="dt-btn" onclick="loadLearnSong('${lib[0]}');showPage('learn',null)">Learn it here</button>`:'<span class="dt-note">Not in your library yet — analyse the file for its chords.</span>'}</div></div>`;
+  }catch(e){ out.innerHTML='<div class="dt-note">Could not reach AudD ('+escapeHtml(e.message)+'). Check your connection — some networks block it.</div>'; }
+}
+
 // ── Aurora page heroes: the Home-style title block on every tool page ──
 const PAGE_HEROES={
   piano:['Piano','Keys','Play, learn chords and scales on a full keyboard.'],
@@ -18972,6 +19293,7 @@ const PAGE_HEROES={
   listen:['Listen','& Detect','Sing or play — see the notes and chords live.'],
   struct:['Song','Structure','Shape your sections and the arrangement.'],
   tools:['Music','Tools','Tuner, recorder and handy utilities.'],
+  detect:['Song','Detector','Hear it, name it, learn it — from your mic, an audio file or a Studio track.'],
   studio:['Classic','Studio','The original multitrack studio.'],
 };
 function pageHero(name){
@@ -18982,7 +19304,7 @@ function pageHero(name){
 }
 
 // ── App shell: one ☰ menu for every page and action ──
-const SHELL_PAGE_NAMES={home:'Home',mpc:'Beat Pads',sheet:'Sheet',create:'Create',piano:'Piano',roll:'Piano Roll',drum:'Drums',learn:'Learn',metro:'Metronome',classic:'Guitar',listen:'Listen',daw:'Studio',dj:'DJ Studio',studio:'Classic Studio',struct:'Structure',tools:'Tools'};
+const SHELL_PAGE_NAMES={detect:'Song Detector',home:'Home',mpc:'Beat Pads',sheet:'Sheet',create:'Create',piano:'Piano',roll:'Piano Roll',drum:'Drums',learn:'Learn',metro:'Metronome',classic:'Guitar',listen:'Listen',daw:'Studio',dj:'DJ Studio',studio:'Classic Studio',struct:'Structure',tools:'Tools'};
 let shellPage='sheet',hmKb=-1,hmFlat=[];
 function shellOnPage(name){
   shellPage=name;
@@ -19038,7 +19360,7 @@ function hmItems(){
     {sec:'Song',items:[
       {icon:'＋',label:'New song',run:()=>{ hmClose(); openNewSongModal(); }},
       {icon:'⤓',label:'Import song',run:()=>{ hmClose(); openImportModal(); }},
-      {icon:'🎯',label:'Detect chords',run:()=>{ hmClose(); openDetector(); }},
+      {icon:'🎯',label:'Song Detector',hint:'chords · key · tempo',keys:'detect identify recognise shazam chords key bpm',run:()=>shellGo('detect')},
       {icon:'↑',label:'Transpose up',run:()=>{ transposeUp(); hmRender(); }},
       {icon:'↓',label:'Transpose down',run:()=>{ transposeDown(); hmRender(); }},
       {icon:'⌫',label:'Delete selected chord',run:()=>{ hmClose(); deleteLastClickedChord(); }},
