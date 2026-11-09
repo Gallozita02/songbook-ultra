@@ -92,6 +92,16 @@ Built by **Carla Mateus** as part of her portfolio and AI Operations studies at 
 - Animated beat dots (downbeat in cyan, other beats in purple)
 - **Tap tempo** — tap a button in rhythm to auto-detect BPM
 
+### ⫶ Stem Splitter
+- Split any song (file or Studio clip) into **Vocals, Drums, Bass and Instruments** — classic signal processing (harmonic/percussive separation + stereo-centre detection + bass band), no AI model download; the four stems always add back up to the original
+- Per-stem mute / solo / volume, clickable waveforms, **Karaoke** (no vocals) and **Acapella** presets, WAV download per stem, **Send to Studio**
+- Studio's clip menu "Split stems" uses the same 4-stem engine
+
+### ✨ Lyric Writer (in the Song Builder)
+- "Write lyrics for me": topic, mood, voice (I / we / you), rhyme scheme (AABB / ABAB) and song shape → full lyrics with a hook built on your topic
+- Uses Claude when connected (original lyrics); otherwise a built-in writer with whole, rhyming lines
+- One click on **Build my song** turns them into a full arrangement
+
 ### 🔍 Song Detector
 A full page (☰ → Song Detector) with three modes:
 - **Live** — play or sing near the mic: live chords, chord history, a frequency-balance meter (lows / low-mids / high-mids / highs) and matching songs from the library

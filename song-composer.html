@@ -2190,6 +2190,39 @@ body.shell-v2 .center{background:
 #page-detect .detector-left,#page-detect .detector-right{width:auto!important;max-width:none!important;min-width:0!important;flex:none!important}
 #page-detect .detector-body{width:100%!important;max-width:none!important;padding:0!important;height:auto!important;overflow:visible!important}
 body.pg-detect .sh-transport{display:none!important}
+
+/* ══════════════ STEM SPLITTER + LYRIC WRITER (Tier 18) ══════════════ */
+#page-stems{background:transparent!important;font-family:var(--sans);overflow:auto}
+body.pg-stems .sh-transport{display:none!important}
+.st-rows{display:flex;flex-direction:column;gap:10px}
+.st-row{display:grid;grid-template-columns:150px 70px 110px 1fr auto;gap:12px;align-items:center;background:rgba(17,14,34,.72);border:1px solid rgba(167,139,250,.14);border-left:4px solid var(--c);border-radius:16px;padding:12px 14px}
+.st-name{display:flex;align-items:center;gap:9px;font-weight:800;font-size:15px}
+.st-name i{width:10px;height:10px;border-radius:50%;background:var(--c);box-shadow:0 0 10px var(--c)}
+.st-btns{display:flex;gap:5px}
+.st-btns button{width:28px;height:26px;border-radius:8px;border:1px solid rgba(167,139,250,.22);background:rgba(255,255,255,.04);color:#c9c2e6;font:inherit;font-size:11px;font-weight:800;cursor:pointer}
+.st-btns button.on-m{background:#f472b6;color:#160b1d;border-color:transparent}
+.st-btns button.on-s{background:#2ee6b6;color:#06231b;border-color:transparent}
+.st-row input[type=range]{width:100%;accent-color:var(--c)}
+.st-wave{position:relative;height:54px;border-radius:10px;background:#0b0918;overflow:hidden;cursor:pointer}
+.st-wave canvas{width:100%;height:100%;display:block;opacity:.9}
+.st-head{position:absolute;top:0;bottom:0;left:0;width:2px;background:#fff;box-shadow:0 0 8px #fff;pointer-events:none}
+.st-row:not(:first-child) .st-head{display:none}
+.st-dl{padding:8px 12px!important;font-size:12px!important}
+@media (max-width:820px){ .st-row{grid-template-columns:1fr 1fr;} .st-wave{grid-column:1/-1} }
+.ha-stems{display:flex;flex-direction:column;gap:5px;width:80%}
+.ha-stems div{display:flex;align-items:center;gap:2px;height:20px}
+.ha-stems i{flex:1;background:var(--c);border-radius:2px;opacity:.85}
+/* lyric writer inside the Song Builder */
+.sb-lw{border:1px solid rgba(167,139,250,.2);border-radius:12px;background:rgba(124,58,237,.06)}
+.sb-lw-toggle{width:100%;text-align:left;background:none;border:none;color:#e9ddff;font:inherit;font-size:13.5px;font-weight:700;padding:10px 12px;cursor:pointer}
+.sb-lw-toggle:hover{color:#fff}
+.sb-lw-body{display:flex;flex-direction:column;gap:9px;padding:0 12px 12px}
+.sb-lw-body[hidden]{display:none}
+.sb-lw-row{display:flex;flex-wrap:wrap;gap:8px;align-items:flex-end}
+.sb-lw-row .sb-lbl{flex:1;min-width:90px}
+.sb-lw-row .sb-in{padding:7px 8px;font-size:12.5px}
+.sb-lw-go{background:linear-gradient(135deg,#7c3aed,#ec4899);border:none;color:#fff;font:inherit;font-size:13px;font-weight:800;border-radius:999px;padding:9px 18px;cursor:pointer}
+.sb-lw-go:disabled{opacity:.6;cursor:wait}
 </style>
 </head>
 <body class="shell-v2">
@@ -2733,6 +2766,8 @@ body.pg-detect .sh-transport{display:none!important}
   </div>
 </div>
 
+<!-- STEM SPLITTER page — built by stemInit() -->
+<div class="page" id="page-stems"></div>
 <!-- SONG DETECTOR page — built by dtInit() -->
 <div class="page" id="page-detect"></div>
 <!-- BEAT PADS (MPC-style) — built by mpcInit() -->
@@ -8919,6 +8954,8 @@ function showPage(name,btn){
   if(name==='mpc'&&typeof mpcInit==='function') mpcInit();
   if(name==='home'&&typeof homeInit==='function') homeInit();
   if(name==='detect'&&typeof dtInit==='function') dtInit();
+  if(name==='stems'&&typeof stemInit==='function') stemInit();
+  if(name!=='stems'&&typeof stemStop==='function') stemStop();
   if(name!=='detect'&&typeof dtStopPreview==='function') dtStopPreview();
   if(name!=='mpc'&&typeof mpcStopAll==='function') mpcStopAll();
   if(typeof shellOnPage==='function') shellOnPage(name);
@@ -16787,32 +16824,7 @@ async function dawVocalDouble(track,clip){
     toast('Wide double added — two detuned, offset copies panned left and right');
   }catch(e){ console.error(e); toast('Double failed — '+e.message); }
 }
-async function dawSplitStems(track,clip){
-  const buf=clip.payload;
-  if(!buf||buf.numberOfChannels<2){ toast('Stem split needs a stereo song — this clip is mono'); return; }
-  toast('Splitting vocals and instrumental…'); await dawYield();
-  try{
-    const sr=buf.sampleRate,L=buf.getChannelData(0),R=buf.getChannelData(1),n=buf.length;
-    const mid=new Float32Array(n),side=new Float32Array(n);
-    for(let i=0;i<n;i++){ mid[i]=(L[i]+R[i])*0.5; side[i]=(L[i]-R[i])*0.5; }
-    // vocals: the centre channel, band-limited to the voice range
-    const vox=await dawFilterRender(mid,sr,[{type:'highpass',freq:140,Q:0.7},{type:'highpass',freq:140,Q:0.7},{type:'lowpass',freq:7500,Q:0.7},{type:'peaking',freq:3000,Q:1,gain:2}]);
-    // instrumental: everything panned off-centre + the centre's low end (kick/bass)
-    const low=await dawFilterRender(mid,sr,[{type:'lowpass',freq:150,Q:0.7},{type:'lowpass',freq:150,Q:0.7}]);
-    const ctx=getCtx();
-    const vb=ctx.createBuffer(1,n,sr); vb.copyToChannel(vox,0);
-    const ib=ctx.createBuffer(2,n,sr); const il=new Float32Array(n),ir=new Float32Array(n);
-    for(let i=0;i<n;i++){ il[i]=side[i]*1.4+low[i]; ir[i]=-side[i]*1.4+low[i]; }
-    ib.copyToChannel(il,0); ib.copyToChannel(ir,1);
-    const base=(clip.name||track.name).slice(0,20);
-    const inst=dawAddDerivedTrack(track,clip,ib,base+' · Instrumental',null,0,0.8);
-    inst.type='sample'; inst.color=DAW_TRACK_TYPES.sample.color;
-    dawAddDerivedTrack(track,clip,vb,base+' · Vocals','Dry / Natural',0,0.85);
-    clip.muted=true;
-    renderDawTrackList(); renderDawTimeline();
-    toast('Split done — Vocals + Instrumental tracks added, original clip muted. Works best when the vocal is centred.');
-  }catch(e){ console.error(e); toast('Split failed — '+e.message); }
-}
+// (old 2-way centre split replaced by the 4-stem engine — see Tier 18)
 function dawReverseAudioClip(track,clip){
   const buf=clip.payload,ctx=getCtx(),out=ctx.createBuffer(buf.numberOfChannels,buf.length,buf.sampleRate);
   for(let c=0;c<buf.numberOfChannels;c++){ const d=buf.getChannelData(c),o=new Float32Array(d.length); for(let i=0;i<d.length;i++) o[i]=d[d.length-1-i]; out.copyToChannel(o,c); }
@@ -18258,6 +18270,19 @@ function sbOpen(prefill){
     <div class="sb-body">
       <div class="sb-col sb-lyr">
         <input class="sb-in" id="sbTitle" placeholder="Song title" value="${escapeHtml(st.title)}">
+        <div class="sb-lw" id="sbLw">
+          <button class="sb-lw-toggle" id="sbLwToggle">✨ Write lyrics for me</button>
+          <div class="sb-lw-body" id="sbLwBody" hidden>
+            <input class="sb-in" id="lwTopic" placeholder="What's it about? e.g. dancing alone at 3am, missing my hometown">
+            <div class="sb-lw-row">
+              <label class="sb-lbl">Mood<select class="sb-in" id="lwMood">${Object.keys(LW_IMAGES).map(m=>`<option>${m}</option>`).join('')}</select></label>
+              <label class="sb-lbl">Voice<select class="sb-in" id="lwPov"><option value="I">I</option><option value="we">We</option><option value="you">You</option></select></label>
+              <label class="sb-lbl">Rhyme<select class="sb-in" id="lwRhyme"><option>AABB</option><option>ABAB</option></select></label>
+              <label class="sb-lbl">Shape<select class="sb-in" id="lwShape"><option value="V C V C B C">Verse · Chorus · Verse · Chorus · Bridge · Chorus</option><option value="V P C V P C B C">With pre-chorus</option><option value="V C V C">Short (V C V C)</option><option value="C V C V C">Hook first</option></select></label>
+            </div>
+            <div class="sb-lw-row"><button class="sb-lw-go" id="lwGo">Write lyrics</button><span class="sb-stat" id="lwBy"></span></div>
+          </div>
+        </div>
         <textarea class="sb-ta" id="sbLyrics" spellcheck="true" placeholder="[Verse]\nWrite your lines here, one per line\nAdd as many as you like\n\n[Chorus]\nThe part everyone sings\n\nTip: use [Verse] [Pre-Chorus] [Chorus] [Bridge] — or just leave a blank line between parts.">${escapeHtml(st.lyrics)}</textarea>
         <div class="sb-row"><button class="sb-link" id="sbFromSheet">Use lyrics from the Sheet page</button><span class="sb-stat" id="sbStat"></span></div>
       </div>
@@ -18283,6 +18308,18 @@ function sbOpen(prefill){
   el.querySelectorAll('.sb-g').forEach(b=>b.onclick=()=>{ el.querySelectorAll('.sb-g').forEach(x=>x.classList.toggle('on',x===b)); draft(); });
   ['sbTitle','sbLyrics','sbKey','sbBpm','sbStack','sbVocalFile'].forEach(id=>$(id).addEventListener('input',()=>{ draft(); if(id==='sbLyrics') stat(); }));
   $('sbLyrics').addEventListener('keydown',e=>e.stopPropagation()); $('sbTitle').addEventListener('keydown',e=>e.stopPropagation()); // typing never triggers Studio keyboard notes
+  $('sbLwToggle').onclick=()=>{ const b=$('sbLwBody'); b.hidden=!b.hidden; if(!b.hidden) $('lwTopic').focus(); };
+  ['lwTopic'].forEach(id=>$(id).addEventListener('keydown',e=>e.stopPropagation()));
+  let lwSeed=0;
+  $('lwGo').onclick=async()=>{
+    const topic=$('lwTopic').value.trim(); if(!topic){ toast('Tell me what the song is about'); $('lwTopic').focus(); return; }
+    $('lwGo').disabled=true; $('lwGo').textContent='Writing…';
+    const res=await lwWrite({topic,mood:$('lwMood').value,pov:$('lwPov').value,rhyme:$('lwRhyme').value,structure:$('lwShape').value,genre:el.querySelector('.sb-g.on')?.dataset.g,seed:lwSeed++});
+    $('lwGo').disabled=false; $('lwGo').textContent='Write again';
+    $('sbLyrics').value=res.text; if(!$('sbTitle').value) $('sbTitle').value=topic.replace(/^./,c=>c.toUpperCase()).slice(0,40);
+    $('lwBy').textContent='Written by '+(res.by==='Claude'?'Claude':'the built-in writer (connect Claude for richer lyrics)')+' — edit anything you like';
+    stat(); draft();
+  };
   $('sbFromSheet').onclick=()=>{
     const s=serializeSong();
     const txt=(s.sections||[]).map(sec=>'['+String(sec.type||'Verse').replace(/^./,c=>c.toUpperCase())+']\n'+sec.lines.map(l=>(l.lyric||'').trim()).filter(Boolean).join('\n')).join('\n\n');
@@ -18748,6 +18785,7 @@ const HOME_CARDS=[
   {id:'builder',name:'Song Builder',sub:'Your lyrics → a full song',tag:'WRITE',color:'#ff4fa3',run:()=>sbOpen(),art:'lyrics'},
   {id:'daw',name:'Studio',sub:'Record · mix · master · stems',tag:'CREATE',color:'#a78bfa',run:()=>showPage('daw',null),art:'wave'},
   {id:'mpc',name:'Beat Pads',sub:'Finger-drum, sample, loop',tag:'PLAY',color:'#2ee6b6',run:()=>showPage('mpc',null),art:'pads'},
+  {id:'stems',name:'Stem Splitter',sub:'Vocals, drums, bass, instruments',tag:'SPLIT',color:'#c4b5fd',run:()=>showPage('stems',null),art:'stems'},
   {id:'dj',name:'DJ Studio',sub:'Two decks, mixer, sampler',tag:'PERFORM',color:'#e879f9',run:()=>showPage('dj',null),art:'decks'},
   {id:'create',name:'Create',sub:'Describe a song, get lyrics & chords',tag:'AI',color:'#b48cff',run:()=>showPage('create',null),art:'spark'},
   {id:'learn',name:'Learn',sub:'Chords, strumming, songs',tag:'LEARN',color:'#5eead4',run:()=>showPage('learn',null),art:'chords'},
@@ -18757,6 +18795,7 @@ function homeArt(kind,color){
   if(kind==='wave') return `<div class="ha-wave">${[...Array(42)].map((_,i)=>`<i style="height:${18+Math.abs(Math.sin(i*0.55)*Math.cos(i*0.17))*72}%;background:${color}"></i>`).join('')}</div>`;
   if(kind==='lyrics') return `<div class="ha-lyr"><b style="color:${color}">CHORUS</b><span>Can you feel it, feel it in the dark</span><span class="dim">Every pulse is burning like a spark</span></div>`;
   if(kind==='decks') return `<div class="ha-decks"><i style="border-color:${color}"></i><u></u><i style="border-color:${color}"></i></div>`;
+  if(kind==='stems') return `<div class="ha-stems">${['#f472b6','#a78bfa','#2ee6b6','#c4b5fd'].map((c,i)=>`<div style="--c:${c}">${[...Array(28)].map((_,j)=>`<i style="height:${12+Math.abs(Math.sin(j*0.6+i*1.7))*80}%"></i>`).join('')}</div>`).join('')}</div>`;
   if(kind==='chords') return `<div class="ha-ch">${['C','G','Am','F'].map(c=>`<span style="border-color:${color};color:${color}">${c}</span>`).join('')}</div>`;
   return `<div class="ha-spark" style="color:${color}">✦</div>`;
 }
@@ -19282,6 +19321,231 @@ async function dtIdentify(blob){
   }catch(e){ out.innerHTML='<div class="dt-note">Could not reach AudD ('+escapeHtml(e.message)+'). Check your connection — some networks block it.</div>'; }
 }
 
+// ══════════════════════════════════════════════════════════════════════════
+// TIER 18 — Stem Splitter (vocals / drums / bass / other) and Lyric Writer
+// (lyrics from a topic: Claude when connected, built-in writer otherwise).
+// ══════════════════════════════════════════════════════════════════════════
+// Separation = classic DSP, no model download: an STFT (2048-pt, 50 % overlap, √Hann so the
+// stems sum back to the original), harmonic/percussive split by median filtering (time-median =
+// sustained, frequency-median = hits), stereo-centre detection (vocals are usually centred), and
+// frequency bands for the bass. Each bin's energy is shared between stems with soft masks;
+// "Other" is exactly what's left, so Vocals + Drums + Bass + Other = the original mix.
+async function stemSeparate(buf,onProgress){
+  const sr=buf.sampleRate,len=buf.length,N=2048,hop=1024,B=N/2+1,maxBin=Math.min(B,Math.ceil(16000/(sr/N)));
+  const L=buf.getChannelData(0),R=buf.numberOfChannels>1?buf.getChannelData(1):buf.getChannelData(0);
+  const win=new Float32Array(N); for(let i=0;i<N;i++) win[i]=Math.sqrt(0.5-0.5*Math.cos(2*Math.PI*i/N));
+  const F=Math.ceil(len/hop)+1, mag=new Float32Array(F*maxBin);
+  const reL=new Float32Array(N),imL=new Float32Array(N),reR=new Float32Array(N),imR=new Float32Array(N);
+  const frame=(f)=>{ const o=f*hop-hop; for(let i=0;i<N;i++){ const j=o+i, w=win[i]; reL[i]=j>=0&&j<len?L[j]*w:0; reR[i]=j>=0&&j<len?R[j]*w:0; imL[i]=0; imR[i]=0; } dtFFT(reL,imL); dtFFT(reR,imR); };
+  // pass 1: mono magnitude spectrogram (for the harmonic/percussive medians)
+  for(let f=0;f<F;f++){ frame(f); const base=f*maxBin; for(let k=0;k<maxBin;k++){ const a=reL[k]+reR[k], b=imL[k]+imR[k]; mag[base+k]=Math.sqrt(a*a+b*b)*0.5; } if(f%400===0){ onProgress&&onProgress(0.35*f/F); await dawYield(); } }
+  const out={vocals:[new Float32Array(len),new Float32Array(len)],drums:[new Float32Array(len),new Float32Array(len)],bass:[new Float32Array(len),new Float32Array(len)]};
+  const binHz=sr/N, bassW=k=>{ const f=k*binHz; return f<150?1:f>260?0:(260-f)/110; }, voxW=k=>{ const f=k*binHz; return f<120?0:f<220?(f-120)/100:f<6500?1:f<9000?(9000-f)/2500:0; };
+  const med=(a,n)=>{ const v=a.subarray(0,n).sort(); return v[n>>1]; }, tmp=new Float32Array(17);
+  const lowBins=Math.ceil(300/(sr/N)); // below 300 Hz a kick's boom outlasts a short window, so sustained-ness is judged over ~0.4 s there
+  const masks={vocals:new Float32Array(B),drums:new Float32Array(B),bass:new Float32Array(B)};
+  const yr=new Float32Array(N),yi=new Float32Array(N);
+  // pass 2: masks per bin, then inverse FFT of each stem (left and right)
+  for(let f=0;f<F;f++){
+    frame(f);
+    for(let k=0;k<B;k++){
+      let mH,mP,c;
+      if(k<maxBin){
+        const tn=k<lowBins?17:9, th=tn>>1;
+        for(let t=0;t<tn;t++){ const ff=Math.min(F-1,Math.max(0,f+t-th)); tmp[t]=mag[ff*maxBin+k]; } const H=med(tmp,tn);
+        for(let t=0;t<9;t++){ const kk=Math.min(maxBin-1,Math.max(0,k+t-4)); tmp[t]=mag[f*maxBin+kk]; } const P=med(tmp,9);
+        mH=(H*H)/(H*H+P*P+1e-12); mP=1-mH;
+      } else { mH=0.3; mP=0.7; } // above 16 kHz: mostly cymbal air
+      const dr=reL[k]-reR[k], di=imL[k]-imR[k], pl=reL[k]*reL[k]+imL[k]*imL[k], pr=reR[k]*reR[k]+imR[k]*imR[k];
+      c=Math.max(0,1-(dr*dr+di*di)/(pl+pr+1e-12)); c*=c; // 1 = dead centre, 0 = panned or out of phase
+      const bw=bassW(k);
+      masks.bass[k]=mH*bw; masks.vocals[k]=mH*(1-bw)*voxW(k)*c; masks.drums[k]=mP;
+    }
+    const o=f*hop-hop;
+    for(const name of ['vocals','drums','bass']){
+      const m=masks[name];
+      for(const [ch,re,im] of [[0,reL,imL],[1,reR,imR]]){
+        for(let k=0;k<B;k++){ yr[k]=re[k]*m[k]; yi[k]=im[k]*m[k]; } for(let k=B;k<N;k++){ yr[k]=yr[N-k]; yi[k]=-yi[N-k]; } // conjugate-symmetric → real signal
+        for(let k=0;k<N;k++) yi[k]=-yi[k]; dtFFT(yr,yi); // inverse via conj-FFT-conj
+        const dst=out[name][ch]; for(let i=0;i<N;i++){ const j=o+i; if(j>=0&&j<len) dst[j]+=yr[i]/N*win[i]; }
+      }
+    }
+    if(f%250===0){ onProgress&&onProgress(0.35+0.6*f/F); await dawYield(); }
+  }
+  // Other = mix − (vocals + drums + bass): exact remainder, so the four stems always sum to the song
+  const other=[new Float32Array(len),new Float32Array(len)], src=[L,R];
+  for(let ch=0;ch<2;ch++){ const s=src[ch],v=out.vocals[ch],d=out.drums[ch],b=out.bass[ch],o2=other[ch]; for(let i=0;i<len;i++) o2[i]=s[i]-v[i]-d[i]-b[i]; }
+  onProgress&&onProgress(1);
+  const mk=chs=>{ const b=new AudioBuffer({numberOfChannels:2,length:len,sampleRate:sr}); b.copyToChannel(chs[0],0); b.copyToChannel(chs[1],1); return b; };
+  return {vocals:mk(out.vocals),drums:mk(out.drums),bass:mk(out.bass),other:mk(other),stereo:buf.numberOfChannels>1};
+}
+const STEM_META=[{id:'vocals',name:'Vocals',color:'#f472b6'},{id:'drums',name:'Drums',color:'#a78bfa'},{id:'bass',name:'Bass',color:'#2ee6b6'},{id:'other',name:'Instruments',color:'#c4b5fd'}];
+const st={built:false,name:'',stems:null,mix:{vocals:{vol:1,mute:false,solo:false},drums:{vol:1,mute:false,solo:false},bass:{vol:1,mute:false,solo:false},other:{vol:1,mute:false,solo:false}},srcs:[],gains:{},t0:0,raf:null,pos:0};
+function stemStop(){ st.srcs.forEach(s=>{ try{ s.stop(); }catch(e){} }); st.srcs=[]; cancelAnimationFrame(st.raf); const b=document.getElementById('stPlay'); if(b) b.textContent='▶ Play'; }
+function stemLevels(){ const anySolo=STEM_META.some(m=>st.mix[m.id].solo); STEM_META.forEach(m=>{ const g=st.gains[m.id]; if(g){ const x=st.mix[m.id]; g.gain.value=(anySolo?x.solo:!x.mute)?x.vol:0; } }); }
+function stemPlay(){
+  if(st.srcs.length){ stemStop(); return; }
+  if(!st.stems) return; const ctx=getCtx(); if(ctx.state==='suspended') ctx.resume();
+  const dest=dawEnsureMaster(), t=ctx.currentTime+0.06, off=st.pos>=st.stems.vocals.duration-0.1?0:st.pos;
+  STEM_META.forEach(m=>{ const g=ctx.createGain(); g.connect(dest); st.gains[m.id]=g; const s=ctx.createBufferSource(); s.buffer=st.stems[m.id]; s.connect(g); s.start(t,off); st.srcs.push(s); });
+  stemLevels(); st.t0=t-off; document.getElementById('stPlay').textContent='■ Stop';
+  st.srcs[0].onended=()=>{ if(st.srcs.length){ st.pos=0; stemStop(); } };
+  const tick=()=>{ st.pos=ctx.currentTime-st.t0; const p=document.getElementById('stHead'); if(p) p.style.left=Math.min(100,st.pos/st.stems.vocals.duration*100)+'%'; st.raf=requestAnimationFrame(tick); }; tick();
+}
+function stemWave(canvas,buf,color){
+  const w=canvas.width=canvas.clientWidth*(window.devicePixelRatio||1), h=canvas.height=canvas.clientHeight*(window.devicePixelRatio||1), g=canvas.getContext('2d');
+  const d=buf.getChannelData(0), d2=buf.getChannelData(1), step=Math.max(1,Math.floor(d.length/w)); g.fillStyle=color;
+  for(let x=0;x<w;x++){ let mx=0; const o=x*step; for(let i=0;i<step;i+=4){ const v=Math.abs(d[o+i]||0)+Math.abs(d2[o+i]||0); if(v>mx) mx=v; } const bh=Math.max(1,Math.min(1,mx*0.6)*h); g.fillRect(x,(h-bh)/2,1,bh); }
+}
+function stemInit(){
+  const page=document.getElementById('page-stems'); if(!page) return;
+  if(!st.built){
+    st.built=true;
+    const box=document.createElement('div'); box.className='dt';
+    box.innerHTML=`<div class="dt-drop" id="stDrop"><b>Drop a song here</b><span>or</span><button class="dt-btn" id="stPick">Choose a file</button><input type="file" id="stFile" accept="audio/*" hidden>
+        <span class="dt-or">or split a Studio clip</span><select id="stClip"></select><button class="dt-btn ghost" id="stClipGo">Split clip</button></div>
+      <div class="dt-prog" id="stProg" hidden><div></div><span></span></div>
+      <div id="stResult" hidden>
+        <div class="dt-actions"><button class="dt-btn" id="stPlay">▶ Play</button><button class="dt-btn ghost" id="stKaraoke">🎤 Karaoke (no vocals)</button><button class="dt-btn ghost" id="stAcap">Acapella (vocals only)</button><button class="dt-btn ghost" id="stAll">All stems</button><span style="flex:1"></span><button class="dt-btn ghost" id="stDlAll">Download all (WAV)</button><button class="dt-btn" id="stStudio">Send to Studio →</button></div>
+        <div class="st-rows" id="stRows"></div>
+        <div class="dt-note" id="stNote"></div>
+      </div>`;
+    page.appendChild(box);
+    const $=id=>document.getElementById(id);
+    $('stPick').onclick=()=>$('stFile').click();
+    $('stFile').onchange=e=>{ const f=e.target.files[0]; e.target.value=''; if(f) stemLoadFile(f); };
+    const drop=$('stDrop'); drop.ondragover=e=>{ e.preventDefault(); drop.classList.add('over'); }; drop.ondragleave=()=>drop.classList.remove('over');
+    drop.ondrop=e=>{ e.preventDefault(); drop.classList.remove('over'); const f=e.dataTransfer.files[0]; if(f) stemLoadFile(f); };
+    $('stClipGo').onclick=()=>{ const v=$('stClip').value; if(!v){ toast('No audio clips in Studio yet'); return; } const [tid,cid]=v.split('|'); const t=dawProject.tracks.find(x=>x.id===tid), c=t&&t.clips.find(x=>x.id===cid); if(c) stemRun(dtClipBuffer(c),c.name||t.name); };
+    $('stPlay').onclick=stemPlay;
+    const preset=solo=>{ STEM_META.forEach(m=>{ st.mix[m.id].solo=false; st.mix[m.id].mute=false; }); if(solo==='karaoke') st.mix.vocals.mute=true; if(solo==='acap') st.mix.vocals.solo=true; stemLevels(); stemRows(); };
+    $('stKaraoke').onclick=()=>preset('karaoke'); $('stAcap').onclick=()=>preset('acap'); $('stAll').onclick=()=>preset('all');
+    $('stDlAll').onclick=async()=>{ for(const m of STEM_META){ dlBlob(dawWavBlob(st.stems[m.id]),st.name+' - '+m.name+'.wav'); await new Promise(r=>setTimeout(r,400)); } };
+    $('stStudio').onclick=stemToStudio;
+  }
+  const sel=document.getElementById('stClip'); const opts=[]; dawProject.tracks.forEach(t=>t.clips.forEach(c=>{ if(c.kind==='audio'&&c.payload) opts.push(`<option value="${t.id}|${c.id}">${escapeHtml((t.name||'Track')+' — '+(c.name||'clip'))}</option>`); }));
+  sel.innerHTML=opts.length?opts.join(''):'<option value="">No audio clips in Studio</option>';
+}
+async function stemLoadFile(f){ try{ const b=await getCtx().decodeAudioData((await f.arrayBuffer()).slice(0)); stemRun(b,f.name.replace(/\.[^.]+$/,'')); }catch(e){ toast('Could not read that audio file — try WAV or MP3'); } }
+async function stemRun(buf,name){
+  stemStop(); st.pos=0; st.name=name;
+  const prog=document.getElementById('stProg'),bar=prog.firstElementChild,lab=prog.lastElementChild; prog.hidden=false; document.getElementById('stResult').hidden=true;
+  const t0=performance.now();
+  st.stems=await stemSeparate(buf,p=>{ bar.style.width=Math.round(p*100)+'%'; lab.textContent='Splitting '+name+'… '+Math.round(p*100)+'%'; });
+  prog.hidden=true; document.getElementById('stResult').hidden=false;
+  document.getElementById('stNote').innerHTML=(st.stems.stereo?'':'<b>This file is mono</b> — vocals are found from the stereo centre, so a mono file gives a weaker vocal split. ')+'Split with classic signal processing (no AI model): great for karaoke, practice and remixing; expect a little bleed between stems on dense mixes.';
+  stemRows(); toast('Split into 4 stems in '+((performance.now()-t0)/1000).toFixed(1)+' s');
+}
+function stemRows(){
+  const rows=document.getElementById('stRows'); if(!rows||!st.stems) return;
+  rows.innerHTML=STEM_META.map(m=>{ const x=st.mix[m.id]; return `<div class="st-row" style="--c:${m.color}"><div class="st-name"><i></i>${m.name}</div>
+    <div class="st-btns"><button data-m="${m.id}" class="${x.mute?'on-m':''}">M</button><button data-s="${m.id}" class="${x.solo?'on-s':''}">S</button></div>
+    <input type="range" min="0" max="150" value="${Math.round(x.vol*100)}" data-v="${m.id}" title="Volume">
+    <div class="st-wave"><canvas data-w="${m.id}"></canvas><div class="st-head" ${m.id==='vocals'?'id="stHead"':''}></div></div>
+    <button class="dt-btn ghost st-dl" data-d="${m.id}">↓ WAV</button></div>`; }).join('');
+  rows.querySelectorAll('canvas[data-w]').forEach(c=>{ const m=STEM_META.find(x=>x.id===c.dataset.w); stemWave(c,st.stems[m.id],m.color); });
+  rows.querySelectorAll('[data-m]').forEach(b=>b.onclick=()=>{ const x=st.mix[b.dataset.m]; x.mute=!x.mute; stemLevels(); stemRows(); });
+  rows.querySelectorAll('[data-s]').forEach(b=>b.onclick=()=>{ const x=st.mix[b.dataset.s]; x.solo=!x.solo; stemLevels(); stemRows(); });
+  rows.querySelectorAll('[data-v]').forEach(i=>i.oninput=()=>{ st.mix[i.dataset.v].vol=Number(i.value)/100; stemLevels(); });
+  rows.querySelectorAll('[data-d]').forEach(b=>b.onclick=()=>{ const m=STEM_META.find(x=>x.id===b.dataset.d); dlBlob(dawWavBlob(st.stems[m.id]),st.name+' - '+m.name+'.wav'); });
+  rows.querySelectorAll('.st-wave').forEach(w=>w.onclick=e=>{ const r=w.getBoundingClientRect(); st.pos=(e.clientX-r.left)/r.width*st.stems.vocals.duration; if(st.srcs.length){ stemStop(); stemPlay(); } else { const p=document.getElementById('stHead'); if(p) p.style.left=(st.pos/st.stems.vocals.duration*100)+'%'; } });
+}
+function stemToStudio(){
+  if(!st.stems) return; stemStop();
+  const at=dawProject.tracks.some(t=>t.clips.length)?Math.ceil(dawFurthestBeat()/4)*4:0;
+  STEM_META.forEach(m=>{ const type=m.id==='vocals'?'vocals':m.id==='drums'?'drums':m.id==='bass'?'bass':'sample';
+    const t=new DawTrack(type,st.name.slice(0,16)+' · '+m.name); t.volume=st.mix[m.id].vol*0.85; t.muted=st.mix[m.id].mute;
+    const c=new DawClip(at,st.stems[m.id].duration*dawProject.bpm/60,'audio',st.stems[m.id]); c.name=m.name; t.clips.push(c);
+    dawProject.tracks.push(t); dawBuildTrackGraph(t); if(type==='vocals') dawApplyVocalChain(t,'Dry / Natural',true); });
+  showPage('daw',null); renderDawTrackList(); renderDawTimeline(); toast('4 stems added to Studio — re-sing the vocal, remix the beat, or analyse the instrumental');
+}
+// Studio's clip-menu "Split stems" now uses the same engine (4 stems instead of a 2-way centre split)
+async function dawSplitStems(track,clip){
+  if(!clip.payload){ return; }
+  toast('Splitting into vocals, drums, bass and instruments…'); await dawYield();
+  try{
+    const stems=await stemSeparate(dtClipBuffer(clip));
+    const base=(clip.name||track.name).slice(0,16); let pos=dawProject.tracks.indexOf(track)+1;
+    STEM_META.forEach(m=>{ const t=new DawTrack(m.id==='vocals'?'vocals':m.id==='other'?'sample':m.id,base+' · '+m.name); const c=new DawClip(clip.startBeat,clip.lengthBeats,'audio',stems[m.id]); c.name=m.name; t.clips.push(c); dawProject.tracks.splice(pos++,0,t); dawBuildTrackGraph(t); });
+    clip.muted=true; renderDawTrackList(); renderDawTimeline();
+    toast('Split into 4 stems — original clip muted'+(stems.stereo?'':' (mono source: the vocal split is weaker)'));
+  }catch(e){ console.error(e); toast('Split failed — '+e.message); }
+}
+
+// ── Lyric Writer: lyrics from a topic ──
+const LW_STOP=new Set('a an the and or but of to in on at for with about from my your our their his her its this that these those is are was were be been being i me we you he she they it as by so if then than just very really song lyrics write some something like what who how when where why can could would should will want feel make made get got do does did not no yes up down out over under into onto'.split(' '));
+const LW_RHYMES=[['night','light','tonight','right','bright','fight','sight','alright','flight','tight'],['heart','apart','start','part','art','dark'],['away','stay','day','say','okay','play','way','grey','gray'],['fire','higher','desire','wire','tired','inspired'],['feel','real','heal','reveal','steal','wheel'],['go','know','slow','glow','show','below','flow','alone'],['free','me','be','see','sea','believe','need'],['time','mine','line','shine','sign','fine','divine'],['rain','pain','again','remain','chain','same','name','flame'],['love','above','enough','of','touch'],['sky','high','fly','why','try','cry','eyes','alive'],['home','alone','own','stone','phone','known','gone'],['dream','seem','stream','scream','between','seen'],['run','sun','one','done','begun','young'],['ground','sound','around','found','down','crown','town'],['fall','all','call','wall','small','tall'],['hold','gold','cold','told','old','bold','soul'],['true','you','through','new','blue','do'],['beat','feet','heat','street','sweet','repeat'],['skin','in','within','begin','win','again']];
+const LW_IMAGES={Happy:['sunlight','open road','summer air','neon sign','city lights','golden hour'],Sad:['empty room','cold coffee','rain on glass','faded photo','silent phone','grey morning'],Romantic:['candlelight','your hand in mine','slow dance','midnight kiss','your heartbeat','soft whisper'],Hopeful:['first light','open door','new page','morning sky','rising sun','far horizon'],Dark:['shadows','broken glass','cold wire','black water','smoke','long night'],Epic:['thunder','mountain top','battle drums','burning sky','stormfront','iron will'],Party:['bass drop','dance floor','strobe lights','loud speakers','late night','sweat and glitter'],Chill:['slow waves','warm breeze','vinyl crackle','lazy sunday','rooftop view','soft haze']};
+function lwKeywords(topic){ return [...new Set(String(topic).toLowerCase().replace(/[^a-zà-ÿ'\s-]/g,' ').split(/\s+/).filter(w=>w.length>2&&!LW_STOP.has(w)))]; }
+// Built-in writer: whole, grammatical lines that rhyme as complete lines (never stitched-on endings).
+// {NP} = the topic as a clean noun phrase, {IMG} = mood imagery, {I}/{me}/{my}/{Im} follow the chosen voice.
+const LW_LINES={
+  night:['{I} keep chasing {NP} through the night','Every street is calling out tonight','{I} can feel {NP} burning bright','Under the {IMG}, the stars feel right','Hold on, {I} won\'t give up the fight','{My} whole world is dancing in the light'],
+  heart:['{I} found {NP} written on {my} heart','Every piece of {me} was falling apart','Maybe this is where the new days start','{I} can see the {IMG} glowing in the dark','Even when the miles keep us apart'],
+  away:['{I} won\'t let {NP} slip away','Something in the {IMG} says to stay','{I} keep living for another day','Tell {me} all the things you couldn\'t say','Nothing\'s gonna take this feeling away'],
+  fire:['{NP} lit a fire','Every heartbeat takes {me} higher','{I} can feel it, pure desire','Dancing out on a live wire','Burning through the {IMG} like a fire'],
+  go:['{I} won\'t let {NP} go','Took a long time, now {I} know','In the {IMG}, {I} start to glow','Every road was moving slow','Some things only hearts can know'],
+  free:['With {NP}, {I} finally feel free','This is who {I} want to be','Close {my} eyes and {I} can see','Everything was meant to be','Out beyond the {IMG} and the sea'],
+  time:['{I} would choose {NP} every time','Racing hearts and running out of time','Watch the {IMG} begin to shine','Every word is written in a line','For a moment, all of it was mine'],
+  rain:['{I} keep dreaming of {NP} in the rain','Every scar is singing out again','Walking through the {IMG}, through the pain','Whisper softly, call {my} name','Nothing here will look the same'],
+  sky:['{NP} is written in the sky','Don\'t ask {me} how, don\'t ask {me} why','With {NP}, {I} learn to fly','Feel the {IMG} and feel alive','Never had to say goodbye'],
+  home:['{NP} feels like coming home','Never knew {I} was so alone','Every road is leading home','Every road was ours to roam','Carved it deep like words in stone'],
+  dream:['{NP} is more than just a dream','Nothing\'s ever what it seems','Lost somewhere in between','Underneath the {IMG}, a quiet scene','Waking slowly from a dream'],
+  ground:['{I} hear {NP} in every sound','Keep {my} feet upon the ground','Everything {I} lost is found','Spinning all the {IMG} around','Heartbeat like a drum, a pounding sound'],
+  hold:['{I} hold {NP} close when the night gets cold','Every word {I} never told','Worth more than silver, worth more than gold','Young and restless, brave and bold','Stories that will never grow old'],
+};
+function lwNounPhrase(topic){
+  let t=String(topic).trim().replace(/[.!?]+$/,'').replace(/^(a song )?(about|on|for)\s+/i,'');
+  t=t.split(/\s+(?:at|in|on|with|about|for|from|during|after|before|because)\s+/i)[0]; // "dancing alone at 3am in Lisbon" → "dancing alone"
+  t=t.replace(/^(missing|loving|leaving|finding|losing|chasing|remembering|forgetting)\s+(?=(my|our|your|the|a|an)\b)/i,''); // "missing my hometown" → "my hometown"
+  const w=t.split(/\s+/).slice(0,4).join(' ');
+  return w||'this feeling';
+}
+function lwBuiltIn(o){
+  const rnd=sbRng(o.topic+o.mood+o.structure+(o.seed||0)), pick=a=>a[Math.floor(rnd()*a.length)];
+  const V=o.pov==='we'?{I:'we',me:'us',my:'our',Im:"we're"}:o.pov==='you'?{I:'you',me:'you',my:'your',Im:"you're"}:{I:'I',me:'me',my:'my',Im:"I'm"};
+  const img=LW_IMAGES[o.mood]||LW_IMAGES.Hopeful, NP=lwNounPhrase(o.topic).replace(/^(my|our|your)\b/i,V.my); // "my hometown" follows the chosen voice
+  const cap=x=>x.charAt(0).toUpperCase()+x.slice(1);
+  const fill=line=>cap(line.replace(/\{NP\}/g,NP).replace(/\{IMG\}/g,()=>pick(img)).replace(/\{(I|me|my|Im|My)\}/g,(m,k)=>k==='My'?cap(V.my):V[k]).replace(/^(i|we|you)\b/,x=>x==='i'?'I':cap(x)));
+  const used=new Set();
+  const couplet=(needNP)=>{ // two different lines from one rhyme family; prefer one that mentions the topic
+    const fams=Object.keys(LW_LINES); let fam=pick(fams);
+    const lines=LW_LINES[fam].filter(l=>!used.has(l));
+    const withNP=lines.filter(l=>l.includes('{NP}')), noNP=lines.filter(l=>!l.includes('{NP}'));
+    const a=needNP&&withNP.length?pick(withNP):pick(lines.length?lines:LW_LINES[fam]); used.add(a);
+    const rest=(noNP.length?noNP:lines).filter(l=>l!==a); const b=rest.length?pick(rest):pick(LW_LINES[fam].filter(l=>l!==a)); used.add(b);
+    return [fill(a),fill(b)];
+  };
+  const hook=cap(NP);
+  const verse=n=>{ const out=[]; if(o.rhyme==='ABAB'&&n>=4){ const c1=couplet(true),c2=couplet(false); out.push(c1[0],c2[0],c1[1],c2[1]); for(let i=4;i<n;i+=2) out.push(...couplet(false)); } else for(let i=0;i<n;i+=2) out.push(...couplet(i===0)); return out.slice(0,n); };
+  const cc=couplet(false);
+  const chorus=[hook+', oh, '+NP.toLowerCase(),cc[0],'Oh, '+NP.toLowerCase()+', '+V.Im+' still here',cc[1]];
+  const parts=(o.structure||'V C V C B C').split(' ').map(x=>({V:'Verse',C:'Chorus',P:'Pre-Chorus',B:'Bridge'})[x]);
+  let vN=0; const lines=[];
+  parts.forEach(p=>{ lines.push('['+(p==='Verse'?'Verse '+(++vN):p)+']');
+    if(p==='Chorus') lines.push(...chorus); else if(p==='Bridge') lines.push(...couplet(true)); else if(p==='Pre-Chorus') lines.push(...couplet(false)); else lines.push(...verse(o.lines||4));
+    lines.push(''); });
+  return lines.join('\n').trim();
+}
+async function lwWrite(o){
+  if(typeof claudeConnected!=='undefined'&&claudeConnected){
+    const prompt=`You are a professional songwriter. Write ORIGINAL song lyrics (never reuse lines from existing songs).
+Topic: ${o.topic}
+Mood: ${o.mood}
+Genre: ${o.genre||'Pop'}
+Point of view: ${o.pov==='we'?'first person plural (we)':o.pov==='you'?'second person (you)':'first person (I)'}
+Rhyme scheme for verses: ${o.rhyme}
+Structure (in order): ${(o.structure||'V C V C B C').split(' ').map(x=>({V:'Verse',C:'Chorus',P:'Pre-Chorus',B:'Bridge'})[x]).join(', ')}
+Verses have ${o.lines||4} lines; choruses 4 lines with a memorable repeated hook built on the topic; bridge 2–4 lines.
+Use vivid, concrete imagery and natural singable phrasing; vary line lengths a little; keep lines under 12 words.
+Reply with ONLY the lyrics, each section headed like [Verse 1], [Chorus], [Bridge], no other text.`;
+    try{ setClaudeThinking&&setClaudeThinking(true); const txt=await callClaudeAPI(prompt,null,null,1200); if(txt&&/\[/.test(txt)) return {text:txt.trim(),by:'Claude'}; }
+    catch(e){ toast('Claude couldn\'t write this time ('+e.message+') — using the built-in writer'); }
+    finally{ setClaudeThinking&&setClaudeThinking(false); }
+  }
+  return {text:lwBuiltIn(o),by:'built-in writer'};
+}
+
 // ── Aurora page heroes: the Home-style title block on every tool page ──
 const PAGE_HEROES={
   piano:['Piano','Keys','Play, learn chords and scales on a full keyboard.'],
@@ -19293,6 +19557,7 @@ const PAGE_HEROES={
   listen:['Listen','& Detect','Sing or play — see the notes and chords live.'],
   struct:['Song','Structure','Shape your sections and the arrangement.'],
   tools:['Music','Tools','Tuner, recorder and handy utilities.'],
+  stems:['Stem','Splitter','Split any song into vocals, drums, bass and instruments — for karaoke, practice and remixing.'],
   detect:['Song','Detector','Hear it, name it, learn it — from your mic, an audio file or a Studio track.'],
   studio:['Classic','Studio','The original multitrack studio.'],
 };
@@ -19304,7 +19569,7 @@ function pageHero(name){
 }
 
 // ── App shell: one ☰ menu for every page and action ──
-const SHELL_PAGE_NAMES={detect:'Song Detector',home:'Home',mpc:'Beat Pads',sheet:'Sheet',create:'Create',piano:'Piano',roll:'Piano Roll',drum:'Drums',learn:'Learn',metro:'Metronome',classic:'Guitar',listen:'Listen',daw:'Studio',dj:'DJ Studio',studio:'Classic Studio',struct:'Structure',tools:'Tools'};
+const SHELL_PAGE_NAMES={stems:'Stem Splitter',detect:'Song Detector',home:'Home',mpc:'Beat Pads',sheet:'Sheet',create:'Create',piano:'Piano',roll:'Piano Roll',drum:'Drums',learn:'Learn',metro:'Metronome',classic:'Guitar',listen:'Listen',daw:'Studio',dj:'DJ Studio',studio:'Classic Studio',struct:'Structure',tools:'Tools'};
 let shellPage='sheet',hmKb=-1,hmFlat=[];
 function shellOnPage(name){
   shellPage=name;
@@ -19336,7 +19601,7 @@ function hmItems(){
   const claudeLbl=(document.getElementById('claudeBtnLabel')?.textContent||'Connect Claude').trim();
   const installBtn=document.getElementById('installAppBtn');
   return [
-    {sec:'Make music',items:[pg('⌂','Home','home'),{icon:'✎',label:'Write a song from my lyrics',hint:'new',keys:'song builder lyrics write compose create from scratch my own',run:()=>sbOpen()},pg('⏺','Studio','daw','record · mix · stems'),pg('▦','Beat Pads (MPC)','mpc','finger drumming · samples'),pg('✦','Create','create','AI song'),pg('♪','Sheet','sheet','chords & lyrics'),pg('🎧','DJ Studio','dj')]},
+    {sec:'Make music',items:[pg('⌂','Home','home'),{icon:'✎',label:'Write a song from my lyrics',hint:'new',keys:'song builder lyrics write compose create from scratch my own',run:()=>sbOpen()},pg('⏺','Studio','daw','record · mix · stems'),pg('▦','Beat Pads (MPC)','mpc','finger drumming · samples'),pg('⫶','Stem Splitter','stems','vocals · drums · bass · karaoke'),pg('✦','Create','create','AI song'),pg('♪','Sheet','sheet','chords & lyrics'),pg('🎧','DJ Studio','dj')]},
     {sec:'Studio',items:[
       {icon:'🎤',label:'Record vocal',run:shellInStudio(()=>dawToggleRecordArmGlobal())},
       {icon:'🎙',label:'Add vocal stack (6 stems)',run:shellInStudio(()=>dawAddVocalStack())},
