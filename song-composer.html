@@ -2242,6 +2242,38 @@ body.pg-stems .sh-transport{display:none!important}
 .nv-h{display:flex;flex-wrap:wrap;gap:6px;align-items:center;font-size:11px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:#a39cc0;margin-bottom:6px}
 .nv-h select{text-transform:none;letter-spacing:0;font-size:11.5px;padding:4px 6px}
 .nv-knobs{display:flex;flex-wrap:wrap;gap:8px}
+
+/* ══════════════ AUTOMATION · AUTO-MIX · DEMOS (Tier 20) ══════════════ */
+.au{display:flex;flex-direction:column;gap:8px;padding:4px 2px;color:#f6f3ff;font-family:var(--sans)}
+.au-empty{color:#a39cc0;font-size:12.5px;padding:24px;text-align:center}
+.au-bar{display:flex;flex-wrap:wrap;align-items:center;gap:8px}
+.au-bar>b{font-size:14px;margin-right:4px}
+.au-pills{display:inline-flex;gap:3px;padding:3px;border-radius:999px;background:rgba(17,14,34,.72);border:1px solid rgba(167,139,250,.16)}
+.au-pill{border:none;background:none;color:#a39cc0;font:inherit;font-size:12px;font-weight:700;padding:6px 13px;border-radius:999px;cursor:pointer}
+.au-pill.on{background:var(--c);color:#0b0918}
+.au-val{font-family:var(--mono);font-size:11.5px;color:#c9c2e6;min-width:150px}
+.au-shapes{display:flex;flex-wrap:wrap;gap:5px;margin-left:auto}
+.au-b{background:rgba(255,255,255,.05);border:1px solid rgba(167,139,250,.22);color:#e9e4ff;border-radius:999px;padding:5px 11px;font:inherit;font-size:11.5px;font-weight:700;cursor:pointer}
+.au-b:hover{border-color:#ec4899}
+.au-cv{width:100%;height:190px;border-radius:14px;background:#0b0918;border:1px solid rgba(167,139,250,.16);cursor:crosshair;display:block}
+.au-hint{font-size:11px;color:#8f88b0}
+.auto-ov{position:absolute;left:0;top:0;pointer-events:none;z-index:3}
+.mx-auto{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin:0 0 8px;padding:8px 10px;border-radius:12px;background:linear-gradient(135deg,rgba(124,58,237,.14),rgba(46,230,182,.06));border:1px solid rgba(167,139,250,.2)}
+.mx-auto span{font-size:11px;color:#a39cc0;flex:1;min-width:200px}
+.mx-ab{border:none;border-radius:999px;padding:7px 15px;font:inherit;font-size:12px;font-weight:800;color:#fff;cursor:pointer;background:linear-gradient(135deg,#7c3aed,#ec4899)}
+.mx-ab.ghost{background:rgba(255,255,255,.05);border:1px solid rgba(167,139,250,.25);color:#e9e4ff}
+.mx-ab:disabled{opacity:.6;cursor:wait}
+.home-demos{position:relative;z-index:1;flex:0 0 auto;max-width:1180px;margin:8px auto 0;padding:0 28px 48px;width:100%;box-sizing:border-box}
+.hd-head h2{margin:0;font-size:26px;font-weight:800;letter-spacing:-.02em;color:#f6f3ff}
+.hd-head p{margin:4px 0 14px;color:#a39cc0;font-size:13.5px}
+.hd-row{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px}
+.hd-card{display:flex;flex-direction:column;gap:4px;text-align:left;background:rgba(17,14,34,.72);border:1px solid rgba(167,139,250,.14);border-radius:18px;padding:14px;color:#f6f3ff;font:inherit;cursor:pointer;transition:transform .15s,border-color .15s,box-shadow .15s}
+.hd-card:hover{transform:translateY(-2px);border-color:var(--c);box-shadow:0 10px 30px rgba(0,0,0,.35),0 0 0 1px var(--c)}
+.hd-bars{display:flex;align-items:flex-end;gap:3px;height:46px;margin-bottom:8px}
+.hd-bars i{flex:1;border-radius:2px;background:var(--c);opacity:.8}
+.hd-card b{font-size:15px}
+.hd-card span{font-size:12px;color:#a39cc0}
+.hd-card em{font-style:normal;font-size:11px;font-weight:800;letter-spacing:.08em;color:var(--c);margin-top:6px}
 </style>
 </head>
 <body class="shell-v2">
@@ -2640,6 +2672,7 @@ body.pg-stems .sh-transport{display:none!important}
           <button class="tab" data-tab="lyrics" onclick="dawSwitchPanelTab('lyrics')">Lyrics</button>
           <button class="tab" data-tab="effects" onclick="dawSwitchPanelTab('effects')">Effects</button>
           <button class="tab" data-tab="mixer" onclick="dawSwitchPanelTab('mixer')">Mixer</button>
+          <button class="tab" data-tab="automation" onclick="dawSwitchPanelTab('automation')">Automation</button>
         </div>
         <div class="spacer"></div>
         <button class="btn" id="dawSavePresetBtn" style="padding:4px 9px;display:none" onclick="dawSavePresetFromPanel()">Save FX chain</button>
@@ -14211,6 +14244,7 @@ function renderDawTimeline(){
       div.addEventListener('contextmenu',e=>{ e.preventDefault();e.stopPropagation(); dawView.selectedClipId=clip.id;dawView.selectedTrackId=track.id; renderDawTimeline(); dawShowClipContextMenu(e.clientX,e.clientY,track,clip); });
       lane.appendChild(div);
     });
+    if(typeof dawAutoOverlay==='function') dawAutoOverlay(lane,track);
     grid.appendChild(lane);
   });
   const play=document.createElement('div'); play.className='play'; play.id='dawPlayheadEl';
@@ -14401,7 +14435,8 @@ function dawBuildTrackGraph(track){
   track._gain=ctx.createGain();
   track._panner=ctx.createStereoPanner();
   track._analyser=ctx.createAnalyser();track._analyser.fftSize=256;
-  track._gain.connect(track._panner);
+  track._autoF=ctx.createBiquadFilter(); track._autoF.type='lowpass'; track._autoF.frequency.value=20000; track._autoF.Q.value=0.7; // automation filter (open unless a Filter lane is drawn)
+  track._gain.connect(track._autoF); track._autoF.connect(track._panner);
   track._fxChain=[];
   if(typeof dawRebuildTrackFxChain==='function') dawRebuildTrackFxChain(track); else track._panner.connect(track._analyser);
   track._analyser.connect(dawMasterGain);
@@ -14697,6 +14732,7 @@ function updateDawKeyBpmLabel(){
   const sd=document.getElementById('dawSigDisplay'); if(sd) sd.textContent=dawProject.timeSig.join('/');
   const mb=document.getElementById('dawMiniBpmKey'); if(mb) mb.textContent=dawProject.bpm+' bpm in '+dawProject.key;
   const mp=document.getElementById('dawMiniProjName'); if(mp) mp.textContent=dawProject.name;
+  const pn=document.getElementById('dawProjectName'); if(pn&&document.activeElement!==pn&&pn.textContent!==dawProject.name) pn.textContent=dawProject.name;
 }
 function dawAddTrack(){
   const type=document.getElementById('dawAddTrackType')?.value||'keys';
@@ -14838,6 +14874,7 @@ function dawSwitchPanelTab(tab){
   else if(tab==='vocal') renderDawVocalTab();
   else if(tab==='mixer') renderDawMixerTab();
   else if(tab==='lyrics') renderDawLyricsTab();
+  else if(tab==='automation') renderDawAutomationTab();
   else{
     const body=document.getElementById('daw-panel-body');
     if(body) body.innerHTML='<div style="color:var(--mu);font-size:11px;padding:20px;text-align:center">'+escapeHtml(tab)+' — not built yet</div>';
@@ -14978,7 +15015,9 @@ function dawAddLoopToTimeline(loopId,trackId,dropBeat){
   if(loop.gen&&!track){ // generated loops bring their own instrument: reuse a matching track or make one
     const type=lxTrackType(loop);
     track=dawProject.tracks.find(t=>t.type===type&&(type==='drums'?(t.drumKit||'Studio')===loop.kit:t.instrument===loop.inst));
-    if(!track){ track=new DawTrack(type,loop.genre+' '+loop.category); if(loop.inst) track.instrument=loop.inst; if(loop.kit) track.drumKit=loop.kit; dawProject.tracks.push(track); dawBuildTrackGraph(track); }
+    if(!track&&loop.inst&&loop.inst.startsWith('Nova:lib:')) track=dawProject.tracks.find(t=>t.novaFrom===loop.inst);
+    if(!track){ track=new DawTrack(type,loop.genre+' '+loop.category); if(loop.inst) track.instrument=loop.inst; if(loop.kit) track.drumKit=loop.kit; dawProject.tracks.push(track); dawBuildTrackGraph(track);
+      if(loop.inst&&loop.inst.startsWith('Nova:lib:')&&typeof novaAssign==='function'){ novaAssign(track,novaPatchFor(loop.inst),true); track.novaFrom=loop.inst; } }
   }
   if(!track) track=dawCurrentTrackForPanel();
   if(!track) track=dawProject.tracks.find(t=>t.id===dawView.selectedTrackId);
@@ -15061,7 +15100,7 @@ function dawMidiToFreq(m){ return 440*Math.pow(2,(m-69)/12); }
 // stop() early on a real keyup (live keyboard playing) — same engine, two calling styles.
 function dawStartVoice(instrumentName,pitch,destNode,velocity,startTime,ctxOverride){
   const ctx=ctxOverride||getCtx();
-  if(typeof instrumentName==='string'&&instrumentName.startsWith('Nova:')&&typeof dawNovaVoice==='function') return dawNovaVoice(novaPatchFor(instrumentName),pitch,destNode,velocity,startTime||ctx.currentTime,ctx); // Tier 19 multi-engine synth
+  if(typeof instrumentName==='string'&&instrumentName.startsWith('Nova:')&&typeof dawNovaVoice==='function') return dawNovaVoice(novaPatchFor(instrumentName),pitch,destNode,velocity,startTime||ctx.currentTime,ctx,instrumentName); // Tier 19 multi-engine synth
   let inst=STUDIO_INSTRUMENTS.find(i=>i.name===instrumentName)||STUDIO_INSTRUMENTS[0];
   // Tier 9 engines: recorded samples and the layered "Ultra" synth. A sampled instrument
   // whose samples haven't arrived yet (first use, or offline) plays its synth fallback.
@@ -16251,7 +16290,9 @@ async function dawRenderTracksOffline(tracks,respectMuteSolo){
       const gain=offline.createGain();
       gain.gain.value=(!respectMuteSolo||(anySolo?track.soloed:!track.muted))?track.volume:0;
       const panner=offline.createStereoPanner();panner.pan.value=track.pan;
-      gain.connect(panner);
+      const autoF=offline.createBiquadFilter(); autoF.type='lowpass'; autoF.frequency.value=20000; autoF.Q.value=0.7;
+      gain.connect(autoF); autoF.connect(panner);
+      if(typeof dawAutoScheduleOffline==='function'&&gain.gain.value>0) dawAutoScheduleOffline(track,{volume:gain.gain,pan:panner.pan,filter:autoF.frequency},durationSec);
       let last=panner;
       (track.effects||[]).forEach(effect=>{
         if(effect.bypassed) return;
@@ -16291,7 +16332,8 @@ async function dawFreezeTrack(track,durationSec,sr){
   if(!ev.length) return null;
   const inst=STUDIO_INSTRUMENTS.find(i=>i.name===track.instrument)||STUDIO_INSTRUMENTS[0];
   const rel=String(track.instrument).startsWith('Nova:')?(novaPatchFor(track.instrument).aenv||[0,0,0,1])[3]:inst.engine==='sample'?inst.release||0.5:inst.engine==='ultra'?(inst.params.amp||[0,0,0,0.3])[3]:(inst.params&&inst.params.release)||0.5;
-  const tail=Math.min(8,Math.max(2,rel*1.8+0.3)), segSec=Math.max(2,16*spb), total=Math.ceil(durationSec*sr);
+  const glides=String(track.instrument).startsWith('Nova:')&&novaPatchFor(track.instrument).glide>0; // glide links consecutive notes, so they must share one context
+  const tail=Math.min(8,Math.max(2,rel*1.8+0.3)), segSec=glides?durationSec+1:Math.max(2,16*spb), total=Math.ceil(durationSec*sr);
   const L=new Float32Array(total),R=new Float32Array(total), jobs=[];
   for(let s=0;s<durationSec;s+=segSec){
     const seg=ev.filter(e=>e.t>=s&&e.t<s+segSec); if(!seg.length) continue;
@@ -16395,7 +16437,7 @@ async function dawSaveProject(){
         clipsOut.push({id:clip.id,startBeat:clip.startBeat,lengthBeats:clip.lengthBeats,kind:clip.kind,payload,name:clip.name,colorOverride:clip.colorOverride,muted:clip.muted,loopCount:clip.loopCount,
           gain:clip.gain,fadeIn:clip.fadeIn,fadeOut:clip.fadeOut,offsetSec:clip.offsetSec,activeTake:clip.activeTake,takes:takesOut});
       }
-      tracksOut.push({id:track.id,type:track.type,name:track.name,color:track.color,muted:track.muted,soloed:track.soloed,volume:track.volume,pan:track.pan,instrument:track.instrument,effects:track.effects,vocalChain:track.vocalChain||null,drumKit:track.drumKit||null,novaPatch:String(track.instrument).startsWith('Nova:')?novaPatchFor(track.instrument):null,height:track.height,clips:clipsOut});
+      tracksOut.push({id:track.id,type:track.type,name:track.name,color:track.color,muted:track.muted,soloed:track.soloed,volume:track.volume,pan:track.pan,instrument:track.instrument,effects:track.effects,vocalChain:track.vocalChain||null,drumKit:track.drumKit||null,novaPatch:String(track.instrument).startsWith('Nova:')?novaPatchFor(track.instrument):null,auto:track.auto||null,height:track.height,clips:clipsOut});
     }
     const out={name:dawProject.name,bpm:dawProject.bpm,key:dawProject.key,timeSig:dawProject.timeSig,loopStart:dawProject.loopStart,loopEnd:dawProject.loopEnd,loopEnabled:dawProject.loopEnabled,masterPreset:dawProject.masterPreset||'Clean',novaUser:typeof novaSerializeUser==='function'?await novaSerializeUser():null,markers:dawProject.markers||[],lyrics:dawProject.lyrics||[],genre:dawProject.genre||null,tracks:tracksOut};
     dl(JSON.stringify(out),'application/json',(dawProject.name||'project')+'.songbook.json');
@@ -16417,6 +16459,7 @@ function dawLoadProjectFile(inputEl){
         const track=new DawTrack(t.type,t.name);
         Object.assign(track,{id:t.id||track.id,color:t.color||track.color,muted:!!t.muted,soloed:!!t.soloed,volume:t.volume??0.8,pan:t.pan??0,instrument:t.instrument||'Grand Piano',effects:t.effects||[],vocalChain:t.vocalChain||null,drumKit:t.drumKit||null,height:t.height||72});
         if(t.novaPatch&&typeof novaAssign==='function') novaAssign(track,t.novaPatch,true);
+        if(t.auto) track.auto=t.auto;
         for(const c of (t.clips||[])){
           let payload=c.payload,takes=null;
           const decodeB64=async b64=>{ const bin=atob(b64); const arr=new Uint8Array(bin.length); for(let i=0;i<bin.length;i++) arr[i]=bin.charCodeAt(i); return await ctx.decodeAudioData(arr.buffer.slice(0)); };
@@ -16983,7 +17026,9 @@ function renderDawMixerTab(){
       <label class="mx-fx" style="cursor:pointer" title="Normalise exported mix to −14 LUFS (Spotify / YouTube / Apple Music)"><input type="checkbox" id="dawMxNorm"${dawSettings.normalizeExport?' checked':''}> −14 LUFS</label>
       <button class="vx-chip" id="dawMxStems" style="font-size:9.5px;padding:3px 6px">Export stems</button>
     </div></div>
-    ${dawProject.tracks.length?'':'<div class="vx-note" style="padding:8px">No tracks yet — add a track or a vocal stack.</div>'}`;
+    ${dawProject.tracks.length?'':'<div class="vx-note" style="padding:8px">No tracks yet — add a track or a vocal stack.</div>'}`
+  if(dawProject.tracks.length){ const bar=document.createElement('div'); bar.className='mx-auto'; bar.innerHTML='<button class="mx-ab" id="dawMxAuto">✦ Auto-mix</button>'+(dawAutoMixUndo?'<button class="mx-ab ghost" id="dawMxAutoUndo">Undo auto-mix</button>':'')+'<span>Measures every track and sets levels and pan by role (vocals up front, bass and drums centred, keys and guitars spread).</span>';
+    body.prepend(bar); bar.querySelector('#dawMxAuto').onclick=async e=>{ e.target.disabled=true; await dawAutoMix(); }; const u=bar.querySelector('#dawMxAutoUndo'); if(u) u.onclick=dawAutoMixRevert; }
   body.querySelectorAll('.mx-s').forEach(el=>{
     const tid=el.dataset.tid, dbEl=el.querySelector('.mx-db'), fader=el.querySelector('.mx-fader');
     if(tid==='__master'){
@@ -18435,6 +18480,15 @@ const LX_GENRES={
   'Ambient':{bpm:80,kit:'Lo-Fi',mode:'major',groove:{kick:[0],rim:[10],hat:[4,12]},bass:'whole',chords:'sustain',ci:'Ambient Shimmer',pi:'Ambient Shimmer',bi:'Sub Bass',li:'Glass Pluck'},
   'Synthwave':{bpm:100,kit:'Studio',mode:'minor',groove:{kick:[0,8],snare:[4,12],hat:[0,2,4,6,8,10,12,14]},bass:'eighths',chords:'sustain',ci:'Retro Synth 84',pi:'Pad Synth',bi:'Analog Bass',li:'Retro Synth 84'},
   'Jazz':{bpm:120,kit:'Studio',mode:'major',groove:{cymbal:[0,6,8,14],hat:[4,12],kick:[0]},bass:'walking',chords:'comp',ci:'Grand Piano',pi:'Strings',bi:'Upright Bass',li:'Saxophone'},
+  // Tier 20 — newer scenes (808s with glide come from Nova)
+  'Phonk':{bpm:130,kit:'808',mode:'minor',groove:{kick:[0,6,10],clap:[4,12],hat:[0,2,3,4,6,8,10,11,12,14],openhat:[14]},bass:'808glide',chords:'sustain',ci:'Electric Piano',pi:'Choir Pad',bi:'Nova:lib:Phonk 808 Crush',li:'Bell'},
+  'Drill':{bpm:142,kit:'808',mode:'minor',groove:{kick:[0,10],snare:[8],hat:[0,3,6,8,11,14],rim:[13]},bass:'808glide',chords:'sustain',ci:'Strings',pi:'Choir Pad',bi:'Nova:lib:Drill Slide 808',li:'Grand Piano'},
+  'K-Pop':{bpm:120,kit:'Studio',mode:'minor',groove:{kick:[0,4,8,12],snare:[4,12],hat:[0,2,4,6,8,10,12,14],openhat:[14]},bass:'octave',chords:'stab',ci:'Electric Piano',pi:'Pad Synth',bi:'Analog Bass',li:'Lead Synth'},
+  'Amapiano':{bpm:112,kit:'Studio',mode:'minor',groove:{kick:[0,4,8,12],rim:[3,6,11,14],hat:[2,6,10,14],clap:[12]},bass:'808glide',chords:'sustain',ci:'Electric Piano',pi:'Pad Synth',bi:'Nova:lib:Punchy Glide 808',li:'Glass Pluck'},
+  'UK Garage':{bpm:132,kit:'Studio',mode:'minor',groove:{kick:[0,10],snare:[4,12],hat:[2,6,10,14],rim:[7,15]},bass:'syncop',chords:'stab',ci:'Electric Piano',pi:'Strings',bi:'Reese Bass',li:'Glass Pluck'},
+  'Jersey Club':{bpm:140,kit:'808',mode:'minor',groove:{kick:[0,3,6,10,12],clap:[4,12],hat:[0,2,4,6,8,10,12,14]},bass:'808',chords:'stab',ci:'Techno Stab',pi:'Pad Synth',bi:'Sub Bass',li:'Glass Pluck'},
+  'Afro House':{bpm:122,kit:'Studio',mode:'minor',groove:{kick:[0,4,8,12],rim:[3,7,10,14],tom:[6,13],openhat:[2,6,10,14]},bass:'offbeat',chords:'sustain',ci:'Electric Piano',pi:'Pad Synth',bi:'Analog Bass',li:'Xylophone'},
+  'Brazilian Funk':{bpm:130,kit:'808',mode:'minor',groove:{kick:[0,3,7,10],clap:[4,6,12,14],hat:[0,2,4,6,8,10,12,14]},bass:'808glide',chords:'stab',ci:'Techno Stab',pi:'Pad Synth',bi:'Nova:lib:Glide 808 Dirty',li:'Lead Synth'},
 };
 const LX_PROGS={major:[[1,5,6,4],[6,4,1,5],[1,4,6,5],[2,5,1,1]],minor:[[1,6,3,7],[1,7,6,7],[1,4,6,5],[6,7,1,1]]};
 const LX_DRUM_VARIANTS=[['Main','main'],['Full','full'],['Minimal','min'],['Fill','fill'],['Breakdown','break'],['Half-Time','half'],['Intro','intro'],['Groove 2','alt']];
@@ -18461,6 +18515,10 @@ function lxBass(style,prog,key,rnd){
     else if(style==='offbeat') [0.5,1.5,2.5,3.5].forEach(x=>N.push({pitch:r,start:o+x,dur:0.38,velocity:100}));
     else if(style==='sixteenth') for(let s=0;s<16;s++){ if(s%4===0) continue; N.push({pitch:s%8===6?r+12:r,start:o+s*0.25,dur:0.2,velocity:s%4===2?110:80}); }
     else if(style==='808'){ N.push({pitch:r,start:o,dur:1.4,velocity:110}); N.push({pitch:r,start:o+2.5,dur:1.2,velocity:95}); }
+    else if(style==='808glide'){ // legato overlaps make Nova slide between notes: up the octave, back down, then into the next chord
+      const up=rnd()<0.5?12:7, nr=nx; N.push({pitch:r,start:o,dur:1.6,velocity:112}); N.push({pitch:r+up,start:o+1.5,dur:0.62,velocity:100});
+      N.push({pitch:r,start:o+2,dur:rnd()<0.5?1.05:0.9,velocity:104}); if(rnd()<0.6) N.push({pitch:r+(rnd()<0.5?3:5),start:o+3,dur:0.6,velocity:96}); else N.push({pitch:r,start:o+3,dur:0.5,velocity:96});
+      if(nr!==r&&b<3) N.push({pitch:nr,start:o+3.5,dur:0.6,velocity:96}); }
     else if(style==='syncop') [[0,1.2],[1.5,0.6],[2.5,0.4],[3,0.9]].forEach(([x,d],i)=>N.push({pitch:i===2?r+12:r,start:o+x,dur:d,velocity:i%2?88:105}));
     else if(style==='half') [0,2].forEach((x,i)=>N.push({pitch:i?r+7:r,start:o+x,dur:1.85,velocity:100}));
     else if(style==='whole') N.push({pitch:r,start:o,dur:3.9,velocity:100});
@@ -18841,8 +18899,11 @@ function homeInit(){
       <div class="hc-art">${homeArt(c.art,c.color)}</div>
       <div class="hc-body"><div class="hc-name">${c.name}</div><div class="hc-sub">${c.sub}</div><div class="hc-tag">${c.tag}</div><div class="hc-open"><span>▶</span> OPEN</div></div>
     </button>`).join('')}</section>
+    <section class="home-demos" id="homeDemos"><div class="hd-head"><h2>Remix a demo</h2><p>Open a finished song in the Studio. Mute parts, swap loops, re-record the hook and make it yours.</p></div>
+      <div class="hd-row">${DEMO_SONGS.map((d,i)=>`<button class="hd-card" data-demo="${i}" style="--c:${d.color}"><div class="hd-bars">${[...Array(18)].map((_,j)=>`<i style="height:${20+Math.abs(Math.sin(j*0.7+i*1.3)*Math.cos(j*0.21+i))*75}%"></i>`).join('')}</div><b>${escapeHtml(d.name)}</b><span>${escapeHtml(d.genre)} · ${LX_GENRES[d.genre]?.bpm||''} BPM · ${escapeHtml(d.key)}</span><em>▶ Open in Studio</em></button>`).join('')}</div></section>
   </div>`;
   page.querySelectorAll('[data-go]').forEach(b=>b.onclick=()=>{ const c=HOME_CARDS.find(x=>x.id===b.dataset.go); if(c) c.run(); });
+  page.querySelectorAll('[data-demo]').forEach(b=>b.onclick=()=>demoOpen(Number(b.dataset.demo)));
 }
 
 // ══════════════════════════════════════════════════════════════════════════
@@ -19596,6 +19657,7 @@ const NOVA_TABLES={
 const NOVA_TEXTURES=['Air Pad','Glass Shimmer','Choir Ahh','Tape Strings','Metal Rain','Ocean Noise'];
 const NOVA_USER={samples:{},tables:{}}; // imported by the user (session + saved with projects)
 const NOVA_REG={};
+const NOVA_GLIDE={}; // last held note per Nova track, for glide
 const novaWaveCache=new WeakMap(), novaTexCache=new WeakMap();
 function novaTableFrames(name){ const u=NOVA_USER.tables[name]; if(u) return u.frames; const fn=NOVA_TABLES[name]||NOVA_TABLES['Basic Shapes']; return [...Array(8)].map((_,i)=>{ const h=fn(i/7), a=new Float32Array(NOVA_H+1); for(let n=1;n<=NOVA_H;n++) a[n]=h(n); return a; }); }
 function novaWave(ctx,key,amps){ let m=novaWaveCache.get(ctx); if(!m){ m=new Map(); novaWaveCache.set(ctx,m); } if(m.has(key)) return m.get(key);
@@ -19618,7 +19680,7 @@ function novaTexture(ctx,name){ // granular source material, synthesised once pe
   let ss=0; for(let i=0;i<len;i++) ss+=d[i]*d[i]; const g=0.25/Math.max(1e-6,Math.sqrt(ss/len)); let pk=0; for(let i=0;i<len;i++){ d[i]*=g; pk=Math.max(pk,Math.abs(d[i])); } if(pk>0.98) for(let i=0;i<len;i++) d[i]*=0.98/pk;
   m[name]=b; return b;
 }
-function novaPatchFor(name){ return NOVA_REG[name]||NOVA_PRESETS[0]; }
+function novaPatchFor(name){ if(NOVA_REG[name]) return NOVA_REG[name]; if(String(name).startsWith('Nova:lib:')){ const p=NOVA_PRESETS.find(x=>x.name===String(name).slice(9)); if(p) return p; } return NOVA_PRESETS[0]; }
 function novaClone(p){ return JSON.parse(JSON.stringify(p)); }
 function novaAssign(track,patch,keep){
   const p=novaClone(patch); track.novaPatch=p; track.instrument='Nova:'+track.id; NOVA_REG[track.instrument]=p;
@@ -19644,7 +19706,7 @@ async function novaAutoLevel(p){
   }catch(e){} return p;
 }
 // ── the voice ──
-function dawNovaVoice(P,pitch,dest,velocity,t,ctx){
+function dawNovaVoice(P,pitch,dest,velocity,t,ctx,name){
   const vel=Math.max(0.05,(velocity??100)/127), live=!(ctx instanceof OfflineAudioContext);
   const [A,D,S,R]=P.aenv||[0.01,0.3,0.8,0.4], f0=dawMidiToFreq(pitch);
   const sum=ctx.createGain(), oscs=[], extras=[];
@@ -19692,6 +19754,10 @@ function dawNovaVoice(P,pitch,dest,velocity,t,ctx){
   layer(P.A); layer(P.B);
   if(P.sub>0){ const o=ctx.createOscillator(); o.type='sine'; o.frequency.value=f0/2; const g=ctx.createGain(); g.gain.value=P.sub; o.connect(g); g.connect(sum); o.start(t); oscs.push(o); }
   if(P.noise>0){ const s=ctx.createBufferSource(); s.buffer=dawNoise(ctx); s.loop=true; const g=ctx.createGain(); g.gain.value=P.noise*0.4; s.connect(g); g.connect(sum); s.start(t,Math.random()); oscs.push(s); }
+  // 808-style glide: a note that starts while the previous one is still held slides from its pitch (mono, the old note is cut)
+  let glideFrom=null;
+  if(P.glide>0&&name){ const g=NOVA_GLIDE[name]; if(g&&g.ctx===ctx&&g.start<t&&g.end>t-0.01&&g.pitch!==pitch){ glideFrom=g; const cents=(g.pitch-pitch)*100;
+      oscs.forEach(o=>{ if(!o.detune) return; const base=o.detune.value; o.detune.setValueAtTime(base+cents,t); o.detune.linearRampToValueAtTime(base,t+P.glide); }); } }
   // filter
   const F=P.filt||{}, f1=ctx.createBiquadFilter(), f2=ctx.createBiquadFilter(); f1.type=F.type||'lowpass'; f2.type=f1.type==='lowpass'||f1.type==='highpass'?f1.type:'allpass'; f1.Q.value=F.q??0.8; f2.Q.value=0.6;
   const kt=Math.pow(2,((pitch-60)/12)*(F.key??0.3)), base=Math.min(18000,(F.cut??3000)*kt), amt=(F.env||0)*(0.4+0.6*vel), [fa,fd,fs]=P.fenv||[0.005,0.4,0.4,0.5];
@@ -19713,8 +19779,13 @@ function dawNovaVoice(P,pitch,dest,velocity,t,ctx){
     else if(L.dest==='pan'){ const pn=ctx.createStereoPanner(); g.gain.value=L.amt; g.connect(pn.pan); outNode.connect(pn); outNode=pn; } });
   outNode.connect(dest);
   const timer=ctx.createBufferSource(); timer.buffer=ctx.createBuffer(1,1,ctx.sampleRate); timer.loop=true; timer.start(t);
-  return{stop(at){ const rt=Math.max(at||ctx.currentTime,t+0.005); dawEnvRelease(amp.gain,rt,R); extras.forEach(e=>e.stopGrains(rt)); const end=rt+R*1.6+0.05;
-    oscs.forEach(o=>{ try{ o.stop(end); }catch(e){} }); try{ timer.stop(end); }catch(e){} dawDisposeOnEnd(timer,[amp,outNode]); }};
+  const handle={stop(at){ const rt=Math.max(at||ctx.currentTime,t+0.005); dawEnvRelease(amp.gain,rt,R); extras.forEach(e=>e.stopGrains(rt)); const end=rt+R*1.6+0.05;
+      if(name&&NOVA_GLIDE[name]&&NOVA_GLIDE[name].voice===handle) NOVA_GLIDE[name].end=rt;
+      oscs.forEach(o=>{ try{ o.stop(end); }catch(e){} }); try{ timer.stop(end); }catch(e){} dawDisposeOnEnd(timer,[amp,outNode]); },
+    cut(at){ try{ amp.gain.cancelScheduledValues(at); amp.gain.setTargetAtTime(0,at,0.012); }catch(e){} extras.forEach(e=>e.stopGrains(at)); }};
+  if(glideFrom) glideFrom.voice.cut(t);
+  if(P.glide>0&&name) NOVA_GLIDE[name]={ctx,pitch,start:t,end:Infinity,voice:handle};
+  return handle;
 }
 // ── 1,280 presets: 20 categories × 64, generated from category recipes ──
 const NOVA_CATS=['Bass','Sub & 808','Reese & Growl','Lead','Pluck','Keys','Bell & Mallet','Pad','Strings & Ensemble','Brass & Stabs','Choir & Vocal','Arp & Sequence','Cinematic','Drone & Atmos','Granular Texture','FX & Riser','Wobble & EDM','Analog Classic','Hybrid Layer','Lo-Fi & Vintage'];
@@ -19752,6 +19823,13 @@ function novaRecipe(cat,r){
 const NOVA_PRESETS=(()=>{ const out=[]; NOVA_CATS.forEach(cat=>{ const r=sbRng('nova-'+cat), nouns=NOVA_NOUN[cat], used=new Set();
   for(let i=0;i<64;i++){ let nm; do{ nm=NOVA_ADJ[Math.floor(r()*NOVA_ADJ.length)]+' '+nouns[Math.floor(r()*nouns.length)]; }while(used.has(nm)&&used.size<NOVA_ADJ.length*nouns.length); used.add(nm);
     const p=novaRecipe(cat,r); p.name=nm; p.cat=cat; p.id='n'+out.length; out.push(p); } }); return out; })();
+// Hand-tuned 808s with glide (used by the Phonk / Drill / Amapiano / Brazilian Funk loops too)
+[['Glide 808 Classic',0.09,0.3,[0.003,1.2,0.65,0.22],'sine'],['Glide 808 Dirty',0.12,0.85,[0.003,1.1,0.6,0.2],'sine'],['Drill Slide 808',0.16,0.45,[0.003,1.6,0.75,0.25],'sine'],
+ ['Phonk 808 Crush',0.07,1,[0.002,0.9,0.55,0.18],'triangle'],['Long Glide 808',0.3,0.35,[0.003,1.8,0.8,0.3],'sine'],['Punchy Glide 808',0.06,0.5,[0.002,0.5,0.35,0.15],'sine']].forEach(([name,glide,drive,aenv,wave],i)=>{
+  const p=novaRecipe('Sub & 808',sbRng('glide808'+i)); p.A.wave=wave; p.A.level=1; p.sub=0.15; p.filt={type:'lowpass',cut:wave==='triangle'?1400:700,q:0.7,env:0,key:0,drive}; p.aenv=aenv; p.glide=glide; p.fx={rev:0,dly:0,cho:0,drive:drive*0.4};
+  p.name=name; p.cat='Sub & 808'; p.id='g808-'+i; NOVA_PRESETS.splice(NOVA_PRESETS.findIndex(x=>x.cat==='Sub & 808'),0,p); });
+// a few classic generated 808s and basses get glide too
+NOVA_PRESETS.forEach((p,i)=>{ if(p.glide==null&&p.cat==='Sub & 808'&&i%3===0) p.glide=[0.06,0.1,0.14][i%9/3|0]; else if(p.glide==null&&(p.cat==='Lead'||p.cat==='Bass')&&i%8===0) p.glide=0.05; });
 // ── import your own sample / wavetable ──
 function novaImport(kind,track){
   const inp=document.createElement('input'); inp.type='file'; inp.accept='audio/*';
@@ -19827,7 +19905,7 @@ function novaRenderEditor(track){
   knob('#nvFilt','filt.cut','Cutoff',40,16000,'Hz'); knob('#nvFilt','filt.q','Reso',0.3,18); knob('#nvFilt','filt.env','Env Amt',0,12000,'Hz'); knob('#nvFilt','filt.key','Keytrack',0,1); knob('#nvFilt','filt.drive','Drive',0,1);
   ['A','D','S','R'].forEach((l,i)=>knob('#nvEnv','aenv['+i+']','Amp '+l,i===2?0:0.001,i===2?1:i===3?6:3)); ['A','D','S'].forEach((l,i)=>knob('#nvEnv','fenv['+i+']','Flt '+l,i===2?0:0.001,i===2?1:3));
   knob('#nvL1','lfo1.rate','Rate',0.05,12,'Hz'); knob('#nvL1','lfo1.amt','Amount',0,1); knob('#nvL2','lfo2.rate','Rate',0.05,12,'Hz'); knob('#nvL2','lfo2.amt','Amount',0,1);
-  knob('#nvMix','sub','Sub',0,1); knob('#nvMix','noise','Noise',0,1); knob('#nvMix','gain','Volume',0.2,2);
+  knob('#nvMix','sub','Sub',0,1); knob('#nvMix','noise','Noise',0,1); knob('#nvMix','gain','Volume',0.2,2); knob('#nvMix','glide','Glide',0,0.5,'s');
   ['rev','dly','cho','drive'].forEach((k,i)=>knob('#nvMix','fx.'+k,['Reverb','Delay','Chorus','Drive'][i],0,1));
   // macros: one-knob moves across several parameters (scaled from the preset's own values)
   const base=novaClone(P), mwrap=ed.querySelector('#nvMacros');
@@ -19846,6 +19924,177 @@ function novaRenderEditor(track){
   ed.querySelector('#nvFav').onclick=()=>{ const f=novaFavs(); f.has(P.id)?f.delete(P.id):f.add(P.id); try{ localStorage.setItem('novaFavs',JSON.stringify([...f])); }catch(e){} novaRenderEditor(track); };
   ed.querySelector('#nvSave').onclick=()=>{ const nm=prompt('Name your preset',(P.name||'My Sound')+' (edit)'); if(!nm) return; const u=novaUserPresets(); const p=novaClone(P); p.name=nm; p.cat='My Presets'; p.id='u'+Date.now(); u.unshift(p); try{ localStorage.setItem('novaUserPresets',JSON.stringify(u)); }catch(e){ toast('Could not save — storage full'); return; } P.id=p.id; P.name=nm; P.cat='My Presets'; novaCat='My Presets'; novaRenderEditor(track); toast('Saved "'+nm+'" to My Presets'); };
   ed.querySelector('#nvImpS').onclick=()=>novaImport('sample',track); ed.querySelector('#nvImpW').onclick=()=>novaImport('wavetable',track);
+}
+
+// ══════════════════════════════════════════════════════════════════════════
+// TIER 20 — Automation lanes (volume / pan / filter per track, drawn in the
+// Automation tab, overlaid on the timeline, played live and in exports),
+// Auto-mix (measures every track and sets levels + pan by role, undoable),
+// and remixable demo songs built from the loop library.
+// ══════════════════════════════════════════════════════════════════════════
+const DAW_AUTO_PARAMS={
+  volume:{label:'Volume',color:'#2ee6b6',def:0.8,fmt:v=>v<=0.001?'−∞ dB':((v=20*Math.log10(v/0.8))>=0?'+':'')+v.toFixed(1)+' dB'}, // relative to the fader: 0.8 = fader level
+  pan:{label:'Pan',color:'#a78bfa',def:0.5,fmt:v=>Math.abs(v-0.5)<0.01?'C':(v<0.5?'L':'R')+Math.round(Math.abs(v-0.5)*200)},
+  filter:{label:'Filter',color:'#f472b6',def:1,fmt:v=>{ const f=dawAutoFilterHz(v); return f>=1000?(f/1000).toFixed(1)+' kHz':Math.round(f)+' Hz'; }},
+};
+function dawAutoFilterHz(v){ return 40*Math.pow(2,Math.max(0,Math.min(1,v))*9); } // 40 Hz … 20.5 kHz, musical (log) sweep
+function dawAutoLane(track,param){ return track.auto&&track.auto[param]&&track.auto[param].length?track.auto[param]:null; }
+function dawAutoValue(pts,beat){
+  if(beat<=pts[0].b) return pts[0].v; const last=pts[pts.length-1]; if(beat>=last.b) return last.v;
+  for(let i=1;i<pts.length;i++) if(beat<=pts[i].b){ const a=pts[i-1],c=pts[i],x=(beat-a.b)/Math.max(1e-9,c.b-a.b); return a.v+(c.v-a.v)*x; }
+  return last.v;
+}
+function dawAutoTarget(track,param,v){ return param==='volume'?track.volume*v/0.8:param==='pan'?v*2-1:dawAutoFilterHz(v); }
+// live: each animation frame glides the track's gain / pan / filter to the lane value at the playhead
+function dawAutoApplyLive(nowBeat){
+  const ctx=getCtx(), now=ctx.currentTime, anySolo=dawProject.tracks.some(t=>t.soloed);
+  dawProject.tracks.forEach(track=>{ if(!track.auto||!track._gain) return;
+    const audible=anySolo?track.soloed:!track.muted;
+    [['volume',track._gain.gain],['pan',track._panner.pan],['filter',track._autoF&&track._autoF.frequency]].forEach(([k,prm])=>{ const pts=dawAutoLane(track,k); if(!pts||!prm) return;
+      let v=dawAutoTarget(track,k,dawAutoValue(pts,nowBeat)); if(k==='volume'&&!audible) v=0;
+      try{ prm.cancelScheduledValues(now); prm.setTargetAtTime(v,now,0.012); }catch(e){} }); });
+}
+function dawAutoReset(){ dawProject.tracks.forEach(t=>{ if(!t._gain) return; [t._gain.gain,t._panner.pan,t._autoF&&t._autoF.frequency].forEach(p=>{ try{ p&&p.cancelScheduledValues(0); }catch(e){} }); if(t._autoF) t._autoF.frequency.value=20000; dawUpdateTrackAudioState(t); }); }
+// offline (export / bounce): the whole lane becomes a sample-accurate ramp
+function dawAutoScheduleOffline(track,params,durationSec){
+  if(!track.auto) return; const spb=60/dawProject.bpm;
+  ['volume','pan','filter'].forEach(k=>{ const pts=dawAutoLane(track,k), prm=params[k]; if(!pts||!prm) return;
+    prm.setValueAtTime(dawAutoTarget(track,k,pts[0].v),0);
+    pts.forEach(p=>{ const t=p.b*spb; if(t>0&&t<durationSec) prm.linearRampToValueAtTime(dawAutoTarget(track,k,p.v),t); }); });
+}
+(function hookAutomationIntoTransport(){
+  const tick=dawEngine.tick, stop=dawEngine.stop;
+  dawEngine.tick=function(){ tick.call(this); if(this.isPlaying){ dawAutoApplyLive(dawView.playheadBeat); if(dawCurrentPanelTab==='automation') dawAutoDraw(); } };
+  dawEngine.stop=function(){ stop.call(this); dawAutoReset(); if(dawCurrentPanelTab==='automation') dawAutoDraw(); };
+})();
+// thin line over the track's lane on the timeline, one per drawn parameter
+function dawAutoOverlay(lane,track){
+  if(!track.auto) return; const h=track.height, grid=document.getElementById('daw-grid'), w=grid?grid.clientWidth:800;
+  const lines=Object.keys(DAW_AUTO_PARAMS).map(k=>{ const pts=dawAutoLane(track,k); if(!pts) return '';
+    const xy=[[-10,pts[0].v],...pts.map(p=>[xFromBeat(p.b),p.v]),[w+10,pts[pts.length-1].v]].map(([x,v])=>x.toFixed(1)+','+(4+(1-v)*(h-8)).toFixed(1)).join(' ');
+    return `<polyline points="${xy}" fill="none" stroke="${DAW_AUTO_PARAMS[k].color}" stroke-width="1.6" stroke-opacity=".9"/>`; }).join('');
+  if(!lines) return; const svg=document.createElementNS('http://www.w3.org/2000/svg','svg'); svg.setAttribute('class','auto-ov'); svg.setAttribute('width',w); svg.setAttribute('height',h); svg.innerHTML=lines; lane.appendChild(svg);
+}
+// ── Automation tab ──
+let dawAutoParam='volume', dawAutoDrag=null;
+const DAW_AUTO_SHAPES={
+  'Fade in':(L,p)=>[{b:0,v:0},{b:Math.min(16,L),v:DAW_AUTO_PARAMS[p].def}],
+  'Fade out':(L,p)=>[{b:Math.max(0,L-16),v:DAW_AUTO_PARAMS[p].def},{b:L,v:0}],
+  'Filter rise':(L)=>[{b:0,v:0.35},{b:Math.min(32,L),v:1}],
+  'Build-up':(L)=>[{b:0,v:1},{b:Math.max(0,L-16),v:1},{b:Math.max(0,L-0.25),v:0.3},{b:L,v:1}],
+  'Duck the drop':(L)=>[{b:0,v:0.8},{b:Math.max(0,L/2-4),v:0.8},{b:Math.max(0,L/2-0.5),v:0.15},{b:L/2,v:0.8}],
+  'Auto-pan':(L)=>{ const o=[]; for(let b=0;b<=L;b+=4) o.push({b,v:b/4%2?0.15:0.85}); return o; },
+};
+function dawAutoSongLen(){ return Math.max(16,Math.ceil(dawFurthestBeat()/4)*4); }
+function renderDawAutomationTab(){
+  const body=document.getElementById('daw-panel-body'); if(!body) return;
+  const track=dawCurrentTrackForPanel();
+  if(!track){ body.innerHTML='<div class="au-empty">Select a track, then draw how its volume, pan or filter moves through the song.</div>'; return; }
+  const pts=dawAutoLane(track,dawAutoParam);
+  body.innerHTML=`<div class="au">
+    <div class="au-bar"><b>${escapeHtml(track.name)}</b>
+      <div class="au-pills">${Object.entries(DAW_AUTO_PARAMS).map(([k,d])=>`<button class="au-pill${k===dawAutoParam?' on':''}" data-p="${k}" style="--c:${d.color}">${d.label}${dawAutoLane(track,k)?' ●':''}</button>`).join('')}</div>
+      <span class="au-val" id="auVal">${pts?'':'Off — click the lane to start'}</span>
+      <div class="au-shapes">${Object.keys(DAW_AUTO_SHAPES).filter(n=>dawAutoParam==='filter'?!/Fade|Duck|pan/.test(n):dawAutoParam==='pan'?n==='Auto-pan':!/Filter|pan|Build/.test(n)).map(n=>`<button class="au-b" data-s="${n}">${n}</button>`).join('')}<button class="au-b" data-s="clear">Clear</button></div></div>
+    <canvas id="auCanvas" class="au-cv"></canvas>
+    <div class="au-hint">Click to add a point · drag to move · double-click a point to delete · lines also show on the track in the timeline</div></div>`;
+  body.querySelectorAll('.au-pill').forEach(b=>b.onclick=()=>{ dawAutoParam=b.dataset.p; renderDawAutomationTab(); });
+  body.querySelectorAll('.au-b').forEach(b=>b.onclick=()=>{ track.auto=track.auto||{};
+    if(b.dataset.s==='clear') delete track.auto[dawAutoParam]; else track.auto[dawAutoParam]=DAW_AUTO_SHAPES[b.dataset.s](dawAutoSongLen(),dawAutoParam);
+    if(!dawEngine.isPlaying) dawAutoReset(); renderDawAutomationTab(); renderDawTimeline(); });
+  const cv=document.getElementById('auCanvas'), toPt=e=>{ const r=cv.getBoundingClientRect(), L=dawAutoSongLen(); return {b:Math.max(0,Math.min(L,Math.round((e.clientX-r.left)/r.width*L*4)/4)),v:Math.max(0,Math.min(1,1-(e.clientY-r.top-8)/(r.height-16))),x:e.clientX-r.left,y:e.clientY-r.top,w:r.width,h:r.height}; };
+  const hit=(q)=>{ const P=dawAutoLane(track,dawAutoParam)||[], L=dawAutoSongLen(); return P.findIndex(p=>Math.hypot(p.b/L*q.w-q.x,8+(1-p.v)*(q.h-16)-q.y)<9); };
+  cv.onmousedown=e=>{ const q=toPt(e); track.auto=track.auto||{}; const P=track.auto[dawAutoParam]=track.auto[dawAutoParam]||[]; let i=hit(q);
+    if(i<0){ P.push({b:q.b,v:q.v}); P.sort((a,c)=>a.b-c.b); i=P.findIndex(p=>p.b===q.b&&p.v===q.v); }
+    dawAutoDrag={i}; dawAutoDraw(); };
+  cv.onmousemove=e=>{ const q=toPt(e), P=dawAutoLane(track,dawAutoParam); const val=document.getElementById('auVal');
+    if(dawAutoDrag&&P){ const p=P[dawAutoDrag.i]; if(p){ p.b=q.b; p.v=q.v; P.sort((a,c)=>a.b-c.b); dawAutoDrag.i=P.indexOf(p); } dawAutoDraw(); }
+    if(val) val.textContent='Bar '+(Math.floor(q.b/4)+1)+' · '+DAW_AUTO_PARAMS[dawAutoParam].fmt(q.v); };
+  const end=()=>{ if(dawAutoDrag){ dawAutoDrag=null; if(!dawEngine.isPlaying) dawAutoReset(); renderDawTimeline(); renderDawAutomationTab(); } };
+  cv.onmouseup=end; cv.onmouseleave=end;
+  cv.ondblclick=e=>{ const i=hit(toPt(e)), P=dawAutoLane(track,dawAutoParam); if(i>=0&&P){ P.splice(i,1); if(!P.length) delete track.auto[dawAutoParam]; renderDawAutomationTab(); renderDawTimeline(); } };
+  dawAutoDraw();
+}
+function dawAutoDraw(){
+  const cv=document.getElementById('auCanvas'), track=dawCurrentTrackForPanel(); if(!cv||!track) return;
+  const dpr=window.devicePixelRatio||1, W=cv.clientWidth, H=cv.clientHeight; if(cv.width!==W*dpr){ cv.width=W*dpr; cv.height=H*dpr; }
+  const g=cv.getContext('2d'); g.setTransform(dpr,0,0,dpr,0,0); g.clearRect(0,0,W,H);
+  const L=dawAutoSongLen(), X=b=>b/L*W, Y=v=>8+(1-v)*(H-16), col=DAW_AUTO_PARAMS[dawAutoParam].color;
+  for(let b=0;b<=L;b+=4){ g.fillStyle=b%16?'rgba(167,139,250,.07)':'rgba(167,139,250,.18)'; g.fillRect(X(b),0,1,H); if(b%16===0&&b<L){ g.fillStyle='#6f6890'; g.font='10px sans-serif'; g.fillText(String(b/4+1),X(b)+3,11); } }
+  (dawProject.markers||[]).forEach(m=>{ g.fillStyle='rgba(236,72,153,.5)'; g.fillRect(X(m.beat),0,1,H); g.fillStyle='#f9a8d4'; g.font='10px sans-serif'; g.fillText(m.name,X(m.beat)+3,H-4); });
+  track.clips.forEach(c=>{ g.fillStyle=hexWithAlpha(track.color,0.12); g.fillRect(X(c.startBeat),H*0.15,X(c.lengthBeats*(c.loopCount||1)),H*0.7); });
+  if(dawAutoParam==='volume'){ g.setLineDash([3,4]); g.strokeStyle='rgba(46,230,182,.35)'; g.beginPath(); g.moveTo(0,Y(0.8)); g.lineTo(W,Y(0.8)); g.stroke(); g.setLineDash([]); g.fillStyle='rgba(46,230,182,.6)'; g.font='10px sans-serif'; g.fillText('fader level',W-64,Y(0.8)-4); }
+  const P=dawAutoLane(track,dawAutoParam);
+  if(P){ const grad=g.createLinearGradient(0,0,0,H); grad.addColorStop(0,hexWithAlpha(col,0.35)); grad.addColorStop(1,hexWithAlpha(col,0.02));
+    g.beginPath(); g.moveTo(0,Y(P[0].v)); P.forEach(p=>g.lineTo(X(p.b),Y(p.v))); g.lineTo(W,Y(P[P.length-1].v)); g.lineTo(W,H); g.lineTo(0,H); g.closePath(); g.fillStyle=grad; g.fill();
+    g.beginPath(); g.moveTo(0,Y(P[0].v)); P.forEach(p=>g.lineTo(X(p.b),Y(p.v))); g.lineTo(W,Y(P[P.length-1].v)); g.strokeStyle=col; g.lineWidth=2; g.stroke();
+    P.forEach(p=>{ g.beginPath(); g.arc(X(p.b),Y(p.v),4.5,0,Math.PI*2); g.fillStyle='#0b0918'; g.fill(); g.strokeStyle=col; g.lineWidth=2; g.stroke(); }); }
+  const ph=X(dawView.playheadBeat||0); g.fillStyle='#fff'; g.fillRect(ph,0,1.5,H);
+}
+// ── Auto-mix: measure each track (dry, as frozen for export), then set level + pan by role ──
+const DAW_MIX_ROLES={vocals:{db:0,pan:[0,-0.3,0.3]},drums:{db:-1,pan:[0]},bass:{db:-3,pan:[0]},keys:{db:-6,pan:[-0.22,0.22]},guitar:{db:-6,pan:[0.3,-0.3]},synth:{db:-7,pan:[0.3,-0.3,0]},sample:{db:-8,pan:[0]}};
+let dawAutoMixUndo=null;
+async function dawAutoMix(){
+  const tracks=dawProject.tracks.filter(t=>t.clips.length); if(!tracks.length){ toast('Add some tracks first'); return; }
+  dawAutoMixUndo=dawProject.tracks.map(t=>({id:t.id,volume:t.volume,pan:t.pan}));
+  toast('Auto-mix: listening to '+tracks.length+' tracks…');
+  if(typeof dawPreloadForTracks==='function') await dawPreloadForTracks(tracks);
+  const spb=60/dawProject.bpm, dur=Math.min(45,dawFurthestBeat()*spb+1), sr=22050; // the first ~45 s says enough about each part's level
+  const measure=async t=>{ // perceived loudness (BS.1770 K-weighted, gated), so a sub-heavy 808 isn't over-read next to bright drums
+    const bufs=[]; const fr=await dawFreezeTrack(t,dur,sr); if(fr) bufs.push(fr);
+    t.clips.forEach(c=>{ if(c.kind==='audio'&&c.payload&&c.payload.getChannelData) bufs.push(c.payload); });
+    const ls=bufs.map(b=>dawMeasureLoudness(b).lufs).filter(isFinite); if(!ls.length) return null;
+    return 10*Math.log10(ls.reduce((acc,l)=>acc+Math.pow(10,l/10),0)/ls.length); };
+  const lv=await Promise.all(tracks.map(measure)), count={};
+  tracks.forEach((t,i)=>{ if(lv[i]==null) return; const role=DAW_MIX_ROLES[t.type]||DAW_MIX_ROLES.synth, k=count[t.type]=(count[t.type]||0)+1;
+    const targetDb=-18+role.db-(k>1?2:0), gainDb=targetDb-lv[i]; t.volume=Math.max(0.05,Math.min(1.5,Math.pow(10,gainDb/20)));
+    t.pan=role.pan[(k-1)%role.pan.length]; });
+  const mx=Math.max(...tracks.map(t=>t.volume)); tracks.forEach(t=>t.volume=Math.max(0.03,t.volume*0.85/mx)); // balance kept, loudest fader at a natural 0.85
+  dawProject.tracks.forEach(t=>t._gain&&dawUpdateTrackAudioState(t));
+  renderDawTrackList(); if(dawCurrentPanelTab==='mixer') renderDawMixerTab();
+  toast('Auto-mix done — levels and pan set by role. Undo from the Mixer if you prefer your own.');
+}
+function dawAutoMixRevert(){ if(!dawAutoMixUndo){ toast('Nothing to undo'); return; } dawAutoMixUndo.forEach(s=>{ const t=dawProject.tracks.find(x=>x.id===s.id); if(t){ t.volume=s.volume; t.pan=s.pan; t._gain&&dawUpdateTrackAudioState(t); } }); dawAutoMixUndo=null; renderDawTrackList(); if(dawCurrentPanelTab==='mixer') renderDawMixerTab(); toast('Mix restored'); }
+// ── Remixable demo songs: open a finished arrangement and take it apart ──
+const DEMO_SONGS=[
+  {name:'Midnight Drift',genre:'Phonk',key:'F#m',color:'#ec4899'},
+  {name:'Concrete Slide',genre:'Drill',key:'C#m',color:'#a78bfa'},
+  {name:'Starlight Signal',genre:'K-Pop',key:'Am',color:'#2ee6b6'},
+  {name:'Sunday Rooftop',genre:'Amapiano',key:'Gm',color:'#f472b6'},
+  {name:'Velvet Tape',genre:'Lo-Fi',key:'D',color:'#c4b5fd'},
+  {name:'Neon Freeway',genre:'Synthwave',key:'Em',color:'#5eead4'},
+  {name:'Two-Step Rain',genre:'UK Garage',key:'Bbm',color:'#e879f9'},
+  {name:'Floor Pressure',genre:'Tech House',key:'Am',color:'#7c3aed'},
+];
+const DEMO_FORM=[ // section, bars, loop names (as named in the library, without the genre prefix)
+  ['Intro',4,['Intro Beat','Warm Pad']],
+  ['Verse',8,['Main Beat','Main Bass','Main Chords','Percussion']],
+  ['Hook',8,['Full Beat','Main Bass','Main Chords','Anthem Hook','Arp Up']],
+  ['Break',4,['Breakdown Beat','Rising Pad','Motif Melody']],
+  ['Drop',8,['Full Beat','Groove Bass','Pulse Chords','Bounce Hook','Percussion']],
+  ['Outro',4,['Minimal Beat','Warm Pad','Main Chords']],
+];
+function demoOpen(i){
+  const d=DEMO_SONGS[i], G=LX_GENRES[d.genre]; if(!G) return;
+  dawStop(); const total=DEMO_FORM.reduce((n,f)=>n+f[1]*4,0);
+  dawProject={name:d.name+' (demo)',bpm:G.bpm,key:d.key,timeSig:[4,4],tracks:[],loopStart:0,loopEnd:16,loopEnabled:false,masterPreset:'Warm',markers:[],lyrics:[],genre:d.genre};
+  if(typeof dawApplyMasterPreset==='function') dawApplyMasterPreset('Warm');
+  const quiet=window.toast; window.toast=()=>{};
+  try{
+    let at=0;
+    DEMO_FORM.forEach(([sec,bars,names])=>{ dawProject.markers.push({beat:at,name:sec,color:d.color});
+      names.forEach(nm=>{ const loop=LX_LOOPS.find(l=>l.genre===d.genre&&l.name===d.genre+' — '+nm); if(!loop) return;
+        dawAddLoopToTimeline(loop.id,null,at); const tr=dawProject.tracks.find(t=>t.clips.some(c=>c.startBeat===at&&c.name===loop.name)); const c=tr&&tr.clips[tr.clips.length-1];
+        if(c) c.loopCount=Math.max(1,Math.round(bars*4/c.lengthBeats)); });
+      at+=bars*4; });
+    // automation showcase: the filter opens over the intro and dips through the break; everything fades out at the end
+    dawProject.tracks.forEach(t=>{ t.auto={};
+      if(t.type==='keys'||t.type==='synth') t.auto.filter=[{b:0,v:0.35},{b:16,v:1},{b:80,v:1},{b:88,v:0.4},{b:96,v:1}]; });
+  } finally { window.toast=quiet; }
+  showPage('daw',null); dawView.playheadBeat=0; dawView.scrollBeats=0; updateDawKeyBpmLabel(); renderDawTrackList(); renderDawTimeline();
+  dawProject.tracks.forEach(t=>{ t.auto=t.auto||{}; t.auto.volume=[{b:0,v:0.8},{b:total-16,v:0.8},{b:total,v:0}]; }); renderDawTimeline();
+  dawAutoMix();
+  toast('"'+d.name+'" opened — every part is yours to mute, swap, re-record or remix');
 }
 
 // ── Aurora page heroes: the Home-style title block on every tool page ──
@@ -19910,6 +20159,9 @@ function hmItems(){
       {icon:'🎚',label:'Mixer',run:shellInStudio(()=>{ dawOpenPanel(); dawSwitchPanelTab('mixer'); })},
       {icon:'🧩',label:'Plugin library ('+Object.keys(STUDIO_FX).length+' effects)',keys:'effects fx plugins reverb delay compressor distortion amp tape vinyl chorus flanger',run:shellInStudio(()=>{ const t=dawProject.tracks.find(x=>x.id===dawView.selectedTrackId)||dawProject.tracks[0]||dawAddTrackOfType('vocals'); dawPanelTrackId=t.id; dawView.selectedTrackId=t.id; dawOpenPanel(); dawSwitchPanelTab('effects'); })},
       {icon:'✺',label:'Mastering & loudness',keys:'master lufs limiter loud streaming',run:shellInStudio(()=>{ dawOpenPanel(); dawSwitchPanelTab('mixer'); })},
+      {icon:'〰',label:'Automation (volume · pan · filter)',keys:'automation fade filter sweep pan envelope draw',run:shellInStudio(()=>{ const t=dawProject.tracks.find(x=>x.id===dawView.selectedTrackId)||dawProject.tracks[0]; if(!t){ toast('Add a track first'); return; } dawOpenInstrumentPanelForTrack(t.id); dawSwitchPanelTab('automation'); })},
+      {icon:'✦',label:'Auto-mix',keys:'auto mix balance levels pan mixing',run:shellInStudio(()=>{ dawOpenPanel(); dawSwitchPanelTab('mixer'); dawAutoMix(); })},
+      {icon:'▶',label:'Remix a demo song',keys:'demo remix example song template open in studio',run:()=>{ showPage('home',null); setTimeout(()=>document.getElementById('homeDemos')?.scrollIntoView({behavior:'smooth'}),80); }},
       {icon:'🎹',label:'Instruments (30+ sampled & synth)',keys:'piano guitar strings synth sound',run:shellInStudio(()=>{ const t=dawProject.tracks.find(x=>x.id===dawView.selectedTrackId)||dawProject.tracks.find(x=>x.type!=='vocals'&&x.type!=='drums')||dawAddTrackOfType('keys'); dawOpenInstrumentPanelForTrack(t.id); dawSwitchPanelTab('instrument'); })},
       {icon:'〰',label:'Channel EQ on selected track',keys:'equalizer eq',run:shellInStudio(()=>dawAddChannelEQ())},
       {icon:'↓',label:'Import audio, stems or MIDI',keys:'suno logic garageband wav mp3 mid',run:shellInStudio(()=>dawImportAudio())},
