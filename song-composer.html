@@ -624,6 +624,58 @@ button:active,.nbtn:active,.ibtn:active,.qbtn:active,.ngrid-btn:active{transform
 #page-daw .rec{width:26px;height:26px;border-radius:50%;background:var(--red);
   border:none;cursor:pointer;display:grid;place-items:center}
 #page-daw .rec.armed{box-shadow:0 0 0 3px rgba(239,68,68,.35);animation:pulseDot 1s infinite}
+/* ── Shell v2: one ☰ menu, slim top bar, no rail / tab row / viz strip ── */
+body.shell-v2 .nav-tabs,body.shell-v2 .left-rail,body.shell-v2 .viz-bar{display:none!important}
+body.shell-v2.show-viz .viz-bar{display:block!important}
+body.shell-v2 .nav-right>:not(.keep){display:none!important}
+body.shell-v2 .right-panel{display:none!important}
+body.shell-v2.show-rp .right-panel{display:flex!important}
+body.shell-v2 .center{max-width:100vw!important}
+body.shell-v2.show-rp .center{max-width:calc(100vw - 220px)!important}
+body.shell-v2 .topnav{gap:10px;padding-left:6px}
+body.shell-v2 .nav-right{margin-left:auto;display:flex;align-items:center;gap:6px;padding-right:10px}
+.hm-btn{width:36px;height:36px;border-radius:10px;border:1px solid var(--glass-border);background:rgba(255,255,255,.03);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;cursor:pointer;flex-shrink:0;transition:background .15s}
+.hm-btn span{display:block;width:16px;height:2px;border-radius:2px;background:var(--tx);transition:transform .2s,opacity .2s}
+.hm-btn:hover{background:rgba(255,123,84,.12)}
+body.hm-open .hm-btn span:nth-child(1){transform:translateY(6px) rotate(45deg)}
+body.hm-open .hm-btn span:nth-child(2){opacity:0}
+body.hm-open .hm-btn span:nth-child(3){transform:translateY(-6px) rotate(-45deg)}
+.sh-page{font-size:12px;color:var(--acc);letter-spacing:.06em;text-transform:uppercase;font-weight:700;white-space:nowrap;padding-left:4px;border-left:1px solid var(--glass-border);margin-left:2px;padding:2px 0 2px 10px}
+.sh-ic{width:32px;padding:0!important;justify-content:center;font-size:13px}
+.hm-scrim{position:fixed;inset:0;background:rgba(0,0,0,.5);backdrop-filter:blur(2px);opacity:0;pointer-events:none;transition:opacity .2s;z-index:900}
+body.hm-open .hm-scrim{opacity:1;pointer-events:auto}
+.hm-drawer{position:fixed;top:0;left:0;bottom:0;width:min(340px,92vw);background:rgba(14,8,12,.97);border-right:1px solid var(--glass-border);box-shadow:8px 0 40px rgba(0,0,0,.6);transform:translateX(-102%);transition:transform .22s cubic-bezier(.2,.8,.2,1);z-index:901;display:flex;flex-direction:column}
+body.hm-open .hm-drawer{transform:none}
+.hm-head{display:flex;align-items:center;justify-content:space-between;padding:14px 14px 8px}
+.hm-logo{font-size:14px;color:var(--tx);font-weight:700}.hm-logo b{color:var(--acc)}
+.hm-x{background:none;border:none;color:var(--tx-2,#aaa);font-size:16px;cursor:pointer;width:30px;height:30px;border-radius:8px}
+.hm-x:hover{background:rgba(255,255,255,.06);color:var(--tx)}
+.hm-search-wrap{position:relative;margin:0 12px 8px}
+.hm-search{width:100%;box-sizing:border-box;background:rgba(255,255,255,.05);border:1px solid var(--glass-border);border-radius:10px;color:var(--tx);padding:9px 64px 9px 12px;font-size:13px;outline:none}
+.hm-search:focus{border-color:var(--acc);box-shadow:0 0 0 3px var(--acc-glow)}
+.hm-search-wrap kbd{position:absolute;right:9px;top:50%;transform:translateY(-50%);font-size:10px;color:var(--mu,#888);border:1px solid var(--glass-border);border-radius:5px;padding:1px 5px;font-family:inherit}
+.hm-list{flex:1;overflow-y:auto;padding:0 8px 10px}
+.hm-sec{font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--mu,#888);padding:12px 8px 5px;font-weight:700}
+.hm-item{display:flex;align-items:center;gap:10px;width:100%;background:none;border:none;color:var(--tx);text-align:left;padding:8px 9px;border-radius:9px;font-size:13px;cursor:pointer;font-family:inherit}
+.hm-item i{font-style:normal;width:22px;text-align:center;font-size:14px;flex-shrink:0}
+.hm-item small{margin-left:auto;color:var(--mu,#888);font-size:10.5px;white-space:nowrap}
+.hm-item:hover,.hm-item.kb{background:rgba(255,123,84,.1)}
+.hm-item.on{color:var(--acc);background:rgba(255,123,84,.08)}
+.hm-item.on::after{content:'';width:6px;height:6px;border-radius:50%;background:var(--acc);margin-left:auto;flex-shrink:0}
+.hm-empty{color:var(--mu,#888);font-size:12px;padding:18px 10px}
+.hm-foot{border-top:1px solid var(--glass-border);padding:9px 14px;font-size:10.5px;color:var(--mu,#888);display:flex;gap:10px;align-items:center}
+@media (max-width:640px){ body.shell-v2 .song-title-nav{max-width:110px} .sh-page{display:none} }
+/* ── Channel EQ (Tier 8) ── */
+#page-daw .fxc.wide{width:420px;flex:0 0 420px}
+#page-daw .ceq{display:flex;flex-direction:column;gap:6px}
+#page-daw .ceq canvas{width:100%;height:170px;background:#0b0710;border-radius:6px;cursor:crosshair;touch-action:none}
+#page-daw .ceq-bands{display:grid;grid-template-columns:repeat(8,1fr);gap:3px}
+#page-daw .ceq-b{background:var(--bg-4);border:1px solid var(--line);border-radius:5px;padding:3px 2px;text-align:center;font-size:8.5px;color:var(--tx-3);cursor:pointer;line-height:1.3;user-select:none}
+#page-daw .ceq-b b{display:block;font-size:9px;color:var(--tx-2)}
+#page-daw .ceq-b.on{border-color:currentColor}
+#page-daw .ceq-b.sel{background:var(--bg-3);box-shadow:0 0 0 1px currentColor inset}
+#page-daw .ceq-row{display:flex;gap:6px;align-items:center;font-size:9.5px;color:var(--tx-3)}
+#page-daw .ceq-row select{background:var(--bg-4);color:var(--tx-2);border:1px solid var(--line);border-radius:4px;font-size:10px;padding:2px}
 /* ── Tier 7: Vocal Studio + Mixer ── */
 #page-daw .rec.recording{box-shadow:0 0 0 4px rgba(239,68,68,.55),0 0 18px rgba(239,68,68,.7);animation:pulseDot .6s infinite}
 #page-daw .dawx-tg.on{background:var(--brand);color:#fff;border-color:transparent}
@@ -1721,11 +1773,13 @@ button:active,.nbtn:active,.ibtn:active,.qbtn:active,.ngrid-btn:active{transform
 }
 </style>
 </head>
-<body>
+<body class="shell-v2">
 <canvas id="starfield"></canvas>
 
 <nav class="topnav">
+  <button class="hm-btn" id="hmBtn" onclick="hmToggle()" title="Menu (Ctrl+K)" aria-label="Open menu" aria-controls="hmDrawer" aria-expanded="false"><span></span><span></span><span></span></button>
   <div class="nav-logo"><span class="note">♪</span><span class="lg-white">Songbook</span><span class="dot"></span><span class="lg-grad">Ultra</span></div>
+  <span class="sh-page" id="shellPageName">Sheet</span>
   <div class="nav-tabs">
     <button class="nav-tab on" onclick="showPage('sheet',this)">Sheet</button>
     <button class="nav-tab" onclick="showPage('create',this)">Create</button>
@@ -1744,7 +1798,11 @@ button:active,.nbtn:active,.ibtn:active,.qbtn:active,.ngrid-btn:active{transform
   </div>
   <div class="nav-right">
     <span class="rec-dot" title="Songbook Ultra"></span>
-    <input class="song-title-nav" id="titleNav" value="Creep" oninput="syncTitle(this)">
+    <input class="song-title-nav keep" id="titleNav" value="Creep" oninput="syncTitle(this)">
+    <button class="nbtn keep sh-ic" id="shellPlayBtn" onclick="shellPlay()" title="Play / pause (Space)">▶</button>
+    <button class="nbtn keep sh-ic" onclick="shellStop()" title="Stop">■</button>
+    <button class="nbtn keep sh-ic" onclick="hmOpen('')" title="Search everything (Ctrl+K)">⌕</button>
+    <button class="nbtn prim keep" onclick="shellExport()">Export</button>
     <button class="nbtn" onclick="transposeDown()">↓</button>
     <button class="nbtn" onclick="transposeUp()">↑</button>
     <button class="nbtn" onclick="deleteLastClickedChord()" title="Click a chord in the sheet, then click here to delete it">Delete Chord</button>
@@ -1760,9 +1818,20 @@ button:active,.nbtn:active,.ibtn:active,.qbtn:active,.ngrid-btn:active{transform
       <span class="claude-btn-dot" id="claudeBtnDot"></span>
       <span id="claudeBtnLabel">Connect Claude</span>
     </button>
-    <button class="nbtn prim" onclick="rpTab('export')">Export</button>
   </div>
 </nav>
+
+<!-- ☰ one menu for everything (replaces the tab row, left rail and extra top buttons) -->
+<div class="hm-scrim" id="hmScrim" onclick="hmClose()"></div>
+<aside class="hm-drawer" id="hmDrawer" aria-hidden="true" role="dialog" aria-label="Menu">
+  <div class="hm-head">
+    <span class="hm-logo">♪ Songbook <b>Ultra</b></span>
+    <button class="hm-x" onclick="hmClose()" aria-label="Close menu">✕</button>
+  </div>
+  <div class="hm-search-wrap"><input id="hmSearch" class="hm-search" placeholder="Search pages & actions…" autocomplete="off" oninput="hmRender()" onkeydown="hmSearchKey(event)"><kbd>Ctrl K</kbd></div>
+  <div class="hm-list" id="hmList"></div>
+  <div class="hm-foot" id="hmFoot"></div>
+</aside>
 
 <div class="viz-bar">
   <canvas id="vizCanvas"></canvas>
@@ -2001,7 +2070,8 @@ button:active,.nbtn:active,.ibtn:active,.qbtn:active,.ngrid-btn:active{transform
           <div class="midd-item" onclick="dawExportMIDI()">🎼 Export MIDI</div>
           <div class="midd-item" onclick="dawExportWAV()">🔊 Export WAV</div>
           <div class="midd-item" onclick="dawExportStems()">🎚 Export stems (one WAV per track)</div>
-          <div class="midd-item" onclick="dawImportAudio()">🎤 Import audio / vocals…</div>
+          <div class="midd-item" onclick="dawExportBundle()">📦 Export for Logic / GarageBand / Suno (ZIP)</div>
+          <div class="midd-item" onclick="dawImportAudio()">🎤 Import audio, stems or MIDI…</div>
           <div class="midd-item" onclick="dawExportChordSheet()">📄 Chord Sheet PDF</div>
         </div>
       </div>
@@ -2019,11 +2089,9 @@ button:active,.nbtn:active,.ibtn:active,.qbtn:active,.ngrid-btn:active{transform
       </div>
       <div class="mi" onclick="toast('Songbook Studio — double-click the timeline to create a clip, right-click a clip for more options.')">Help</div>
       <input type="file" id="dawLoadInput" accept="application/json" style="display:none" onchange="dawLoadProjectFile(this)">
-      <input type="file" id="dawAudioImportInput" accept="audio/*,.wav,.mp3,.m4a,.aac,.ogg,.flac,.webm" style="display:none" onchange="dawHandleAudioImport(this)">
+      <input type="file" id="dawAudioImportInput" multiple accept="audio/*,.wav,.mp3,.m4a,.aac,.ogg,.flac,.webm,.aif,.aiff,.mid,.midi,audio/midi" style="display:none" onchange="dawHandleAudioImport(this)">
       <div class="proj" id="dawProjectName" contenteditable spellcheck="false" oninput="dawProject.name=dawProjectName.textContent">Untitled Project</div>
       <div class="spacer"></div>
-      <button class="btn" onclick="toast('Real-time collaboration needs a signaling server this build doesn\'t have yet.')">👥 Invite</button>
-      <button class="btn primary" onclick="dawExportWAV()">↑ Export</button>
     </div>
 
     <!-- transport -->
@@ -2046,7 +2114,7 @@ button:active,.nbtn:active,.ibtn:active,.qbtn:active,.ngrid-btn:active{transform
         <option>Am</option><option>Em</option><option>Dm</option><option>Gm</option>
       </select>
       <span class="lbl">SIG</span><input id="dawSig" class="tinput" value="4/4" readonly>
-      <label class="lbl" style="cursor:pointer;display:flex;align-items:center;gap:4px"><input type="checkbox" id="dawRecArmVisible" style="display:none">⏺ REC</label>
+<input type="checkbox" id="dawRecArmVisible" style="display:none">
       <button class="btn dawx-tg" id="dawMetroBtn" style="padding:4px 9px" onclick="dawToggleSetting('metronome')" title="Metronome click during playback">🕒 Click</button>
       <button class="btn dawx-tg" id="dawCountInBtn" style="padding:4px 9px" onclick="dawToggleSetting('countIn')" title="One bar count-in before recording">1-2-3-4</button>
       <button class="btn" style="padding:4px 9px" onclick="dawOpenPanel();dawSwitchPanelTab('mixer')" title="Mixer">🎚 Mixer</button>
@@ -8463,6 +8531,7 @@ function showPage(name,btn){
     const oc=b.getAttribute('onclick')||'';
     b.classList.toggle('on', oc.indexOf(`showPage('${name}'`)>-1);
   });
+  if(typeof shellOnPage==='function') shellOnPage(name);
 }
 function railOn(btn){ /* highlighting now handled centrally by showPage(); kept as a safe no-op */ }
 function rpTab(name){
@@ -14221,6 +14290,7 @@ function dawInit(){
   grid.addEventListener('dragover',e=>e.preventDefault());
   grid.addEventListener('drop',e=>{
     e.preventDefault();
+    if(e.dataTransfer.files&&e.dataTransfer.files.length&&typeof dawImportDroppedFiles==='function'){ dawImportDroppedFiles(e); return; } // audio / stems / MIDI dragged in from the desktop
     const loopId=e.dataTransfer.getData('text/daw-loop-id'); if(!loopId) return;
     const {x,y}=dawGridPoint(e);
     const trackIdx=dawTrackIndexFromY(y);
@@ -15096,8 +15166,9 @@ function dawRenderFxChainList(track){
       };
       redrawCurve();
     }
+    if(def.customEditor){ card.classList.add('wide'); body.appendChild(def.customEditor(track,index,effect)); }
     const knobRow=document.createElement('div');knobRow.className='knobs';
-    def.params.forEach(paramSpec=>{
+    if(!def.customEditor) def.params.forEach(paramSpec=>{
       const knob=dawMakeKnob(paramSpec,effect.params[paramSpec.id],v=>{
         effect.params[paramSpec.id]=v;
         const inst=track._fxChain&&track._fxChain[index];
@@ -15971,26 +16042,41 @@ function dawSelectTake(track,clip,i){
 let dawImportTarget=null;
 function dawImportAudio(trackId){ dawImportTarget=trackId||null; document.getElementById('dawAudioImportInput')?.click(); }
 async function dawHandleAudioImport(input){
-  const file=input.files&&input.files[0]; input.value=''; if(!file) return;
+  const files=[...(input.files||[])]; input.value=''; if(!files.length) return;
+  // several files at once = stems: line them all up on the same beat (bar 1 unless the playhead was moved)
+  const startBeat=Math.max(0,Math.round((dawView.playheadBeat||0)*4)/4);
+  await dawImportFiles(files,{startBeat,trackId:files.length===1?dawImportTarget:null});
+}
+async function dawImportFiles(files,opts){
+  let ok=0,fail=0;
+  for(const file of files){
+    try{
+      if(/\.midi?$/i.test(file.name)||file.type==='audio/midi'||file.type==='audio/x-midi') await dawImportMidiFile(file,opts.startBeat);
+      else await dawImportAudioFile(file,opts.startBeat,opts.trackId);
+      ok++;
+    }catch(e){ console.error(e); fail++; toast('Could not read '+file.name+' — '+(e.message||'unsupported file')); }
+  }
+  renderDawTrackList(); renderDawTimeline();
+  if(files.length>1) toast('Imported '+ok+' of '+files.length+' files'+(fail?' ('+fail+' failed)':'')+' — all aligned at bar '+(Math.floor(opts.startBeat/dawProject.timeSig[0])+1));
+}
+async function dawImportAudioFile(file,startBeat,trackId){
   toast('Importing '+file.name+'…');
-  try{
-    const ctx=getCtx();
-    const buf=await ctx.decodeAudioData((await file.arrayBuffer()).slice(0));
-    let track=dawProject.tracks.find(t=>t.id===dawImportTarget);
-    if(!track){
-      const isVox=/vox|vocal|acap|voice|lead|harmony|adlib/i.test(file.name);
-      track=dawAddTrackOfType(isVox?'vocals':'sample');
-      track.name=file.name.replace(/\.[^.]+$/,'').slice(0,28);
-      if(isVox) dawApplyVocalChain(track,'Pop Lead',true);
-    }
-    const startBeat=Math.max(0,Math.round((dawView.playheadBeat||0)*4)/4);
-    const clip=new DawClip(startBeat,buf.duration*dawProject.bpm/60,'audio',buf);
-    clip.name=file.name.replace(/\.[^.]+$/,'');
-    track.clips.push(clip);
-    dawView.selectedClipId=clip.id; dawView.selectedTrackId=track.id;
-    renderDawTrackList(); renderDawTimeline();
-    toast('Imported '+clip.name+' ('+buf.duration.toFixed(1)+'s, '+(buf.numberOfChannels>1?'stereo':'mono')+'). Right-click it for vocal tools.');
-  }catch(e){ console.error(e); toast('Could not read that audio file — try WAV or MP3'); }
+  const ctx=getCtx();
+  const buf=await ctx.decodeAudioData((await file.arrayBuffer()).slice(0));
+  let track=dawProject.tracks.find(t=>t.id===trackId);
+  const base=file.name.replace(/\.[^.]+$/,'').replace(/^\d+[\s._-]+/,'');
+  if(!track){
+    const isVox=/vox|vocal|acap|voice|lead v|harmony|adlib|ad-lib|backing/i.test(file.name);
+    const kind=isVox?'vocals':/drum|kick|snare|hat|perc|beat/i.test(file.name)?'drums':/bass|808/i.test(file.name)?'bass':/guitar|gtr/i.test(file.name)?'guitar':/key|piano|synth|pad|chord/i.test(file.name)?'keys':'sample';
+    track=dawAddTrackOfType(kind);
+    track.name=base.slice(0,28)||track.name;
+    if(isVox) dawApplyVocalChain(track,'Pop Lead',true);
+  }
+  const clip=new DawClip(startBeat,buf.duration*dawProject.bpm/60,'audio',buf);
+  clip.name=base;
+  track.clips.push(clip);
+  dawView.selectedClipId=clip.id; dawView.selectedTrackId=track.id;
+  toast('Imported '+base+' ('+buf.duration.toFixed(1)+'s, '+(buf.numberOfChannels>1?'stereo':'mono')+'). Right-click it for vocal tools.');
 }
 
 // ── offline vocal DSP ──
@@ -16345,6 +16431,486 @@ async function dawExportStems(){
     toast('Exported '+tracks.length+' stems (all the same length, so they line up in any DAW)');
   }catch(e){ console.error(e); toast('Stem export failed — '+e.message); }
 }
+
+// ══════════════════════════════════════════════════════════════════════════
+// TIER 8 — Channel EQ, cross-app compatibility (Logic / GarageBand / Suno
+// Studio), and the one-menu app shell.
+// ══════════════════════════════════════════════════════════════════════════
+
+// ── Channel EQ: 8 bands, draggable curve, live spectrum (Logic Channel EQ-style) ──
+const CEQ_BANDS=[
+  {type:'highpass',f:30,g:0,q:0.71,on:1,label:'Low Cut',color:'#ef4444'},
+  {type:'lowshelf',f:100,g:0,q:0.71,on:1,label:'Low',color:'#f59e0b'},
+  {type:'peaking',f:250,g:0,q:1,on:1,label:'Low Mid',color:'#fbbf24'},
+  {type:'peaking',f:800,g:0,q:1,on:1,label:'Mid',color:'#4ade80'},
+  {type:'peaking',f:2500,g:0,q:1,on:1,label:'Hi Mid',color:'#22d3ee'},
+  {type:'peaking',f:6000,g:0,q:1,on:1,label:'Presence',color:'#5aa9f5'},
+  {type:'highshelf',f:10000,g:0,q:0.71,on:1,label:'Air',color:'#a78bfa'},
+  {type:'lowpass',f:20000,g:0,q:0.71,on:0,label:'High Cut',color:'#f472b6'},
+];
+const CEQ_PRESETS={
+  'Flat':{},
+  'Vocal clarity':{f0:100,g2:-3,f2:300,g4:3,f4:3000,g6:4,f6:12000},
+  'Vocal warmth':{f0:80,g1:2,f1:180,g3:-2,f3:1200,g6:2},
+  'De-mud':{g2:-5,f2:350,q2:1.4},
+  'Bright air':{g6:6,f6:11000,g5:2,f5:5000},
+  'Bass boost':{f0:25,g1:5,f1:80,g2:-2,f2:300},
+  'Kick punch':{g1:4,f1:60,g3:-4,f3:400,g4:3,f4:3500},
+  'Telephone':{f0:400,on7:1,f7:3200,g3:4,f3:1500},
+  'Master polish':{f0:25,g1:1.5,f1:90,g2:-1.5,f2:300,g6:2,f6:12000},
+};
+function ceqDefaults(){ const o={}; CEQ_BANDS.forEach((b,i)=>{ o['f'+i]=b.f; o['g'+i]=b.g; o['q'+i]=b.q; o['on'+i]=b.on; }); return o; }
+function ceqApplyBand(bq,band,p,i,sr){
+  const nyq=sr/2-60, on=!!p['on'+i], f=Math.max(10,Math.min(nyq,p['f'+i])), q=Math.max(0.1,p['q'+i]);
+  bq.type=band.type;
+  if(band.type==='highpass'){ bq.frequency.value=on?f:10; bq.Q.value=20*Math.log10(q); }
+  else if(band.type==='lowpass'){ bq.frequency.value=on?f:nyq; bq.Q.value=20*Math.log10(q); }
+  else { bq.frequency.value=f; bq.Q.value=q; bq.gain.value=on?p['g'+i]:0; }
+}
+STUDIO_FX.chaneq={name:'Channel EQ',cats:['Clean Up','Vocals','Drums','Bass','Brightness','Glue Mix'],
+  params:CEQ_BANDS.flatMap((b,i)=>[{id:'f'+i,label:b.label+' Hz',min:20,max:20000,def:b.f},{id:'g'+i,label:b.label+' dB',min:-24,max:24,def:b.g},{id:'q'+i,label:b.label+' Q',min:0.1,max:18,def:b.q},{id:'on'+i,label:b.label+' on',min:0,max:1,def:b.on}]),
+  build(ctx,p){
+    p=Object.assign(ceqDefaults(),p);
+    const filters=CEQ_BANDS.map((b,i)=>{ const bq=ctx.createBiquadFilter(); ceqApplyBand(bq,b,p,i,ctx.sampleRate); return bq; });
+    for(let i=0;i<filters.length-1;i++) filters[i].connect(filters[i+1]);
+    const out=ctx.createGain(); filters[filters.length-1].connect(out);
+    let analyser=null;
+    if(!(ctx instanceof OfflineAudioContext)){ analyser=ctx.createAnalyser(); analyser.fftSize=4096; analyser.smoothingTimeConstant=0.82; out.connect(analyser); }
+    return{input:filters[0],output:out,filters,analyser,
+      setParam(id,v){ p[id]=v; const i=Number(id.replace(/\D/g,'')); if(filters[i]) ceqApplyBand(filters[i],CEQ_BANDS[i],p,i,ctx.sampleRate); }};
+  },
+  customEditor(track,index,effect){ return ceqEditor(track,index,effect); },
+};
+function ceqEditor(track,index,effect){
+  effect.params=Object.assign(ceqDefaults(),effect.params||{});
+  const P=effect.params, actx=getCtx();
+  const shadow=CEQ_BANDS.map((b,i)=>{ const bq=actx.createBiquadFilter(); ceqApplyBand(bq,b,P,i,actx.sampleRate); return bq; }); // drawing-only copies, valid even when bypassed
+  let sel=3;
+  const wrap=document.createElement('div'); wrap.className='ceq';
+  const cv=document.createElement('canvas'); wrap.appendChild(cv);
+  const bandsEl=document.createElement('div'); bandsEl.className='ceq-bands'; wrap.appendChild(bandsEl);
+  const row=document.createElement('div'); row.className='ceq-row';
+  row.innerHTML=`<select title="EQ preset">${Object.keys(CEQ_PRESETS).map(n=>`<option>${n}</option>`).join('')}</select><span class="ceq-info"></span><span style="margin-left:auto">drag = freq/gain · wheel = Q · double-click = on/off</span>`;
+  wrap.appendChild(row);
+  const info=row.querySelector('.ceq-info');
+  row.querySelector('select').value='Flat';
+  row.querySelector('select').onchange=e=>{ const pre=CEQ_PRESETS[e.target.value]; const d=ceqDefaults(); Object.keys(d).forEach(k=>set(k,k in pre?pre[k]:d[k])); };
+  const W=()=>cv.clientWidth||400, H=()=>cv.clientHeight||170;
+  const xOf=f=>Math.log10(f/20)/3*W(), fOf=x=>20*Math.pow(1000,Math.max(0,Math.min(1,x/W())));
+  const yOf=db=>H()/2-db/24*(H()/2-12), dbOf=y=>Math.max(-24,Math.min(24,(H()/2-y)/(H()/2-12)*24));
+  const fmtF=f=>f>=1000?(f/1000).toFixed(f>=10000?0:1)+'k':Math.round(f)+'';
+  function live(){ return track._fxChain&&track._fxChain[index]; }
+  function set(id,v){
+    P[id]=v; const i=Number(id.replace(/\D/g,''));
+    ceqApplyBand(shadow[i],CEQ_BANDS[i],P,i,actx.sampleRate);
+    const inst=live(); if(inst&&inst.setParam) inst.setParam(id,v);
+    renderBands();
+  }
+  function renderBands(){
+    bandsEl.innerHTML='';
+    CEQ_BANDS.forEach((b,i)=>{
+      const el=document.createElement('div'); el.className='ceq-b'+(P['on'+i]?' on':'')+(i===sel?' sel':''); el.style.color=b.color;
+      const g=(b.type==='highpass'||b.type==='lowpass')?'':(P['g'+i]>0?'+':'')+Number(P['g'+i]).toFixed(1);
+      el.innerHTML=`<b>${b.label}</b>${fmtF(P['f'+i])}${g?'<br>'+g+' dB':'<br>'+(P['on'+i]?'on':'off')}`;
+      el.onclick=()=>{ sel=i; renderBands(); };
+      el.ondblclick=()=>set('on'+i,P['on'+i]?0:1);
+      bandsEl.appendChild(el);
+    });
+    const b=CEQ_BANDS[sel];
+    info.textContent=b.label+': '+fmtF(P['f'+sel])+' Hz'+((b.type==='highpass'||b.type==='lowpass')?'':' · '+Number(P['g'+sel]).toFixed(1)+' dB')+' · Q '+Number(P['q'+sel]).toFixed(2);
+  }
+  const N=220, freqs=new Float32Array(N), mag=new Float32Array(N), ph=new Float32Array(N);
+  for(let i=0;i<N;i++) freqs[i]=20*Math.pow(1000,i/(N-1));
+  let spec=null;
+  function draw(){
+    if(!cv.isConnected) return;
+    const dpr=window.devicePixelRatio||1, w=W(), h=H();
+    if(cv.width!==Math.round(w*dpr)){ cv.width=Math.round(w*dpr); cv.height=Math.round(h*dpr); }
+    const g=cv.getContext('2d'); g.setTransform(dpr,0,0,dpr,0,0); g.clearRect(0,0,w,h);
+    g.strokeStyle='rgba(255,255,255,.06)'; g.lineWidth=1; g.fillStyle='rgba(255,255,255,.28)'; g.font='9px sans-serif';
+    [50,100,200,500,1000,2000,5000,10000].forEach(f=>{ const x=xOf(f); g.beginPath(); g.moveTo(x,0); g.lineTo(x,h); g.stroke(); g.fillText(fmtF(f),x+2,h-3); });
+    [-18,-12,-6,6,12,18].forEach(db=>{ const y=yOf(db); g.beginPath(); g.moveTo(0,y); g.lineTo(w,y); g.stroke(); });
+    g.strokeStyle='rgba(255,255,255,.18)'; g.beginPath(); g.moveTo(0,yOf(0)); g.lineTo(w,yOf(0)); g.stroke();
+    // live spectrum (post-EQ) while audio is flowing
+    const inst=live();
+    if(inst&&inst.analyser){
+      const an=inst.analyser; if(!spec||spec.length!==an.frequencyBinCount) spec=new Float32Array(an.frequencyBinCount);
+      an.getFloatFrequencyData(spec);
+      const sr=actx.sampleRate; g.beginPath(); g.moveTo(0,h);
+      for(let x=0;x<=w;x+=2){ const f=fOf(x),bin=Math.min(spec.length-1,Math.round(f/(sr/2)*spec.length)); const db=Math.max(-100,spec[bin]); g.lineTo(x,h-(db+100)/100*h*0.9); }
+      g.lineTo(w,h); g.closePath(); g.fillStyle='rgba(155,124,232,.18)'; g.fill();
+    }
+    // combined curve
+    const total=new Float32Array(N).fill(1);
+    shadow.forEach(bq=>{ bq.getFrequencyResponse(freqs,mag,ph); for(let i=0;i<N;i++) total[i]*=mag[i]; });
+    g.beginPath();
+    for(let i=0;i<N;i++){ const x=i/(N-1)*w, y=yOf(Math.max(-30,Math.min(30,20*Math.log10(total[i]||1e-6)))); i?g.lineTo(x,y):g.moveTo(x,y); }
+    g.strokeStyle='#ffb48f'; g.lineWidth=2; g.shadowColor='rgba(255,123,84,.6)'; g.shadowBlur=6; g.stroke(); g.shadowBlur=0;
+    // band handles
+    CEQ_BANDS.forEach((b,i)=>{
+      const x=xOf(P['f'+i]), y=(b.type==='highpass'||b.type==='lowpass')?yOf(0):yOf(P['g'+i]);
+      g.beginPath(); g.arc(x,y,i===sel?7:5.5,0,Math.PI*2);
+      g.fillStyle=P['on'+i]?b.color:'rgba(120,120,130,.5)'; g.fill();
+      g.strokeStyle=i===sel?'#fff':'rgba(0,0,0,.5)'; g.lineWidth=1.5; g.stroke();
+      g.fillStyle='#111'; g.font='bold 8px sans-serif'; g.fillText(String(i+1),x-2.5,y+3);
+    });
+    requestAnimationFrame(draw);
+  }
+  function pick(e){
+    const r=cv.getBoundingClientRect(), x=e.clientX-r.left, y=e.clientY-r.top; let best=-1,bd=18;
+    CEQ_BANDS.forEach((b,i)=>{ const hx=xOf(P['f'+i]), hy=(b.type==='highpass'||b.type==='lowpass')?yOf(0):yOf(P['g'+i]); const d=Math.hypot(hx-x,hy-y); if(d<bd){ bd=d; best=i; } });
+    return {i:best,x,y};
+  }
+  let drag=-1;
+  cv.addEventListener('pointerdown',e=>{
+    const h=pick(e);
+    if(h.i<0){ // click on empty space: grab the nearest *bell* band by frequency so you can sculpt anywhere
+      let best=2,bd=1e9; for(let i=2;i<=5;i++){ const d=Math.abs(xOf(P['f'+i])-h.x); if(d<bd){ bd=d; best=i; } } h.i=best;
+      if(!P['on'+best]) set('on'+best,1);
+    }
+    sel=h.i; drag=h.i; try{ cv.setPointerCapture(e.pointerId); }catch(err){} renderBands();
+    move(e);
+  });
+  function move(e){
+    if(drag<0) return;
+    const r=cv.getBoundingClientRect(), b=CEQ_BANDS[drag];
+    set('f'+drag,Math.round(fOf(e.clientX-r.left)));
+    if(b.type!=='highpass'&&b.type!=='lowpass') set('g'+drag,Math.round(dbOf(e.clientY-r.top)*10)/10);
+  }
+  cv.addEventListener('pointermove',move);
+  cv.addEventListener('pointerup',e=>{ move(e); drag=-1; }); // apply the release position too, so fast drags land exactly
+  cv.addEventListener('pointercancel',()=>{ drag=-1; });
+  cv.addEventListener('wheel',e=>{ e.preventDefault(); const q=P['q'+sel]*Math.pow(1.12,e.deltaY<0?1:-1); set('q'+sel,Math.max(0.1,Math.min(18,Math.round(q*100)/100))); },{passive:false});
+  cv.addEventListener('dblclick',e=>{ const h=pick(e); if(h.i>=0) set('on'+h.i,P['on'+h.i]?0:1); });
+  renderBands(); requestAnimationFrame(draw);
+  return wrap;
+}
+function dawAddChannelEQ(track){
+  track=track||dawCurrentTrackForPanel()||dawProject.tracks.find(t=>t.id===dawView.selectedTrackId);
+  if(!track){ toast('Select a track first'); return; }
+  track.effects=Array.isArray(track.effects)?track.effects:[];
+  if(!track.effects.some(e=>e.type==='chaneq')) track.effects.unshift({type:'chaneq',params:ceqDefaults(),bypassed:false});
+  dawBuildTrackGraph(track); dawRebuildTrackFxChain(track);
+  dawPanelTrackId=track.id; dawView.selectedTrackId=track.id; dawOpenPanel(); dawSwitchPanelTab('effects');
+}
+
+// ── cross-app compatibility ──
+const DAW_CRC_TABLE=(()=>{ const t=new Uint32Array(256); for(let n=0;n<256;n++){ let c=n; for(let k=0;k<8;k++) c=c&1?0xEDB88320^(c>>>1):c>>>1; t[n]=c>>>0; } return t; })();
+function dawCrc32(u8){ let c=0xFFFFFFFF; for(let i=0;i<u8.length;i++) c=DAW_CRC_TABLE[(c^u8[i])&0xFF]^(c>>>8); return (c^0xFFFFFFFF)>>>0; }
+// Minimal ZIP writer (stored, UTF-8 names) — opens natively on macOS and Windows.
+function dawMakeZip(files){
+  const enc=new TextEncoder(),parts=[],central=[],now=new Date();
+  const dt=(now.getHours()<<11)|(now.getMinutes()<<5)|(now.getSeconds()>>1), dd=((now.getFullYear()-1980)<<9)|((now.getMonth()+1)<<5)|now.getDate();
+  let offset=0;
+  for(const f of files){
+    const name=enc.encode(f.name),crc=dawCrc32(f.data),size=f.data.length;
+    const lh=new DataView(new ArrayBuffer(30));
+    lh.setUint32(0,0x04034b50,true); lh.setUint16(4,20,true); lh.setUint16(6,0x0800,true); lh.setUint16(8,0,true);
+    lh.setUint16(10,dt,true); lh.setUint16(12,dd,true); lh.setUint32(14,crc,true); lh.setUint32(18,size,true); lh.setUint32(22,size,true);
+    lh.setUint16(26,name.length,true); lh.setUint16(28,0,true);
+    parts.push(new Uint8Array(lh.buffer),name,f.data);
+    const ch=new DataView(new ArrayBuffer(46));
+    ch.setUint32(0,0x02014b50,true); ch.setUint16(4,20,true); ch.setUint16(6,20,true); ch.setUint16(8,0x0800,true); ch.setUint16(10,0,true);
+    ch.setUint16(12,dt,true); ch.setUint16(14,dd,true); ch.setUint32(16,crc,true); ch.setUint32(20,size,true); ch.setUint32(24,size,true);
+    ch.setUint16(28,name.length,true); ch.setUint32(42,offset,true);
+    central.push(new Uint8Array(ch.buffer),name);
+    offset+=30+name.length+size;
+  }
+  const cdSize=central.reduce((s,a)=>s+a.length,0), end=new DataView(new ArrayBuffer(22));
+  end.setUint32(0,0x06054b50,true); end.setUint16(8,files.length,true); end.setUint16(10,files.length,true); end.setUint32(12,cdSize,true); end.setUint32(16,offset,true);
+  return new Blob([...parts,...central,new Uint8Array(end.buffer)],{type:'application/zip'});
+}
+const DAW_KEY_SIG={C:[0,0],G:[1,0],D:[2,0],A:[3,0],E:[4,0],B:[5,0],F:[-1,0],Bb:[-2,0],Eb:[-3,0],Ab:[-4,0],Db:[-5,0],Am:[0,1],Em:[1,1],Bm:[2,1],'F#m':[3,1],'C#m':[4,1],Dm:[-1,1],Gm:[-2,1],Cm:[-3,1],Fm:[-4,1]};
+function dawMidiEventsForTrack(track,channel){
+  const events=[],division=480,tk=b=>Math.round(b*division);
+  track.clips.forEach(clip=>{
+    if(clip.muted) return;
+    for(let rep=0;rep<(clip.loopCount||1);rep++){
+      const cs=clip.startBeat+rep*clip.lengthBeats;
+      if(clip.kind==='midi') (clip.payload||[]).forEach(n=>{ const on=cs+n.start; events.push({tick:tk(on),type:'on',note:n.pitch,velocity:Math.max(1,Math.min(127,Math.round(n.velocity||100))),channel}); events.push({tick:tk(on+n.dur),type:'off',note:n.pitch,channel}); });
+      else if(clip.kind==='pattern') Object.entries(clip.payload||{}).forEach(([drum,hits])=>{ const note=DAW_MIDI_DRUM_NOTES[drum]||36; (hits||[]).forEach((on,i)=>{ if(!on) return; const b=cs+i*(clip.lengthBeats/16); events.push({tick:tk(b),type:'on',note,velocity:100,channel:9}); events.push({tick:tk(b+0.1),type:'off',note,channel:9}); }); });
+    }
+  });
+  return events;
+}
+// Standard MIDI File type 1: conductor track (tempo, time signature, key) + one track per part.
+function dawBuildMidiFile(tracks){
+  const division=480,us=Math.round(60000000/dawProject.bpm),[num,den]=dawProject.timeSig,ks=DAW_KEY_SIG[dawProject.key]||[0,0];
+  const cond=[...dawVarLen(0),0xFF,0x51,0x03,(us>>16)&0xFF,(us>>8)&0xFF,us&0xFF,
+    ...dawVarLen(0),0xFF,0x58,0x04,num,Math.round(Math.log2(den)),24,8,
+    ...dawVarLen(0),0xFF,0x59,0x02,ks[0]&0xFF,ks[1],
+    ...dawVarLen(0),0xFF,0x2F,0x00];
+  const chunks=[[0x4D,0x54,0x72,0x6B,(cond.length>>>24)&0xFF,(cond.length>>>16)&0xFF,(cond.length>>>8)&0xFF,cond.length&0xFF,...cond]];
+  let ch=0; // melodic parts get their own channel, skipping 10 (index 9) which General MIDI reserves for drums
+  tracks.forEach(t=>{
+    let c=9;
+    if(!t.clips.some(cl=>cl.kind==='pattern')){ if(ch%16===9) ch++; c=ch%16; ch++; }
+    chunks.push(dawBuildMidiTrackBytes(dawMidiEventsForTrack(t,c),t.name));
+  });
+  const header=[0x4D,0x54,0x68,0x64,0,0,0,6,0,1,(chunks.length>>8)&0xFF,chunks.length&0xFF,(division>>8)&0xFF,division&0xFF];
+  return new Uint8Array([...header,...chunks.flat()]);
+}
+function dawSafeName(s){ return String(s||'Untitled').replace(/[\\/:*?"<>|]+/g,'_').trim().slice(0,60)||'Untitled'; }
+async function dawExportBundle(){
+  const tracks=dawProject.tracks.filter(t=>t.clips.some(c=>!c.muted));
+  if(!tracks.length){ toast('Nothing to export yet — add or record something first'); return; }
+  const proj=dawSafeName(dawProject.name), folder=proj+' ('+dawProject.bpm+' BPM, '+dawProject.key+')/';
+  const files=[], wavBytes=async buf=>new Uint8Array(await audioBufferToWavBlob(buf).arrayBuffer());
+  try{
+    for(let i=0;i<tracks.length;i++){
+      toast('Rendering stem '+(i+1)+' of '+tracks.length+'…'); await dawYield();
+      files.push({name:folder+'Stems/'+String(i+1).padStart(2,'0')+' '+dawSafeName(tracks[i].name)+'.wav',data:await wavBytes(await dawRenderTracksOffline([tracks[i]],false))});
+    }
+    toast('Rendering full mix…'); await dawYield();
+    files.push({name:folder+proj+' - Full Mix.wav',data:await wavBytes(await dawRenderTracksOffline(dawProject.tracks,true))});
+    const midiTracks=tracks.filter(t=>t.clips.some(c=>c.kind==='midi'||c.kind==='pattern'));
+    if(midiTracks.length){
+      files.push({name:folder+proj+' - All MIDI.mid',data:dawBuildMidiFile(midiTracks)});
+      midiTracks.forEach((t,i)=>files.push({name:folder+'MIDI/'+String(i+1).padStart(2,'0')+' '+dawSafeName(t.name)+'.mid',data:dawBuildMidiFile([t])}));
+    }
+    const bpm=dawProject.bpm,key=dawProject.key,sig=dawProject.timeSig.join('/');
+    const readme=[
+      proj+' — exported from Songbook Ultra Studio',
+      '',
+      'Tempo: '+bpm+' BPM   Key: '+key+'   Time signature: '+sig,
+      'Audio: 44.1 kHz / 16-bit WAV. Every stem starts at bar 1 (0:00) and is exactly the same length,',
+      'so they line up perfectly when placed at the very start of the timeline.',
+      '',
+      'Stems/      one WAV per track, rendered with its effects and fader level',
+      'Full Mix    the whole song as you hear it in Studio',
+      midiTracks.length?'MIDI        every instrument/drum part as notes (tempo, time signature and key included)':'',
+      '',
+      'LOGIC PRO',
+      '  1. New empty project, set the tempo to '+bpm+' and the key to '+key+'.',
+      '  2. Select every file in Stems/ and drag them into the tracks area at bar 1 — choose to create a new track for each file.',
+      midiTracks.length?'  3. Drag "All MIDI.mid" in for editable software-instrument tracks.':'',
+      '',
+      'GARAGEBAND',
+      '  1. New empty project, set the tempo to '+bpm+' and the key to '+key+'.',
+      '  2. Drag each stem to bar 1 (one track per stem). Leave "Follow Tempo & Pitch" off so the audio stays exactly as rendered.',
+      midiTracks.length?'  3. Drag the .mid files in to get software-instrument tracks.':'',
+      '',
+      'SUNO STUDIO',
+      '  Start a project at '+bpm+' BPM and drop the stems (or the Full Mix) onto the timeline at 0:00.',
+      '',
+      'BACK INTO SONGBOOK',
+      '  Studio > File > Import audio, stems or MIDI — select all the stems at once and they land aligned at bar 1.',
+      '  Stems exported from Suno Studio, Logic or GarageBand import the same way.',
+    ].filter((l,i,a)=>l!==''||a[i-1]!=='').join('\r\n');
+    files.push({name:folder+'READ ME - how to import.txt',data:new TextEncoder().encode(readme)});
+    const zip=dawMakeZip(files);
+    dlBlob(zip,proj+' - Songbook bundle.zip');
+    toast('Bundle ready: '+tracks.length+' stems, full mix'+(midiTracks.length?', MIDI':'')+' and import notes ('+(zip.size/1048576).toFixed(1)+' MB)');
+  }catch(e){ console.error(e); toast('Bundle export failed — '+e.message); }
+}
+// Standard MIDI File reader (type 0 and 1, PPQ timing). Splits notes by track + channel.
+function dawParseMidi(u8){
+  const dv=new DataView(u8.buffer,u8.byteOffset,u8.byteLength);
+  const tag=at=>String.fromCharCode(u8[at],u8[at+1],u8[at+2],u8[at+3]);
+  if(u8.length<14||tag(0)!=='MThd') throw new Error('not a MIDI file');
+  const ntr=dv.getUint16(10),div=dv.getUint16(12);
+  if(div&0x8000) throw new Error('SMPTE-timed MIDI isn\'t supported');
+  let p=8+dv.getUint32(4),tempo=null,ts=null;
+  const parts=[];
+  for(let t=0;t<ntr&&p+8<=u8.length;t++){
+    if(tag(p)!=='MTrk'){ p+=8+dv.getUint32(p+4); t--; if(p>=u8.length) break; continue; }
+    const len=dv.getUint32(p+4); let q=p+8; const end=Math.min(u8.length,q+len); p=q+len;
+    let tick=0,status=0,name='';
+    const open={},byCh={},program={};
+    const vlq=()=>{ let v=0,b; do{ b=u8[q++]; v=(v<<7)|(b&0x7f); }while((b&0x80)&&q<end); return v; };
+    while(q<end){
+      tick+=vlq();
+      if(u8[q]&0x80) status=u8[q++];
+      if(status===0xFF){
+        const type=u8[q++],l=vlq(),d=u8.subarray(q,q+l); q+=l;
+        if(type===0x51&&tempo==null&&l>=3) tempo=60000000/((d[0]<<16)|(d[1]<<8)|d[2]);
+        else if(type===0x58&&!ts&&l>=2) ts=[d[0],Math.pow(2,d[1])];
+        else if((type===0x03||type===0x04)&&!name) name=new TextDecoder('latin1').decode(d).trim();
+        else if(type===0x2F) break;
+        continue;
+      }
+      if(status===0xF0||status===0xF7){ q+=vlq(); continue; }
+      const type=status&0xF0,ch=status&0x0F,d1=u8[q++],d2=(type===0xC0||type===0xD0)?0:u8[q++];
+      if(type===0x90&&d2>0) (open[ch*128+d1]=open[ch*128+d1]||[]).push({tick,vel:d2});
+      else if(type===0x80||type===0x90){ const st=open[ch*128+d1]; if(st&&st.length){ const o=st.shift(); (byCh[ch]=byCh[ch]||[]).push({pitch:d1,start:o.tick/div,dur:Math.max(1,tick-o.tick)/div,vel:o.vel}); } }
+      else if(type===0xC0&&program[ch]==null) program[ch]=d1;
+    }
+    Object.entries(byCh).forEach(([ch,notes])=>parts.push({name,channel:Number(ch),program:program[ch],notes}));
+  }
+  return {tempo,ts,parts};
+}
+const DAW_GM_DRUM_MAP=n=>n===35||n===36?'kick':n===38||n===40?'snare':n===37?'rim':n===39?'clap':n===42||n===44?'hat':n===46?'openhat':[41,43,45,47,48,50].includes(n)?'tom':[49,51,52,53,55,57,59].includes(n)?'cymbal':null;
+function dawGuessPart(part){
+  const nm=(part.name||'').toLowerCase(),pg=part.program;
+  if(part.channel===9||/drum|perc|kit|beat/.test(nm)) return {type:'drums'};
+  if(/bass|808/.test(nm)||(pg>=32&&pg<=39)) return {type:'bass',instrument:pg===38||pg===39||/sub|808/.test(nm)?'Sub Bass':'Bass Guitar'};
+  if(/guit|gtr/.test(nm)||(pg>=24&&pg<=31)) return {type:'guitar',instrument:pg===24?'Nylon Guitar':'Steel Guitar'};
+  if(/string|violin|cello/.test(nm)||(pg>=40&&pg<=51)) return {type:'keys',instrument:'Strings'};
+  if(/organ/.test(nm)||(pg>=16&&pg<=23)) return {type:'keys',instrument:'Hammond Organ'};
+  if(/pad/.test(nm)||(pg>=88&&pg<=95)) return {type:'synth',instrument:'Pad Synth'};
+  if(/synth|lead/.test(nm)||(pg>=80&&pg<=87)) return {type:'synth',instrument:'Lead Synth'};
+  if(/bell|glock|celest/.test(nm)||(pg>=8&&pg<=15)) return {type:'keys',instrument:'Bell'};
+  if(/rhodes|e\.?piano|electric piano|wurl/.test(nm)||pg===4||pg===5) return {type:'keys',instrument:'Electric Piano'};
+  return {type:'keys',instrument:'Grand Piano'};
+}
+async function dawImportMidiFile(file,startBeat){
+  const m=dawParseMidi(new Uint8Array(await file.arrayBuffer()));
+  if(!m.parts.length) throw new Error('no notes found');
+  const empty=!dawProject.tracks.some(t=>t.clips.length);
+  if(m.tempo&&empty){ dawSetBpm(Math.round(m.tempo)); }
+  else if(m.tempo&&Math.round(m.tempo)!==dawProject.bpm) toast('Note: the MIDI file is '+Math.round(m.tempo)+' BPM, the project is '+dawProject.bpm+' BPM — notes keep their bar positions');
+  const barLen=dawProject.timeSig[0], base=startBeat||0, fileBase=file.name.replace(/\.[^.]+$/,'');
+  m.parts.forEach((part,pi)=>{
+    const guess=dawGuessPart(part);
+    const track=dawAddTrackOfType(guess.type);
+    track.name=(part.name||(m.parts.length>1?fileBase+' '+(pi+1):fileBase)).slice(0,28);
+    if(guess.instrument) track.instrument=guess.instrument;
+    if(guess.type==='drums'){
+      const bars={};
+      part.notes.forEach(n=>{ const drum=DAW_GM_DRUM_MAP(n.pitch); if(!drum) return; const bar=Math.floor(n.start/barLen); const step=Math.round((n.start-bar*barLen)/(barLen/16)); if(step>15) return;
+        const pat=bars[bar]=bars[bar]||dawNewBeatSteps(16); pat[drum][step]=1; });
+      Object.entries(bars).forEach(([bar,pat])=>{ const c=new DawClip(base+Number(bar)*barLen,barLen,'pattern',pat); c.name=track.name; track.clips.push(c); });
+    } else {
+      const first=Math.min(...part.notes.map(n=>n.start)), last=Math.max(...part.notes.map(n=>n.start+n.dur));
+      const cs=Math.floor(first/barLen)*barLen, len=Math.max(barLen,Math.ceil((last-cs)/barLen)*barLen);
+      const c=new DawClip(base+cs,len,'midi',part.notes.map(n=>({pitch:n.pitch,start:n.start-cs,dur:n.dur,velocity:n.vel})));
+      c.name=track.name; track.clips.push(c);
+    }
+  });
+  toast('MIDI imported: '+m.parts.length+' part'+(m.parts.length>1?'s':'')+' from '+file.name+(m.tempo&&empty?' at '+Math.round(m.tempo)+' BPM':''));
+}
+function dawImportDroppedFiles(e){
+  const {x,y}=dawGridPoint(e);
+  const startBeat=Math.max(0,Math.round(beatFromX(x)*4)/4);
+  const files=[...e.dataTransfer.files];
+  const idx=dawTrackIndexFromY(y), track=idx>=0?dawProject.tracks[idx]:null;
+  // one audio file dropped on an existing track goes onto that track; anything else gets its own track(s)
+  const single=files.length===1&&!/\.midi?$/i.test(files[0].name);
+  dawImportFiles(files,{startBeat:files.length>1?Math.round(startBeat/dawProject.timeSig[0])*dawProject.timeSig[0]:startBeat,trackId:single&&track?track.id:null});
+}
+
+// ── App shell: one ☰ menu for every page and action ──
+const SHELL_PAGE_NAMES={sheet:'Sheet',create:'Create',piano:'Piano',roll:'Piano Roll',drum:'Drums',learn:'Learn',metro:'Metronome',classic:'Guitar',listen:'Listen',daw:'Studio',dj:'DJ Studio',studio:'Classic Studio',struct:'Structure',tools:'Tools'};
+let shellPage='sheet',hmKb=-1,hmFlat=[];
+function shellOnPage(name){
+  shellPage=name;
+  const el=document.getElementById('shellPageName'); if(el) el.textContent=SHELL_PAGE_NAMES[name]||name;
+  if(document.body.classList.contains('hm-open')) hmRender();
+}
+function shellGo(name){ showPage(name,null); hmClose(); }
+function shellInStudio(fn){ return ()=>{ if(shellPage!=='daw') showPage('daw',null); hmClose(); setTimeout(fn,30); }; }
+function shellPlay(){
+  if(shellPage==='daw') dawTogglePlay();
+  else if(shellPage==='dj') toast('Use the Play button on each deck');
+  else if(typeof togglePlay==='function') togglePlay();
+}
+function shellStop(){
+  if(shellPage==='daw') dawStop();
+  else if(shellPage==='dj'&&typeof stopAllDJ==='function') stopAllDJ();
+  else if(typeof stopAll==='function') stopAll();
+}
+function shellToggleClass(cls,key){ const on=document.body.classList.toggle(cls); try{ localStorage.setItem(key,on?'1':'0'); }catch(e){} if(document.body.classList.contains('hm-open')) hmRender(); return on; }
+function shellShowSongPanel(tab){ document.body.classList.add('show-rp'); try{ localStorage.setItem('shellShowRp','1'); }catch(e){} if(tab&&typeof rpTab==='function') rpTab(tab); }
+function shellExport(){
+  if(shellPage==='daw'){ hmOpen('export'); return; }
+  shellShowSongPanel('export');
+}
+function hmItems(){
+  const pg=(icon,label,page,hint)=>({icon,label,page,hint,run:()=>shellGo(page)});
+  const claudeLbl=(document.getElementById('claudeBtnLabel')?.textContent||'Connect Claude').trim();
+  const installBtn=document.getElementById('installAppBtn');
+  return [
+    {sec:'Make music',items:[pg('⏺','Studio','daw','record · mix · stems'),pg('✦','Create','create','AI song'),pg('♪','Sheet','sheet','chords & lyrics'),pg('🎧','DJ Studio','dj')]},
+    {sec:'Studio',items:[
+      {icon:'🎤',label:'Record vocal',run:shellInStudio(()=>dawToggleRecordArmGlobal())},
+      {icon:'🎙',label:'Add vocal stack (6 stems)',run:shellInStudio(()=>dawAddVocalStack())},
+      {icon:'🎚',label:'Mixer',run:shellInStudio(()=>{ dawOpenPanel(); dawSwitchPanelTab('mixer'); })},
+      {icon:'〰',label:'Channel EQ on selected track',keys:'equalizer eq',run:shellInStudio(()=>dawAddChannelEQ())},
+      {icon:'↓',label:'Import audio, stems or MIDI',keys:'suno logic garageband wav mp3 mid',run:shellInStudio(()=>dawImportAudio())},
+      {icon:'💾',label:'Save project',run:shellInStudio(()=>dawSaveProject())},
+      {icon:'📂',label:'Open project',run:shellInStudio(()=>document.getElementById('dawLoadInput')?.click())},
+    ]},
+    {sec:'Export',items:[
+      {icon:'📦',label:'Bundle for Logic / GarageBand / Suno',hint:'ZIP',keys:'export compatible stems midi',run:shellInStudio(()=>dawExportBundle())},
+      {icon:'🎚',label:'Export stems',hint:'WAV each',keys:'export',run:shellInStudio(()=>dawExportStems())},
+      {icon:'🔊',label:'Export mix',hint:'WAV',keys:'export audio',run:shellInStudio(()=>dawExportWAV())},
+      {icon:'🎼',label:'Export MIDI',keys:'export',run:shellInStudio(()=>dawExportMIDI())},
+      {icon:'📄',label:'Song sheet export (PDF, text…)',keys:'export pdf chord sheet',run:()=>{ hmClose(); shellShowSongPanel('export'); }},
+    ]},
+    {sec:'Play & practise',items:[pg('🎹','Piano','piano'),pg('▦','Piano Roll','roll'),pg('◉','Drums','drum'),pg('🎸','Guitar','classic'),pg('🎓','Learn','learn'),pg('⏱','Metronome','metro'),pg('👂','Listen','listen')]},
+    {sec:'Song',items:[
+      {icon:'＋',label:'New song',run:()=>{ hmClose(); openNewSongModal(); }},
+      {icon:'⤓',label:'Import song',run:()=>{ hmClose(); openImportModal(); }},
+      {icon:'🎯',label:'Detect chords',run:()=>{ hmClose(); openDetector(); }},
+      {icon:'↑',label:'Transpose up',run:()=>{ transposeUp(); hmRender(); }},
+      {icon:'↓',label:'Transpose down',run:()=>{ transposeDown(); hmRender(); }},
+      {icon:'⌫',label:'Delete selected chord',run:()=>{ hmClose(); deleteLastClickedChord(); }},
+      pg('☰','Song structure','struct'),
+      {icon:'📚',label:(document.body.classList.contains('show-rp')?'Hide':'Show')+' song library panel',keys:'side panel songs chords writing',run:()=>shellToggleClass('show-rp','shellShowRp')},
+    ]},
+    {sec:'More',items:[
+      pg('🔧','Tools','tools','tuner · recorder'),
+      {icon:'✳',label:claudeLbl,keys:'claude ai login account',run:()=>{ hmClose(); openClaudeLogin(); }},
+      {icon:'☁',label:'Cloud sync',run:()=>{ hmClose(); shellShowSongPanel('songs'); document.getElementById('cloudSyncSection')?.scrollIntoView({behavior:'smooth',block:'center'}); }},
+      ...(installBtn&&installBtn.style.display!=='none'?[{icon:'⬇',label:'Install app',run:()=>{ hmClose(); installApp(); }}]:[]),
+      {icon:'〜',label:(document.body.classList.contains('show-viz')?'Hide':'Show')+' visualizer',run:()=>shellToggleClass('show-viz','shellShowViz')},
+      pg('🗄','Classic Studio','studio'),
+    ]},
+  ];
+}
+function hmRender(){
+  const list=document.getElementById('hmList'); if(!list) return;
+  const q=(document.getElementById('hmSearch')?.value||'').trim().toLowerCase();
+  const words=q.split(/\s+/).filter(Boolean);
+  list.innerHTML=''; hmFlat=[];
+  hmItems().forEach(sec=>{
+    const items=sec.items.filter(it=>!words.length||words.every(w=>(it.label+' '+(it.hint||'')+' '+(it.keys||'')+' '+sec.sec).toLowerCase().includes(w)));
+    if(!items.length) return;
+    const h=document.createElement('div'); h.className='hm-sec'; h.textContent=sec.sec; list.appendChild(h);
+    items.forEach(it=>{
+      const b=document.createElement('button'); b.className='hm-item'+(it.page&&it.page===shellPage?' on':'');
+      b.innerHTML=`<i>${it.icon}</i><span>${escapeHtml(it.label)}</span>${it.hint&&!(it.page===shellPage)?`<small>${escapeHtml(it.hint)}</small>`:''}`;
+      b.onclick=()=>it.run();
+      b.dataset.k=hmFlat.length; hmFlat.push({it,el:b});
+      list.appendChild(b);
+    });
+  });
+  if(!hmFlat.length) list.innerHTML='<div class="hm-empty">Nothing matches “'+escapeHtml(q)+'”.</div>';
+  hmKb=words.length&&hmFlat.length?0:-1; hmMark();
+}
+function hmMark(){ hmFlat.forEach((x,i)=>x.el.classList.toggle('kb',i===hmKb)); if(hmKb>=0) hmFlat[hmKb].el.scrollIntoView({block:'nearest'}); }
+function hmSearchKey(e){
+  if(e.key==='ArrowDown'){ e.preventDefault(); hmKb=Math.min(hmFlat.length-1,hmKb+1); hmMark(); }
+  else if(e.key==='ArrowUp'){ e.preventDefault(); hmKb=Math.max(0,hmKb-1); hmMark(); }
+  else if(e.key==='Enter'&&hmFlat[Math.max(0,hmKb)]){ e.preventDefault(); hmFlat[Math.max(0,hmKb)].it.run(); }
+  e.stopPropagation(); // typing in the search box must never trigger Studio keyboard notes
+}
+function hmOpen(query){
+  document.body.classList.add('hm-open');
+  document.getElementById('hmDrawer')?.setAttribute('aria-hidden','false');
+  document.getElementById('hmBtn')?.setAttribute('aria-expanded','true');
+  const s=document.getElementById('hmSearch'); if(s){ s.value=query||''; }
+  hmRender(); setTimeout(()=>s&&s.focus(),60);
+}
+function hmClose(){
+  document.body.classList.remove('hm-open');
+  document.getElementById('hmDrawer')?.setAttribute('aria-hidden','true');
+  document.getElementById('hmBtn')?.setAttribute('aria-expanded','false');
+}
+function hmToggle(){ document.body.classList.contains('hm-open')?hmClose():hmOpen(''); }
+window.addEventListener('keydown',e=>{
+  if((e.ctrlKey||e.metaKey)&&!e.shiftKey&&!e.altKey&&(e.key==='k'||e.key==='K')){ e.preventDefault(); e.stopPropagation(); hmToggle(); return; }
+  if(e.key==='Escape'&&document.body.classList.contains('hm-open')){ e.preventDefault(); e.stopPropagation(); hmClose(); }
+},true);
+(function shellInit(){
+  try{
+    if(localStorage.getItem('shellShowRp')==='1') document.body.classList.add('show-rp');
+    if(localStorage.getItem('shellShowViz')==='1') document.body.classList.add('show-viz');
+  }catch(e){}
+  const cur=[...document.querySelectorAll('.page.on')].map(p=>p.id.replace('page-',''))[0]||'sheet';
+  shellOnPage(cur);
+  const f=document.getElementById('hmFoot'); if(f) f.innerHTML='<span>Ctrl K search</span><span>Esc close</span><span>↑↓ Enter</span>';
+})();
 
 // ── Mini project panel — a scaled-down always-available view + transport ──
 function dawToggleMiniPanel(){
