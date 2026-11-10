@@ -2274,6 +2274,14 @@ body.pg-stems .sh-transport{display:none!important}
 .hd-card b{font-size:15px}
 .hd-card span{font-size:12px;color:#a39cc0}
 .hd-card em{font-style:normal;font-size:11px;font-weight:800;letter-spacing:.08em;color:var(--c);margin-top:6px}
+
+/* ══════════════ PRO PLUGIN COLLECTIONS (Tier 21) ══════════════ */
+.px-learn{display:block;width:calc(100% - 12px);margin:6px;border:none;border-radius:999px;padding:7px 10px;font:inherit;font-size:11.5px;font-weight:800;color:#fff;cursor:pointer;background:linear-gradient(135deg,#7c3aed,#ec4899);box-shadow:0 4px 14px rgba(124,58,237,.35)}
+.px-learn:disabled{opacity:.65;cursor:wait}
+.px-inst{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin:6px 0 8px;padding:8px;border-radius:12px;background:linear-gradient(135deg,rgba(46,230,182,.08),rgba(124,58,237,.1));border:1px solid rgba(46,230,182,.22)}
+.px-inst b{font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;color:#5eead4;margin-right:4px}
+.px-inst button{background:rgba(11,9,24,.7);border:1px solid rgba(167,139,250,.25);color:#e9e4ff;border-radius:999px;padding:5px 10px;font:inherit;font-size:11px;font-weight:700;cursor:pointer}
+.px-inst button:hover{border-color:#2ee6b6}
 </style>
 </head>
 <body class="shell-v2">
@@ -18144,6 +18152,463 @@ STUDIO_FX.compressor.factory={'Vocal':{threshold:-22,ratio:4,attack:0.005,releas
 STUDIO_FX.delay.factory={'Slapback':{time:0.11,feedback:0.15,mix:0.25},'Long echo':{time:0.6,feedback:0.55,mix:0.3},'Dark repeats':{time:0.4,feedback:0.6,filter:1500,mix:0.3}};
 // keep tempo-synced plugins on the beat when playback starts or loops
 function dawResyncTempoFx(t0,beat0){ dawProject.tracks.forEach(t=>(t._fxChain||[]).forEach(fx=>{ if(fx&&fx.resync) fx.resync(t0,beat0); })); }
+
+// ══════════════════════════════════════════════════════════════════════════
+// TIER 21 — Pro plugin collections. A small DSP toolkit (EQ bands, opto/FET/
+// VCA/vari-mu style compression, tape/tube/transformer/console saturation,
+// mid/side, crossovers, parallel paths, algorithmic reverbs) and ~70 plugins
+// composed from it: Vocal, Mastering, Analog, Dynamics, EQ, Reverb, Channel
+// Strip, Drums, Guitar, One-Knob, Signature chains, Console 4K, Heritage
+// Studio, Curves and AI Mixing ("Learn" analyses the track and sets itself).
+// All original designs and names.
+// ══════════════════════════════════════════════════════════════════════════
+const pxSatCache=new Map();
+function pxSatCurve(drive,asym,kind){ // drive 0..1 → static transfer curve, gain-compensated
+  const key=[drive.toFixed(3),asym.toFixed(3),kind].join('|'); if(pxSatCache.has(key)) return pxSatCache.get(key);
+  const n=2048,c=new Float32Array(n),k=1+drive*(kind==='fuzz'?60:kind==='tube'?14:kind==='tape'?6:9),b=asym*0.35;
+  const f=x=>kind==='tape'?Math.tanh(k*x)/(1+0.15*Math.abs(Math.tanh(k*x))):kind==='fuzz'?Math.sign(x)*(1-Math.exp(-Math.abs(k*x))):kind==='console'?(x*k)/(1+Math.abs(x*k)):Math.tanh(k*x);
+  // loudness-preserving: a sine at −12 dBFS keeps its RMS; louder material is rounded off (that's the saturation)
+  const off=f(b); let si=0,so=0; for(let j=0;j<64;j++){ const x=0.25*Math.sin(j/64*2*Math.PI), y=f(x+b)-off; si+=x*x; so+=y*y; } const norm=Math.max(1e-6,Math.sqrt(so/si));
+  for(let i=0;i<n;i++){ const x=i*2/(n-1)-1; c[i]=(f(x+b)-off)/norm; }
+  pxSatCache.set(key,c); return c;
+}
+const pxIRCache=new WeakMap();
+function pxIR(ctx,type,decay,damp){ // algorithmic impulse responses: room, chamber, hall, plate, spring, gated, reverse, bloom
+  let m=pxIRCache.get(ctx); if(!m){ m=new Map(); pxIRCache.set(ctx,m); }
+  const key=type+'|'+decay.toFixed(2)+'|'+damp.toFixed(2); if(m.has(key)) return m.get(key);
+  const sr=ctx.sampleRate, len=Math.max(0.12,Math.min(12,type==='gated'?decay:decay*1.25+0.08)), N=Math.floor(sr*len), buf=ctx.createBuffer(2,N,sr);
+  let seed=type.length*7919+Math.round(decay*100); const rnd=()=>{ seed=(seed*1664525+1013904223)>>>0; return seed/4294967296*2-1; };
+  const er={room:[[0.006,0.7],[0.011,0.55],[0.017,0.5],[0.023,0.42],[0.031,0.35],[0.04,0.3]],chamber:[[0.009,0.6],[0.014,0.55],[0.019,0.5],[0.026,0.48],[0.033,0.4],[0.041,0.38],[0.05,0.33],[0.062,0.3]],
+    hall:[[0.019,0.5],[0.031,0.45],[0.047,0.4],[0.063,0.36],[0.081,0.3]],bloom:[[0.04,0.3],[0.09,0.3]]}[type]||[];
+  const attack={hall:0.035,bloom:0.4,chamber:0.012,plate:0.002,room:0.004,spring:0.002,gated:0.002,reverse:0}[type]??0.005;
+  for(let ch=0;ch<2;ch++){ const d=buf.getChannelData(ch); let lp=0, ss=0;
+    for(let i=0;i<N;i++){ const t=i/sr; let env;
+      if(type==='gated') env=t<decay*0.85?1:Math.max(0,1-(t-decay*0.85)/(decay*0.15));
+      else if(type==='reverse') env=Math.pow(t/len,2.2)*(t<len-0.01?1:0);
+      else env=Math.exp(-6.9*t/decay)*Math.min(1,attack?t/attack:1);
+      let x=rnd()*env;
+      if(type==='spring'){ x*=0.6; x+=Math.sin(2*Math.PI*(2400-1800*Math.min(1,(t%0.033)/0.033))*t)*0.25*env; }
+      const c=type==='plate'?0.85-damp*0.35*Math.min(1,t/decay):Math.max(0.03,(0.75-damp*0.55)*Math.exp(-t*damp*3/Math.max(0.3,decay))); lp+=c*(x-lp); d[i]=lp; }
+    er.forEach(([tt,a])=>{ const i=Math.floor((tt*(1+(ch?0.07:0)))*sr); if(i<N) d[i]+=a*(ch?-1:1)*(type==='bloom'?0.5:1); });
+    for(let i=0;i<N;i++) ss+=d[i]*d[i]; const g=1/Math.sqrt(Math.max(1e-9,ss)); for(let i=0;i<N;i++) d[i]*=g*1.4; }
+  m.set(key,buf); return buf;
+}
+// Web Audio's DynamicsCompressor adds hidden auto-makeup gain ((1/full-range gain)^0.6, the browser's own formula);
+// pxCompAutoMakeup reproduces it so each plugin's Makeup knob is the only gain applied.
+const pxAutoMkCache=new Map();
+function pxCompAutoMakeup(T,r,K){
+  const key=T.toFixed(2)+'|'+r.toFixed(2)+'|'+K.toFixed(2); if(pxAutoMkCache.has(key)) return pxAutoMkCache.get(key);
+  const d2l=d=>Math.pow(10,d/20), l2d=l=>20*Math.log10(Math.max(1e-12,l)), lt=d2l(T), ltk=d2l(T+K), slope=1/r;
+  const knee=(x,k)=>x<lt?x:lt+(1-Math.exp(-k*(x-lt)))/k, slopeAt=(x,k)=>{ if(x<lt) return 1; const x2=x*d2l(0.001); return (l2d(knee(x2,k))-l2d(knee(x,k)))/0.001; };
+  let k=5; if(K>0){ let lo=0.1,hi=10000; for(let i=0;i<60;i++){ k=Math.sqrt(lo*hi); if(slopeAt(ltk,k)<slope) hi=k; else lo=k; } }
+  const full=0>T+K?(K>0?l2d(knee(ltk,k)):T)+slope*(0-(T+K)):l2d(knee(1,k)), mk=Math.max(0,-0.6*full);
+  if(pxAutoMkCache.size>2000) pxAutoMkCache.clear(); pxAutoMkCache.set(key,mk); return mk;
+}
+// one module = {input, output, update()}; spec values may be numbers or functions of the plugin's params
+function pxModule(ctx,p,s){
+  const v=x=>typeof x==='function'?x(p):x;
+  const biq=(type,f,q,g)=>{ const b=ctx.createBiquadFilter(); b.type=type; const up=()=>{ b.frequency.value=Math.max(10,Math.min(ctx.sampleRate/2-100,v(f))); if(q!=null) b.Q.value=v(q); if(g!=null) b.gain.value=v(g); }; up(); return {input:b,output:b,update:up}; };
+  switch(s.t){
+    case 'gain':{ const g=ctx.createGain(); const up=()=>g.gain.value=Math.pow(10,v(s.db)/20); up(); return {input:g,output:g,update:up}; }
+    case 'hp': return biq('highpass',s.f,s.q??0.707);
+    case 'lp': return biq('lowpass',s.f,s.q??0.707);
+    case 'bp': return biq('bandpass',s.f,s.q??1);
+    case 'peak': return biq('peaking',s.f,s.q??1,s.g);
+    case 'ls': return biq('lowshelf',s.f,null,s.g);
+    case 'hs': return biq('highshelf',s.f,null,s.g);
+    case 'notch': return biq('notch',s.f,s.q??2);
+    case 'comp':{ const c=ctx.createDynamicsCompressor(), mk=ctx.createGain(); c.connect(mk);
+      const up=()=>{ const T=Math.max(-100,Math.min(0,v(s.thr))), R=Math.max(1,Math.min(20,v(s.ratio))), K=Math.max(0,Math.min(40,v(s.knee??6)));
+        c.threshold.value=T; c.ratio.value=R; c.attack.value=Math.max(0,Math.min(1,v(s.att))); c.release.value=Math.max(0.01,Math.min(1,v(s.rel))); c.knee.value=K; mk.gain.value=Math.pow(10,(v(s.makeup??0)-pxCompAutoMakeup(T,R,K))/20); };
+      up(); return {input:c,output:mk,update:up,comp:c}; }
+    case 'sat':{ const pre=ctx.createGain(), sh=ctx.createWaveShaper(), dry=ctx.createGain(), wet=ctx.createGain(), out=ctx.createGain(); sh.oversample='4x';
+      pre.connect(sh); sh.connect(wet); wet.connect(out); pre.connect(dry); dry.connect(out);
+      let last=''; const up=()=>{ const d=Math.max(0,Math.min(1,v(s.drive))), a=v(s.asym??0), k=s.kind||'tube', key=d+'|'+a+'|'+k; if(key!==last){ sh.curve=pxSatCurve(d,a,k); last=key; } const mx=v(s.mix??1); wet.gain.value=mx; dry.gain.value=1-mx; out.gain.value=1; };
+      up(); return {input:pre,output:out,update:up}; }
+    case 'width':{ const i=ctx.createGain(), o=ctx.createGain(); const mtx=fxMatrix(ctx,i,o,fxWidthMatrix(1,false,false,false,0)); const up=()=>mtx.set(fxWidthMatrix(v(s.w),false,false,false,0)); up(); return {input:i,output:o,update:up}; }
+    case 'chain':{ const mods=s.mods.map(m=>pxModule(ctx,p,m)); const i=ctx.createGain(), o=ctx.createGain(); let last=i; mods.forEach(m=>{ last.connect(m.input); last=m.output; }); last.connect(o);
+      return {input:i,output:o,update:()=>mods.forEach(m=>m.update()),mods}; }
+    case 'par':{ // parallel: dry + processed copy (mode 'blend' crossfades, 'add' adds on top, New-York style)
+      const i=ctx.createGain(), o=ctx.createGain(), dry=ctx.createGain(), wet=ctx.createGain(), ch=pxModule(ctx,p,{t:'chain',mods:s.mods});
+      i.connect(dry); dry.connect(o); i.connect(ch.input); ch.output.connect(wet); wet.connect(o);
+      const up=()=>{ ch.update(); const m=Math.max(0,Math.min(1,v(s.mix))); if(s.mode==='add'){ dry.gain.value=1; wet.gain.value=m; } else { dry.gain.value=Math.cos(m*Math.PI/2); wet.gain.value=Math.sin(m*Math.PI/2); } };
+      up(); return {input:i,output:o,update:up,mods:ch.mods}; }
+    case 'bands':{ // 3-way crossover (Linkwitz–Riley 4th order), a chain per band
+      const i=ctx.createGain(), o=ctx.createGain(), lr=(type,f)=>[pxModule(ctx,p,{t:type,f,q:0.707}),pxModule(ctx,p,{t:type,f,q:0.707})];
+      const path=(filters,mods)=>{ const ch=pxModule(ctx,p,{t:'chain',mods:[...filters.map(()=>({t:'gain',db:0})),...(mods||[])]}); let last=i; filters.forEach(f=>{ last.connect(f.input); last=f.output; }); last.connect(ch.input); ch.output.connect(o); return {up:()=>{ filters.forEach(f=>f.update()); ch.update(); },mods:ch.mods}; };
+      const lo=path(lr('lp',s.f1),s.low), mid=path([...lr('hp',s.f1),...lr('lp',s.f2)],s.mid), hi=path(lr('hp',s.f2),s.high);
+      return {input:i,output:o,update:()=>{ lo.up(); mid.up(); hi.up(); },mods:[...lo.mods,...mid.mods,...hi.mods]}; }
+    case 'split2':{ // 2-way crossover: low band / high band chains (e.g. mono bass)
+      const i=ctx.createGain(), o=ctx.createGain(); const mk=(type,mods)=>{ const a=pxModule(ctx,p,{t:type,f:s.f}), b=pxModule(ctx,p,{t:type,f:s.f}), ch=pxModule(ctx,p,{t:'chain',mods:mods||[]}); i.connect(a.input); a.output.connect(b.input); b.output.connect(ch.input); ch.output.connect(o); return ()=>{ a.update(); b.update(); ch.update(); }; };
+      const u1=mk('lp',s.low), u2=mk('hp',s.high); return {input:i,output:o,update:()=>{ u1(); u2(); }}; }
+    case 'ms':{ // mid/side: encode, process each, decode
+      const i=ctx.createGain(), o=ctx.createGain(), sp=ctx.createChannelSplitter(2), mg=ctx.createChannelMerger(2); i.connect(sp);
+      const mono=()=>{ const g=ctx.createGain(); g.channelCount=1; g.channelCountMode='explicit'; g.channelInterpretation='discrete'; return g; };
+      const M=mono(), S=mono(), lm=ctx.createGain(), rm=ctx.createGain(), ls=ctx.createGain(), rs=ctx.createGain(); lm.gain.value=0.5; rm.gain.value=0.5; ls.gain.value=0.5; rs.gain.value=-0.5;
+      sp.connect(lm,0); sp.connect(rm,1); sp.connect(ls,0); sp.connect(rs,1); lm.connect(M); rm.connect(M); ls.connect(S); rs.connect(S);
+      const mc=pxModule(ctx,p,{t:'chain',mods:s.mid||[]}), sc=pxModule(ctx,p,{t:'chain',mods:s.side||[]}); [mc.input,mc.output,sc.input,sc.output].forEach(n=>{ n.channelCount=1; n.channelCountMode='explicit'; });
+      M.connect(mc.input); S.connect(sc.input); const inv=ctx.createGain(); inv.gain.value=-1; sc.output.connect(inv);
+      mc.output.connect(mg,0,0); sc.output.connect(mg,0,0); mc.output.connect(mg,0,1); inv.connect(mg,0,1); mg.connect(o);
+      return {input:i,output:o,update:()=>{ mc.update(); sc.update(); }}; }
+    case 'verb':{ // algorithmic convolution reverb with pre-delay and send EQ
+      const i=ctx.createGain(), o=ctx.createGain(), dry=ctx.createGain(), wet=ctx.createGain(), pre=ctx.createDelay(0.5), hp=ctx.createBiquadFilter(), lp=ctx.createBiquadFilter(), cv=ctx.createConvolver();
+      hp.type='highpass'; lp.type='lowpass'; i.connect(dry); dry.connect(o); i.connect(pre); pre.connect(hp); hp.connect(lp); lp.connect(cv); cv.connect(wet); wet.connect(o);
+      let last=''; const up=()=>{ const type=v(s.type), dec=Math.max(0.1,v(s.decay)), dmp=Math.max(0,Math.min(1,v(s.damp??0.4))), key=type+dec.toFixed(2)+dmp.toFixed(2);
+        if(key!==last){ cv.buffer=pxIR(ctx,type,dec,dmp); last=key; } pre.delayTime.value=Math.max(0,Math.min(0.5,v(s.pre??0.01))); hp.frequency.value=v(s.hp??150); lp.frequency.value=v(s.lp??12000);
+        const mx=Math.max(0,Math.min(1,v(s.mix))); if(s.insert===false){ dry.gain.value=0; wet.gain.value=1; } else { dry.gain.value=Math.cos(mx*Math.PI/2); wet.gain.value=Math.sin(mx*Math.PI/2)*0.9; } };
+      up(); return {input:i,output:o,update:up}; }
+    case 'delay':{ // tape-style echo with wow and darkening repeats
+      const i=ctx.createGain(), o=ctx.createGain(), dry=ctx.createGain(), wet=ctx.createGain(), d=ctx.createDelay(4), fb=ctx.createGain(), lp=ctx.createBiquadFilter(), hp=ctx.createBiquadFilter(), lfo=ctx.createOscillator(), lg=ctx.createGain();
+      lp.type='lowpass'; hp.type='highpass'; i.connect(dry); dry.connect(o); i.connect(d); d.connect(lp); lp.connect(hp); hp.connect(fb); fb.connect(d); hp.connect(wet); wet.connect(o);
+      lfo.frequency.value=0.6; lfo.connect(lg); lg.connect(d.delayTime); lfo.start();
+      const up=()=>{ d.delayTime.value=Math.max(0.005,Math.min(3.9,v(s.time))); fb.gain.value=Math.min(0.95,v(s.fb)); lp.frequency.value=v(s.lp??4500); hp.frequency.value=v(s.hp??120); lg.gain.value=v(s.wow??0)*0.004; const mx=v(s.mix); dry.gain.value=s.insert===false?0:1-mx*0.5; wet.gain.value=mx; };
+      up(); return {input:i,output:o,update:up}; }
+    case 'mod':{ // modulated short delay: chorus / ADT / dimension
+      const i=ctx.createGain(), o=ctx.createGain(), dry=ctx.createGain(), wet=ctx.createGain(), sp=ctx.createChannelSplitter(2), mg=ctx.createChannelMerger(2); i.connect(dry); dry.connect(o);
+      const lfos=[0,1].map(ch=>{ const d=ctx.createDelay(0.1), l=ctx.createOscillator(), g=ctx.createGain(); l.type='sine'; l.connect(g); g.connect(d.delayTime); l.start(); i.connect(d); d.connect(mg,0,ch); return {d,l,g,ch}; });
+      mg.connect(wet); wet.connect(o);
+      const up=()=>{ lfos.forEach(({d,l,g,ch})=>{ d.delayTime.value=v(s.delay)*(ch?1.13:1); l.frequency.value=v(s.rate)*(ch?1.07:1); g.gain.value=v(s.depth)*0.004; }); const mx=v(s.mix); dry.gain.value=1-mx*0.4; wet.gain.value=mx; };
+      up(); return {input:i,output:o,update:up}; }
+    case 'noise':{ // tape hiss / vinyl crackle mixed in
+      const i=ctx.createGain(), o=ctx.createGain(), n=ctx.createBufferSource(), g=ctx.createGain(), sr=ctx.sampleRate, b=ctx.createBuffer(2,sr*2,sr);
+      for(let ch=0;ch<2;ch++){ const d=b.getChannelData(ch); let lp=0; for(let k=0;k<d.length;k++){ const r=Math.random()*2-1; if(s.kind==='crackle'){ d[k]=Math.random()<0.0007?(Math.random()*2-1):0; d[k]+=r*0.004; } else { lp+=0.25*(r-lp); d[k]=(r-lp)*0.5; } } }
+      n.buffer=b; n.loop=true; n.connect(g); g.connect(o); n.start(); i.connect(o);
+      const up=()=>{ g.gain.value=v(s.amt)*(s.kind==='crackle'?0.25:0.02); }; up(); return {input:i,output:o,update:up}; }
+    case 'fx':{ // reuse an existing Songbook plugin inside a chain
+      const d=STUDIO_FX[s.type], q=Object.fromEntries(d.params.map(x=>[x.id,x.def])); Object.entries(s.map||{}).forEach(([k,f])=>q[k]=v(f));
+      const inst=d.build(ctx,q); return {input:inst.input,output:inst.output,update:()=>Object.entries(s.map||{}).forEach(([k,f])=>{ const nv=v(f); if(nv!==q[k]){ q[k]=nv; inst.setParam&&inst.setParam(k,nv); } }),inst}; }
+  }
+  throw new Error('unknown module '+s.t);
+}
+function pxCollectComps(m,out){ if(!m) return out; if(m.comp) out.push(m.comp); (m.mods||[]).forEach(x=>pxCollectComps(x,out)); if(m.inst&&m.inst.getGR) out.push({get reduction(){ return m.inst.getGR(); }}); return out; }
+// plugin factory: pxP(id,label,min,max,def,unit) params, a chain of modules, factory presets
+const pxP=(id,label,min,max,def,unit)=>({id,label,min,max,def,unit:unit||''});
+function pxPlugin(name,cats,desc,params,chain,factory,extra){
+  return Object.assign({name,cats,desc,params,factory,pro:true,
+    build(ctx,p){ const root=pxModule(ctx,p,{t:'chain',mods:chain}), comps=pxCollectComps(root,[]);
+      return {input:root.input,output:root.output,setParam(id,v){ p[id]=v; root.update(); },getGR(){ return comps.reduce((a,c)=>Math.min(a,c.reduction||0),0); }}; }},extra||{});
+}
+const PX_FX={
+  // ───────────── Vocal ─────────────
+  voxPolish:pxPlugin('Vox Polish',['Vocals','Vocal Chain'],'One-stop vocal finisher: clean lows, smooth level, tame esses, add presence and air.',
+    [pxP('polish','Polish',0,1,0.5),pxP('air','Air',0,12,4,'dB'),pxP('presence','Presence',-6,8,2,'dB'),pxP('deess','De-ess',0,1,0.5),pxP('body','Body',-6,6,0,'dB'),pxP('output','Output',-12,12,0,'dB')],
+    [{t:'hp',f:90},{t:'peak',f:250,g:p=>p.body,q:0.9},{t:'comp',thr:p=>-14-p.polish*14,ratio:p=>2+p.polish*3,att:0.006,rel:0.12,knee:8,makeup:p=>p.polish*4},
+     {t:'fx',type:'deesser',map:{frequency:6800,threshold:p=>-14-p.deess*16,reduction:p=>p.deess*10}},{t:'peak',f:3200,g:p=>p.presence,q:0.8},{t:'hs',f:11000,g:p=>p.air},{t:'gain',db:p=>p.output}],
+    {'Pop shine':{polish:0.7,air:6,presence:3,deess:0.6},'Warm & close':{polish:0.5,air:1,presence:0,body:2},'Rap upfront':{polish:0.85,air:3,presence:4,deess:0.5,body:1}}),
+  levelRider:pxPlugin('Level Rider',['Vocals','Dynamics'],'Rides the vocal level like a hand on the fader, so quiet words come through.',
+    [pxP('target','Target',-30,-6,-18,'dB'),pxP('speed','Speed',0,1,0.5),pxP('range','Range',0,1,0.6),pxP('output','Output',-12,12,0,'dB')],
+    [{t:'comp',thr:p=>p.target-6,ratio:p=>1.5+p.range*4,att:p=>0.08-p.speed*0.07,rel:p=>0.6-p.speed*0.45,knee:24,makeup:p=>p.range*6},{t:'gain',db:p=>p.output}],{'Gentle':{speed:0.3,range:0.4},'Fast talker':{speed:0.85,range:0.7}}),
+  airLift:pxPlugin('Air Lift',['Vocals','EQ','Brightness'],'Adds silky top-end with harmonic sparkle instead of harsh boost.',
+    [pxP('air','Air',0,1,0.5),pxP('freq','Freq',6000,16000,10000,'Hz'),pxP('sparkle','Sparkle',0,1,0.3)],
+    [{t:'par',mix:p=>p.sparkle*0.5,mode:'add',mods:[{t:'hp',f:p=>p.freq},{t:'sat',drive:0.5,kind:'tube',asym:0.2}]},{t:'hs',f:p=>p.freq,g:p=>p.air*9}],{'Breathy':{air:0.7,freq:12000,sparkle:0.4},'Subtle':{air:0.3,sparkle:0.15}}),
+  voxThick:pxPlugin('Vocal Thickener',['Vocals','Modulation','Space'],'Double-tracked width and weight without phasey artifacts.',
+    [pxP('amount','Amount',0,1,0.5),pxP('width','Width',0,2,1.4),pxP('warmth','Warmth',-4,6,1,'dB')],
+    [{t:'mod',delay:0.018,rate:0.35,depth:p=>0.6+p.amount,mix:p=>p.amount*0.6},{t:'width',w:p=>p.width},{t:'ls',f:220,g:p=>p.warmth}],{'Chorus double':{amount:0.7,width:1.6}}),
+  radioVox:pxPlugin('Radio Voice',['Vocals','Lo-Fi','Sound Design'],'Telephone, megaphone and old-radio vocal effects.',
+    [pxP('low','Low cut',200,1200,500,'Hz'),pxP('high','High cut',1800,6000,3200,'Hz'),pxP('drive','Drive',0,1,0.4),pxP('output','Output',-12,12,7,'dB')],
+    [{t:'hp',f:p=>p.low,q:1.2},{t:'hp',f:p=>p.low,q:0.8},{t:'lp',f:p=>p.high,q:1.4},{t:'lp',f:p=>p.high,q:0.8},{t:'peak',f:1500,g:4,q:1.2},{t:'sat',drive:p=>p.drive,kind:'console',asym:0.3},{t:'gain',db:p=>p.output}],
+    {'Telephone':{low:600,high:3000,drive:0.3},'Megaphone':{low:800,high:2800,drive:0.8},'Old radio':{low:350,high:4200,drive:0.45}}),
+  breathCtl:pxPlugin('Breath Control',['Vocals','Dynamics'],'Lowers breaths and room noise between phrases without chopping words.',
+    [pxP('threshold','Threshold',-70,-20,-45,'dB'),pxP('reduce','Reduce',0,1,0.6)],
+    [{t:'fx',type:'gate',map:{threshold:p=>p.threshold,attack:0.004,hold:0.12,release:p=>0.25-p.reduce*0.15}}],{'Gentle':{threshold:-50,reduce:0.4},'Tight':{threshold:-38,reduce:0.9}}),
+  // ───────────── Mastering ─────────────
+  masterGlue:pxPlugin('Master Glue',['Mastering','Dynamics','Glue Mix'],'Bus compression that makes a mix move as one: slow attack, gentle ratio.',
+    [pxP('threshold','Threshold',-30,0,-12,'dB'),pxP('ratio','Ratio',1.2,4,2),pxP('attack','Attack',0.001,0.1,0.03,'s'),pxP('release','Release',0.05,1,0.3,'s'),pxP('makeup','Makeup',0,12,2,'dB'),pxP('mix','Mix',0,1,1)],
+    [{t:'par',mix:p=>p.mix,mode:'blend',mods:[{t:'comp',thr:p=>p.threshold,ratio:p=>p.ratio,att:p=>p.attack,rel:p=>p.release,knee:10,makeup:p=>p.makeup}]}],
+    {'Glue 2:1':{threshold:-12,ratio:2,attack:0.03,release:0.3},'Punchy 4:1':{threshold:-16,ratio:4,attack:0.01,release:0.1,makeup:4},'Parallel 50%':{threshold:-20,ratio:4,mix:0.5,makeup:4}},{hasGRMeter:true}),
+  maximizer:pxPlugin('Loudness Maximizer',['Mastering','Loudness'],'Soft-clip then brick-wall limit for loud, clean masters. Set the ceiling, raise Loudness.',
+    [pxP('loud','Loudness',0,18,6,'dB'),pxP('clip','Soft clip',0,1,0.3),pxP('ceiling','Ceiling',-3,0,-1,'dB'),pxP('release','Release',0.01,0.5,0.08,'s')],
+    [{t:'gain',db:p=>p.loud},{t:'sat',drive:p=>p.clip*0.35,kind:'console'},{t:'fx',type:'limiter',map:{threshold:p=>-Math.min(12,p.loud*0.6),ceiling:p=>p.ceiling,release:p=>p.release}}],
+    {'Streaming −14':{loud:4,clip:0.2,ceiling:-1},'Club loud':{loud:11,clip:0.5,ceiling:-0.3},'Transparent':{loud:3,clip:0,ceiling:-1}},{hasGRMeter:true}),
+  tiltMaster:pxPlugin('Tilt Master EQ',['Mastering','EQ'],'Broad, musical tone shaping: tilt darker or brighter around a pivot, plus air and weight.',
+    [pxP('tilt','Tilt',-6,6,0,'dB'),pxP('pivot','Pivot',300,3000,900,'Hz'),pxP('weight','Weight',-4,6,0,'dB'),pxP('air','Air',-4,6,0,'dB')],
+    [{t:'ls',f:p=>p.pivot,g:p=>-p.tilt/2},{t:'hs',f:p=>p.pivot,g:p=>p.tilt/2},{t:'ls',f:60,g:p=>p.weight},{t:'hs',f:14000,g:p=>p.air}],{'Brighter':{tilt:2,air:1.5},'Warmer':{tilt:-2,weight:1.5}}),
+  triBand:pxPlugin('Tri-Band Dynamics',['Mastering','Dynamics','Multiband'],'Three-band compressor: control the low end, mids and highs separately.',
+    [pxP('lowX','Low/Mid',60,600,180,'Hz'),pxP('highX','Mid/High',1500,10000,4500,'Hz'),pxP('lowThr','Low thr',-40,0,-18,'dB'),pxP('midThr','Mid thr',-40,0,-16,'dB'),pxP('highThr','High thr',-40,0,-20,'dB'),pxP('ratio','Ratio',1,8,3),pxP('lowGain','Low gain',-6,6,0,'dB'),pxP('midGain','Mid gain',-6,6,0,'dB'),pxP('highGain','High gain',-6,6,0,'dB')],
+    [{t:'bands',f1:p=>p.lowX,f2:p=>p.highX,low:[{t:'comp',thr:p=>p.lowThr,ratio:p=>p.ratio,att:0.02,rel:0.2,knee:6,makeup:p=>p.lowGain}],mid:[{t:'comp',thr:p=>p.midThr,ratio:p=>p.ratio,att:0.01,rel:0.15,knee:6,makeup:p=>p.midGain}],high:[{t:'comp',thr:p=>p.highThr,ratio:p=>p.ratio,att:0.004,rel:0.08,knee:6,makeup:p=>p.highGain}]}],
+    {'Tight low end':{lowThr:-24,ratio:4},'De-harsh':{highThr:-28,ratio:4,highGain:-1},'Even master':{lowThr:-20,midThr:-18,highThr:-22,ratio:2.5}},{hasGRMeter:true}),
+  imager:pxPlugin('Stereo Imager',['Mastering','Stereo','Space'],'Widen the highs while keeping bass mono and solid, like on a club system.',
+    [pxP('width','Width',0,2,1.3),pxP('monoBelow','Mono below',40,300,120,'Hz')],
+    [{t:'split2',f:p=>p.monoBelow,low:[{t:'width',w:0}],high:[{t:'width',w:p=>p.width}]}],{'Wide':{width:1.6},'Mono bass only':{width:1}}),
+  masterOne:pxPlugin('Master Chain One',['Mastering','Loudness','One-Knob'],'A complete mastering chain on a few knobs: tone, glue, width and loudness.',
+    [pxP('amount','Amount',0,1,0.5),pxP('tone','Tone',-1,1,0),pxP('width','Width',0,2,1.15),pxP('ceiling','Ceiling',-3,0,-1,'dB')],
+    [{t:'hs',f:9000,g:p=>p.tone*3+p.amount},{t:'ls',f:90,g:p=>-p.tone*2+p.amount},{t:'comp',thr:p=>-8-p.amount*10,ratio:2,att:0.03,rel:0.25,knee:10,makeup:p=>p.amount*3},
+     {t:'split2',f:120,low:[{t:'width',w:0}],high:[{t:'width',w:p=>p.width}]},{t:'gain',db:p=>p.amount*8},{t:'fx',type:'limiter',map:{threshold:p=>-1-p.amount*6,ceiling:p=>p.ceiling,release:0.08}}],
+    {'Gentle':{amount:0.3},'Loud & bright':{amount:0.8,tone:0.4,width:1.3}},{hasGRMeter:true}),
+  vinylCut:pxPlugin('Vinyl Master',['Mastering','Lo-Fi','Heritage Studio'],'The sound of a record: mono bass, rounded top, gentle saturation and optional crackle.',
+    [pxP('warmth','Warmth',0,1,0.5),pxP('crackle','Crackle',0,1,0.2),pxP('age','Age',0,1,0.3)],
+    [{t:'split2',f:150,low:[{t:'width',w:0}],high:[]},{t:'sat',drive:p=>p.warmth*0.4,kind:'tube',asym:0.15},{t:'lp',f:p=>16000-p.age*10000},{t:'hp',f:p=>25+p.age*60},{t:'noise',kind:'crackle',amt:p=>p.crackle}],
+    {'Fresh pressing':{warmth:0.3,crackle:0.05,age:0.1},'Dusty crate':{warmth:0.6,crackle:0.6,age:0.7}}),
+  // ───────────── Analog modeled ─────────────
+  tape15:pxPlugin('Tape Machine',['Analog','Glue Mix','Heritage Studio'],'Reel-to-reel character: soft saturation, head bump, rounded highs, wow and hiss.',
+    [pxP('drive','Drive',0,1,0.4),pxP('speed','Speed',0,1,0.5),pxP('bump','Head bump',0,6,2,'dB'),pxP('wow','Wow',0,1,0.15),pxP('hiss','Hiss',0,1,0)],
+    [{t:'sat',drive:p=>p.drive*0.7,kind:'tape',asym:0.05},{t:'peak',f:p=>p.speed>0.5?55:75,g:p=>p.bump,q:1.1},{t:'lp',f:p=>9000+p.speed*9000,q:0.6},{t:'delay',time:0.012,fb:0,mix:1,insert:false,wow:p=>p.wow*2,lp:20000,hp:10},{t:'noise',kind:'hiss',amt:p=>p.hiss}],
+    {'15 ips warm':{drive:0.4,speed:0.4,bump:2},'30 ips clean':{drive:0.25,speed:1,bump:1},'Cassette':{drive:0.55,speed:0,wow:0.5,hiss:0.4,bump:3}}),
+  tubePre:pxPlugin('Tube Preamp',['Analog','Distortion','Enhance'],'Valve preamp warmth: even harmonics, thicker mids, smooth top.',
+    [pxP('drive','Drive',0,1,0.35),pxP('bias','Bias',0,1,0.4),pxP('presence','Presence',-4,6,1,'dB'),pxP('output','Output',-12,12,0,'dB')],
+    [{t:'sat',drive:p=>p.drive,kind:'tube',asym:p=>p.bias},{t:'peak',f:4000,g:p=>p.presence,q:0.7},{t:'gain',db:p=>p.output}],{'Glow':{drive:0.25},'Hot':{drive:0.75,bias:0.6}}),
+  transformer:pxPlugin('Transformer Color',['Analog','Enhance'],'Iron transformer weight: firmer lows and gentle harmonic density.',
+    [pxP('color','Color',0,1,0.4),pxP('low','Low weight',0,4,1.5,'dB')],[{t:'sat',drive:p=>p.color*0.5,kind:'console',asym:0.1},{t:'ls',f:110,g:p=>p.low},{t:'lp',f:19000}],{'Subtle':{color:0.25},'Thick':{color:0.75,low:3}}),
+  optoLevel:pxPlugin('Opto Leveler',['Analog','Dynamics','Vocals','Heritage Studio'],'Optical-style smooth leveling: program-dependent and very musical on vocals and bass.',
+    [pxP('peak','Peak reduction',0,100,40,''),pxP('gain','Gain',0,24,3,'dB'),pxP('mode','Limit',0,1,0)],
+    [{t:'comp',thr:p=>-p.peak*0.4,ratio:p=>p.mode>0.5?12:3,att:0.012,rel:0.45,knee:18,makeup:p=>p.gain},{t:'sat',drive:0.08,kind:'tube',asym:0.2}],{'Vocal smooth':{peak:45,gain:4},'Bass even':{peak:55,gain:5},'Limit':{peak:60,mode:1,gain:4}},{hasGRMeter:true}),
+  fetComp:pxPlugin('FET Crusher',['Analog','Dynamics','Drums','Vocals'],'Fast FET-style compressor with bite. Push Input for attitude; "All-in" for the classic smash.',
+    [pxP('input','Input',0,24,8,'dB'),pxP('ratio','Ratio',4,20,4),pxP('attack','Attack',0.0001,0.01,0.0008,'s'),pxP('release','Release',0.05,1.1,0.2,'s'),pxP('allin','All-in',0,1,0),pxP('output','Output',-24,6,-4,'dB')],
+    [{t:'gain',db:p=>p.input},{t:'comp',thr:p=>-10-p.allin*10,ratio:p=>p.allin>0.5?20:p.ratio,att:p=>p.attack,rel:p=>p.release,knee:p=>p.allin>0.5?0:3},{t:'sat',drive:p=>0.15+p.allin*0.45,kind:'console',asym:0.1},{t:'gain',db:p=>p.output}],
+    {'Vocal bite':{input:10,ratio:4},'Drum smash':{input:16,allin:1,output:-8},'Bass grab':{input:8,ratio:8,attack:0.002}},{hasGRMeter:true}),
+  variMu:pxPlugin('Vari-Mu Bus',['Analog','Dynamics','Mastering','Glue Mix'],'Tube vari-mu glue: ratio rises with level, adding thickness as it compresses.',
+    [pxP('threshold','Threshold',-30,0,-14,'dB'),pxP('recovery','Recovery',0.1,1,0.4,'s'),pxP('drive','Tube',0,1,0.3),pxP('makeup','Makeup',0,12,3,'dB')],
+    [{t:'comp',thr:p=>p.threshold,ratio:1.8,att:0.025,rel:p=>p.recovery,knee:30,makeup:p=>p.makeup},{t:'sat',drive:p=>p.drive*0.4,kind:'tube',asym:0.3}],{'Mix bus':{threshold:-14},'Thick':{threshold:-22,drive:0.6,makeup:5}},{hasGRMeter:true}),
+  passiveEq:pxPlugin('Passive Program EQ',['Analog','EQ','Heritage Studio'],'Tube passive-style EQ: boost and cut the same low frequency for big, tight bass; silky highs.',
+    [pxP('lowFreq','Low freq',20,100,60,'Hz'),pxP('lowBoost','Low boost',0,10,3,'dB'),pxP('lowAtten','Low atten',0,10,1.5,'dB'),pxP('highFreq','High freq',3000,16000,10000,'Hz'),pxP('highBoost','High boost',0,10,2,'dB'),pxP('bandwidth','Bandwidth',0.3,2,0.8),pxP('highAtten','High atten',0,10,0,'dB')],
+    [{t:'ls',f:p=>p.lowFreq,g:p=>p.lowBoost},{t:'peak',f:p=>p.lowFreq*3.2,g:p=>-p.lowAtten,q:0.8},{t:'peak',f:p=>p.highFreq,g:p=>p.highBoost,q:p=>p.bandwidth},{t:'hs',f:18000,g:p=>-p.highAtten},{t:'sat',drive:0.06,kind:'tube',asym:0.1}],
+    {'Kick trick':{lowFreq:60,lowBoost:5,lowAtten:3},'Vocal sheen':{highFreq:12000,highBoost:4,bandwidth:0.6},'Mix sweetener':{lowBoost:2,lowAtten:1,highBoost:1.5}}),
+  dimension:pxPlugin('Dimension Chorus',['Analog','Modulation','Space'],'Bucket-brigade style stereo chorus: lush width that stays in tune.',
+    [pxP('mode','Mode',1,4,2),pxP('mix','Mix',0,1,0.5)],[{t:'mod',delay:p=>0.006+p.mode*0.002,rate:p=>0.25+p.mode*0.15,depth:p=>0.2+p.mode*0.2,mix:p=>p.mix},{t:'lp',f:11000}],{'Mode 1':{mode:1},'Mode 4':{mode:4,mix:0.6}}),
+  // ───────────── Compressors, gates, de-essers ─────────────
+  smartComp:pxPlugin('Studio Comp',['Dynamics','Vocals','Drums','Bass'],'A clean, all-purpose compressor with sensible presets for every source.',
+    [pxP('threshold','Threshold',-50,0,-20,'dB'),pxP('ratio','Ratio',1,20,4),pxP('attack','Attack',0,0.1,0.01,'s'),pxP('release','Release',0.02,1,0.15,'s'),pxP('knee','Knee',0,30,8,'dB'),pxP('makeup','Makeup',0,24,4,'dB'),pxP('mix','Mix',0,1,1)],
+    [{t:'par',mix:p=>p.mix,mode:'blend',mods:[{t:'comp',thr:p=>p.threshold,ratio:p=>p.ratio,att:p=>p.attack,rel:p=>p.release,knee:p=>p.knee,makeup:p=>p.makeup}]}],
+    {'Vocal':{threshold:-22,ratio:4,attack:0.006,release:0.12,makeup:5},'Kick':{threshold:-16,ratio:5,attack:0.02,release:0.08,makeup:3},'Snare':{threshold:-18,ratio:4,attack:0.008,release:0.1},'Bass':{threshold:-24,ratio:6,attack:0.01,release:0.2,makeup:6},'Acoustic':{threshold:-20,ratio:3,attack:0.015,release:0.2},'Piano':{threshold:-20,ratio:2.5,attack:0.02,release:0.25}},{hasGRMeter:true}),
+  nyComp:pxPlugin('Parallel Smash',['Dynamics','Drums','Glue Mix'],'New-York-style parallel compression: crush a copy, blend it under the original.',
+    [pxP('smash','Smash',0,1,0.7),pxP('blend','Blend',0,1,0.35),pxP('tone','Tone',-6,6,2,'dB')],
+    [{t:'par',mix:p=>p.blend,mode:'add',mods:[{t:'comp',thr:p=>-20-p.smash*20,ratio:20,att:0.001,rel:0.08,knee:0,makeup:p=>8+p.smash*10},{t:'hs',f:5000,g:p=>p.tone},{t:'ls',f:90,g:p=>p.tone*0.5}]}],{'Drum room':{smash:0.8,blend:0.4},'Vocal energy':{smash:0.5,blend:0.25}},{hasGRMeter:true}),
+  detailLift:pxPlugin('Detail Lift',['Dynamics','Enhance'],'Upward compression: brings up quiet detail (breaths, room, string noise) without squashing peaks.',
+    [pxP('lift','Lift',0,1,0.5),pxP('focus','Focus',-6,6,0,'dB')],
+    [{t:'par',mix:p=>p.lift*0.6,mode:'add',mods:[{t:'comp',thr:-50,ratio:6,att:0.003,rel:0.2,knee:20,makeup:22},{t:'peak',f:3000,g:p=>p.focus,q:0.7}]}],{'Subtle':{lift:0.3},'Intimate':{lift:0.7,focus:2}},{hasGRMeter:true}),
+  drumGate:pxPlugin('Drum Gate',['Dynamics','Drums'],'Tight gate for toms and snares, with a key filter so cymbals don\'t open it.',
+    [pxP('threshold','Threshold',-60,0,-30,'dB'),pxP('hold','Hold',0,0.4,0.06,'s'),pxP('release','Release',0.01,0.5,0.08,'s'),pxP('keyHP','Key HP',20,500,80,'Hz')],
+    [{t:'hp',f:p=>p.keyHP*0.5},{t:'fx',type:'gate',map:{threshold:p=>p.threshold,attack:0.001,hold:p=>p.hold,release:p=>p.release}}],{'Tom':{threshold:-34,hold:0.12,release:0.15},'Snare':{threshold:-28,hold:0.05,release:0.07},'Kick':{threshold:-26,hold:0.04,release:0.06}}),
+  sibilance:pxPlugin('Sibilance Tamer',['Dynamics','Vocals'],'Split-band de-esser: catches harsh "s" sounds while keeping the air above them.',
+    [pxP('freq','Frequency',3000,10000,6500,'Hz'),pxP('amount','Amount',0,1,0.5),pxP('air','Air protect',0,6,1.5,'dB')],
+    [{t:'fx',type:'deesser',map:{frequency:p=>p.freq,threshold:p=>-12-p.amount*20,reduction:p=>4+p.amount*12}},{t:'hs',f:13000,g:p=>p.air}],{'Female vocal':{freq:7500,amount:0.55},'Male vocal':{freq:5500,amount:0.5},'Harsh cymbals':{freq:9000,amount:0.6,air:0}}),
+  // ───────────── Equalizers ─────────────
+  proEq6:pxPlugin('Precision EQ',['EQ','Clean Up'],'Six-band surgical EQ: high/low cuts, two shelves and two bell bands with narrow Q.',
+    [pxP('hp','Low cut',20,500,30,'Hz'),pxP('lsF','Low shelf',40,400,100,'Hz'),pxP('lsG','LS gain',-12,12,0,'dB'),pxP('b1F','Bell 1',100,2000,350,'Hz'),pxP('b1G','Bell 1 gain',-12,12,0,'dB'),pxP('b1Q','Bell 1 Q',0.3,10,1.4),pxP('b2F','Bell 2',800,12000,3000,'Hz'),pxP('b2G','Bell 2 gain',-12,12,0,'dB'),pxP('b2Q','Bell 2 Q',0.3,10,1.4),pxP('hsF','High shelf',3000,16000,9000,'Hz'),pxP('hsG','HS gain',-12,12,0,'dB'),pxP('lp','High cut',3000,20000,20000,'Hz')],
+    [{t:'hp',f:p=>p.hp},{t:'ls',f:p=>p.lsF,g:p=>p.lsG},{t:'peak',f:p=>p.b1F,g:p=>p.b1G,q:p=>p.b1Q},{t:'peak',f:p=>p.b2F,g:p=>p.b2G,q:p=>p.b2Q},{t:'hs',f:p=>p.hsF,g:p=>p.hsG},{t:'lp',f:p=>p.lp}],
+    {'Remove mud':{hp:80,b1F:300,b1G:-4,b1Q:1.2},'Vocal clarity':{hp:100,b1F:250,b1G:-2,b2F:3500,b2G:2.5,hsG:2},'Kick shape':{hp:30,lsF:60,lsG:3,b1F:380,b1G:-4,b2F:4000,b2G:3},'Snare body':{hp:80,b1F:200,b1G:2,b2F:5000,b2G:2}}),
+  midSideEq:pxPlugin('Mid/Side EQ',['EQ','Mastering','Stereo'],'EQ the centre and the sides separately: clean the low end of the sides, open up the stereo highs.',
+    [pxP('midLow','Mid low',-6,6,0,'dB'),pxP('midPres','Mid presence',-6,6,0,'dB'),pxP('sideCut','Side low cut',20,400,120,'Hz'),pxP('sideAir','Side air',-6,8,2,'dB'),pxP('sideLevel','Side level',-6,6,0,'dB')],
+    [{t:'ms',mid:[{t:'ls',f:120,g:p=>p.midLow},{t:'peak',f:2500,g:p=>p.midPres,q:0.8}],side:[{t:'hp',f:p=>p.sideCut},{t:'hs',f:8000,g:p=>p.sideAir},{t:'gain',db:p=>p.sideLevel}]}],{'Wide highs':{sideAir:4,sideLevel:1},'Focus centre':{midPres:2,sideLevel:-2}}),
+  dynLow:pxPlugin('Low-End Focus',['EQ','Bass','Mastering'],'Tightens boomy bass: a dynamic low band that only compresses when the lows get loud.',
+    [pxP('freq','Freq',40,250,110,'Hz'),pxP('threshold','Threshold',-40,0,-18,'dB'),pxP('boost','Boost',-4,6,1,'dB')],
+    [{t:'bands',f1:p=>p.freq,f2:16000,low:[{t:'comp',thr:p=>p.threshold,ratio:4,att:0.01,rel:0.12,knee:6,makeup:p=>p.boost}],mid:[],high:[]}],{'Tame boom':{freq:120,threshold:-24,boost:0},'Punchy sub':{freq:80,threshold:-18,boost:2}},{hasGRMeter:true}),
+  // ───────────── Reverbs ─────────────
+  plateVerb:pxPlugin('Studio Plate',['Reverb','Space','Vocals','Heritage Studio'],'Dense, bright plate: the classic vocal and snare reverb.',
+    [pxP('decay','Decay',0.4,6,2.2,'s'),pxP('pre','Pre-delay',0,0.15,0.02,'s'),pxP('damp','Damping',0,1,0.35),pxP('lowCut','Low cut',50,600,200,'Hz'),pxP('mix','Mix',0,1,0.25)],
+    [{t:'verb',type:'plate',decay:p=>p.decay,pre:p=>p.pre,damp:p=>p.damp,hp:p=>p.lowCut,mix:p=>p.mix}],{'Vocal plate':{decay:1.8,pre:0.03,mix:0.22},'Snare plate':{decay:1.2,pre:0.005,mix:0.3},'Long shine':{decay:4,damp:0.2,mix:0.3}}),
+  hallVerb:pxPlugin('Concert Hall',['Reverb','Space','Orchestral'],'Big, natural hall with slow build-up and smooth tail.',
+    [pxP('decay','Decay',1,10,3.2,'s'),pxP('pre','Pre-delay',0,0.2,0.035,'s'),pxP('damp','Damping',0,1,0.45),pxP('mix','Mix',0,1,0.3)],
+    [{t:'verb',type:'hall',decay:p=>p.decay,pre:p=>p.pre,damp:p=>p.damp,hp:120,mix:p=>p.mix}],{'Strings hall':{decay:3.5,mix:0.35},'Huge':{decay:7,damp:0.35,mix:0.4}}),
+  roomVerb:pxPlugin('Live Room',['Reverb','Space','Drums'],'A real-sounding room for drums, guitars and natural vocals.',
+    [pxP('size','Size',0.2,1.5,0.6,'s'),pxP('damp','Damping',0,1,0.5),pxP('mix','Mix',0,1,0.2)],
+    [{t:'verb',type:'room',decay:p=>p.size,pre:0.004,damp:p=>p.damp,hp:100,mix:p=>p.mix}],{'Drum room':{size:0.8,mix:0.3},'Tight booth':{size:0.25,mix:0.15}}),
+  chamberVerb:pxPlugin('Echo Chamber',['Reverb','Space','Heritage Studio'],'Echo-chamber reverb: the warm, dense space behind countless classic records.',
+    [pxP('decay','Decay',0.6,5,1.9,'s'),pxP('pre','Pre-delay',0,0.12,0.02,'s'),pxP('tone','Tone',2000,12000,6000,'Hz'),pxP('mix','Mix',0,1,0.25)],
+    [{t:'verb',type:'chamber',decay:p=>p.decay,pre:p=>p.pre,damp:0.45,hp:250,lp:p=>p.tone,mix:p=>p.mix}],{'Classic vocal':{decay:1.8,tone:5000},'Bright chamber':{tone:10000}}),
+  springVerb:pxPlugin('Spring Tank',['Reverb','Space','Guitar'],'Boingy guitar-amp spring reverb, from subtle drip to surf splash.',
+    [pxP('decay','Decay',0.5,4,1.8,'s'),pxP('tone','Tone',1500,8000,4000,'Hz'),pxP('mix','Mix',0,1,0.3)],
+    [{t:'verb',type:'spring',decay:p=>p.decay,pre:0,damp:0.3,hp:300,lp:p=>p.tone,mix:p=>p.mix}],{'Surf':{decay:2.6,mix:0.45},'Amp drip':{decay:1.2,mix:0.2}}),
+  gatedVerb:pxPlugin('Gated Verb',['Reverb','Drums','Sound Design'],'Big reverb chopped short: the explosive 80s snare.',
+    [pxP('length','Length',0.1,0.8,0.35,'s'),pxP('mix','Mix',0,1,0.45)],[{t:'verb',type:'gated',decay:p=>p.length,pre:0,damp:0.2,hp:200,mix:p=>p.mix}],{'80s snare':{length:0.4,mix:0.5},'Tight':{length:0.2}}),
+  reverseVerb:pxPlugin('Reverse Swell',['Reverb','Sound Design','FX'],'Reversed reverb that swells into each note: ghostly vocals and risers.',
+    [pxP('length','Length',0.3,4,1.5,'s'),pxP('mix','Mix',0,1,0.4)],[{t:'verb',type:'reverse',decay:p=>p.length,pre:0,damp:0.3,hp:200,mix:p=>p.mix}],{'Ghost vocal':{length:1.2,mix:0.5}}),
+  bloomVerb:pxPlugin('Bloom Space',['Reverb','Space','Ambient','Cinematic'],'Enormous ambient bloom for pads, guitars and cinematic textures.',
+    [pxP('decay','Decay',3,12,7,'s'),pxP('damp','Damping',0,1,0.3),pxP('mix','Mix',0,1,0.4)],[{t:'verb',type:'bloom',decay:p=>p.decay,pre:0.06,damp:p=>p.damp,hp:250,mix:p=>p.mix},{t:'width',w:1.4}],{'Infinite pad':{decay:11,mix:0.55}}),
+  // ───────────── Channel strips ─────────────
+  cleanStrip:pxPlugin('Clean Channel',['Channel Strip','EQ','Dynamics'],'Everything a track needs in one strip: low cut, 3-band EQ, compressor, output.',
+    [pxP('hp','Low cut',20,400,60,'Hz'),pxP('low','Low',-12,12,0,'dB'),pxP('mid','Mid',-12,12,0,'dB'),pxP('midF','Mid freq',200,6000,1200,'Hz'),pxP('high','High',-12,12,0,'dB'),pxP('thr','Comp thr',-40,0,-18,'dB'),pxP('ratio','Ratio',1,10,3),pxP('output','Output',-12,12,0,'dB')],
+    [{t:'hp',f:p=>p.hp},{t:'ls',f:120,g:p=>p.low},{t:'peak',f:p=>p.midF,g:p=>p.mid,q:0.9},{t:'hs',f:8000,g:p=>p.high},{t:'comp',thr:p=>p.thr,ratio:p=>p.ratio,att:0.01,rel:0.15,knee:6,makeup:p=>Math.max(0,-p.thr*(1-1/p.ratio)*0.3)},{t:'gain',db:p=>p.output}],
+    {'Vocal':{hp:90,mid:2,midF:3000,high:2,thr:-20,ratio:3},'Bass':{hp:35,low:2,mid:-2,midF:400,thr:-22,ratio:4},'Acoustic':{hp:80,mid:-2,midF:300,high:3}},{hasGRMeter:true}),
+  vintageStrip:pxPlugin('Vintage Channel',['Channel Strip','Analog','Vocals'],'Tube pre, passive EQ and opto leveler in one warm vintage strip.',
+    [pxP('drive','Pre drive',0,1,0.3),pxP('lowBoost','Low boost',0,8,2,'dB'),pxP('highBoost','High boost',0,8,2,'dB'),pxP('peak','Leveler',0,100,35),pxP('gain','Gain',0,18,2,'dB')],
+    [{t:'sat',drive:p=>p.drive,kind:'tube',asym:0.3},{t:'ls',f:80,g:p=>p.lowBoost},{t:'peak',f:240,g:p=>-p.lowBoost*0.4,q:0.8},{t:'peak',f:10000,g:p=>p.highBoost,q:0.7},{t:'comp',thr:p=>-p.peak*0.4,ratio:3,att:0.012,rel:0.4,knee:18,makeup:p=>p.gain}],
+    {'Velvet vocal':{drive:0.3,highBoost:3,peak:45,gain:4},'Warm bass':{drive:0.45,lowBoost:4,highBoost:0,peak:50}},{hasGRMeter:true}),
+  // ───────────── Console 4K (British large-format console style) ─────────────
+  k4Channel:pxPlugin('4K Console Channel',['Console 4K','Channel Strip','EQ','Dynamics'],'British large-format console channel: filters, punchy 4-band EQ, fast channel compressor and console drive.',
+    [pxP('hpf','HPF',16,350,20,'Hz'),pxP('lpf','LPF',3000,22000,22000,'Hz'),pxP('lfG','LF',-15,15,0,'dB'),pxP('lfF','LF freq',30,450,100,'Hz'),pxP('lmfG','LMF',-15,15,0,'dB'),pxP('lmfF','LMF freq',200,2500,600,'Hz'),pxP('lmfQ','LMF Q',0.5,4,1.5),pxP('hmfG','HMF',-15,15,0,'dB'),pxP('hmfF','HMF freq',600,7000,3000,'Hz'),pxP('hmfQ','HMF Q',0.5,4,1.5),pxP('hfG','HF',-15,15,0,'dB'),pxP('hfF','HF freq',1500,16000,10000,'Hz'),pxP('cThr','Comp thr',-30,10,0,'dB'),pxP('cRatio','Comp ratio',1,20,3),pxP('drive','Drive',0,1,0.15),pxP('output','Output',-18,18,0,'dB')],
+    [{t:'hp',f:p=>p.hpf,q:0.6},{t:'hp',f:p=>p.hpf,q:1.3},{t:'lp',f:p=>p.lpf},{t:'ls',f:p=>p.lfF,g:p=>p.lfG},{t:'peak',f:p=>p.lmfF,g:p=>p.lmfG,q:p=>p.lmfQ*(1+Math.abs(p.lmfG)/15)},{t:'peak',f:p=>p.hmfF,g:p=>p.hmfG,q:p=>p.hmfQ*(1+Math.abs(p.hmfG)/15)},{t:'hs',f:p=>p.hfF,g:p=>p.hfG},
+     {t:'comp',thr:p=>p.cThr-10,ratio:p=>p.cRatio,att:0.003,rel:0.1,knee:2,makeup:p=>Math.max(0,(10-p.cThr)*0.25)},{t:'sat',drive:p=>p.drive*0.4,kind:'console',asym:0.05},{t:'gain',db:p=>p.output}],
+    {'Kick punch':{hpf:30,lfG:4,lfF:60,lmfG:-5,lmfF:350,hmfG:4,hmfF:3500,cThr:-4,cRatio:4},'Snare crack':{hpf:90,lfG:2,lfF:180,hmfG:5,hmfF:5000,cThr:-6,cRatio:4},'Vocal forward':{hpf:90,lmfG:-2,lmfF:300,hmfG:3,hmfF:3200,hfG:3,cThr:-8,cRatio:3},'Bass growl':{hpf:30,lfG:3,lfF:80,lmfG:3,lmfF:800,cThr:-10,cRatio:4,drive:0.4}},{hasGRMeter:true}),
+  k4Bus:pxPlugin('4K Bus Compressor',['Console 4K','Mastering','Dynamics','Glue Mix'],'The mix-bus glue of the big British consoles: stepped attack/ratio, auto release.',
+    [pxP('threshold','Threshold',-20,10,-4,'dB'),pxP('ratio','Ratio',2,10,4),pxP('attack','Attack',0.0001,0.03,0.01,'s'),pxP('release','Release',0.1,1.2,0.6,'s'),pxP('makeup','Makeup',0,15,3,'dB'),pxP('mix','Mix',0,1,1)],
+    [{t:'par',mix:p=>p.mix,mode:'blend',mods:[{t:'comp',thr:p=>p.threshold-10,ratio:p=>p.ratio,att:p=>p.attack,rel:p=>p.release>1.1?0.25:p.release,knee:4,makeup:p=>p.makeup}]}],
+    {'Mix glue':{threshold:-4,ratio:2,attack:0.03,release:1.2,makeup:2},'Drum bus slam':{threshold:-10,ratio:4,attack:0.003,release:0.1,makeup:5},'Master 2:1':{threshold:-2,ratio:2,attack:0.03,release:1.2,makeup:1.5}},{hasGRMeter:true}),
+  k4Eq:pxPlugin('4K Console EQ',['Console 4K','EQ'],'The punchy console EQ on its own, with the black-knob (proportional Q) curves.',
+    [pxP('lfG','LF',-15,15,0,'dB'),pxP('lfF','LF freq',30,450,100,'Hz'),pxP('lmfG','LMF',-15,15,0,'dB'),pxP('lmfF','LMF freq',200,2500,600,'Hz'),pxP('hmfG','HMF',-15,15,0,'dB'),pxP('hmfF','HMF freq',600,7000,3000,'Hz'),pxP('hfG','HF',-15,15,0,'dB'),pxP('hfF','HF freq',1500,16000,10000,'Hz')],
+    [{t:'ls',f:p=>p.lfF,g:p=>p.lfG},{t:'peak',f:p=>p.lmfF,g:p=>p.lmfG,q:p=>0.7+Math.abs(p.lmfG)/8},{t:'peak',f:p=>p.hmfF,g:p=>p.hmfG,q:p=>0.7+Math.abs(p.hmfG)/8},{t:'hs',f:p=>p.hfF,g:p=>p.hfG}],
+    {'Smile':{lfG:3,hfG:3},'Guitar cut-through':{lmfG:-3,lmfF:300,hmfG:3,hmfF:2500}}),
+  // ───────────── Heritage Studio (classic British recording-studio collection) ─────────────
+  heritageDesk:pxPlugin('Heritage Desk',['Heritage Studio','Channel Strip','Analog'],'A 1960s/70s British studio desk: valve-transistor color, broad tone controls and the desk limiter.',
+    [pxP('drive','Input drive',0,1,0.3),pxP('bass','Bass',-10,10,0,'dB'),pxP('treble','Treble',-10,10,0,'dB'),pxP('presence','Presence',-10,10,0,'dB'),pxP('presF','Presence freq',800,10000,2800,'Hz'),pxP('limit','Limiter',0,1,0.3),pxP('output','Output',-12,12,0,'dB')],
+    [{t:'sat',drive:p=>p.drive*0.6,kind:'tube',asym:0.25},{t:'ls',f:100,g:p=>p.bass},{t:'peak',f:p=>p.presF,g:p=>p.presence,q:0.9},{t:'hs',f:10000,g:p=>p.treble},{t:'comp',thr:p=>-4-p.limit*20,ratio:p=>2+p.limit*8,att:0.008,rel:0.35,knee:12,makeup:p=>p.limit*8},{t:'gain',db:p=>p.output}],
+    {'Beat-era drums':{drive:0.6,bass:2,treble:3,limit:0.8},'Vocal warmth':{drive:0.35,presence:2,treble:2,limit:0.4},'Bright guitars':{drive:0.5,treble:4,presence:3,presF:4000}},{hasGRMeter:true}),
+  heritageADT:pxPlugin('Heritage ADT',['Heritage Studio','Vocals','Modulation'],'Artificial double tracking: a second, slightly varying copy, invented for lead vocals in the 60s.',
+    [pxP('delay','Delay',0.005,0.05,0.022,'s'),pxP('vary','Vary',0,1,0.4),pxP('mix','Mix',0,1,0.45),pxP('width','Width',0,2,1.5)],
+    [{t:'mod',delay:p=>p.delay,rate:p=>0.2+p.vary*0.8,depth:p=>0.3+p.vary*1.5,mix:p=>p.mix},{t:'width',w:p=>p.width}],{'Classic ADT':{delay:0.025,vary:0.4},'Flange-y':{delay:0.006,vary:0.8}}),
+  heritageEcho:pxPlugin('Heritage Tape Echo',['Heritage Studio','Echo','Space','Vocals'],'Tape echo from the studio machines: slap-back to long repeats that darken and wobble.',
+    [pxP('time','Time',0.05,1.2,0.14,'s'),pxP('feedback','Feedback',0,0.9,0.2),pxP('tone','Tone',1500,9000,4000,'Hz'),pxP('wow','Wow',0,1,0.3),pxP('mix','Mix',0,1,0.3)],
+    [{t:'delay',time:p=>p.time,fb:p=>p.feedback,lp:p=>p.tone,wow:p=>p.wow,mix:p=>p.mix}],{'Slapback':{time:0.12,feedback:0.1,mix:0.3},'Dub':{time:0.48,feedback:0.65,tone:2500,mix:0.35}}),
+  // ───────────── Drums ─────────────
+  drumBus:pxPlugin('Drum Bus',['Drums','Dynamics','Glue Mix'],'Everything drums need on the bus: drive, punchy compression, low thump and transient crack.',
+    [pxP('drive','Drive',0,1,0.3),pxP('crunch','Crunch',0,1,0.2),pxP('boom','Boom',0,8,2,'dB'),pxP('boomF','Boom freq',40,120,60,'Hz'),pxP('punch','Punch',0,1,0.5),pxP('comp','Comp',0,1,0.5),pxP('output','Output',-12,12,0,'dB')],
+    [{t:'sat',drive:p=>p.drive*0.6,kind:'console',asym:0.1},{t:'par',mix:p=>p.crunch,mode:'add',mods:[{t:'hp',f:2500},{t:'sat',drive:0.8,kind:'fuzz'}]},{t:'peak',f:p=>p.boomF,g:p=>p.boom,q:1.2},
+     {t:'fx',type:'transient',map:{attack:p=>p.punch*80,sustain:0}},{t:'comp',thr:p=>-6-p.comp*16,ratio:4,att:0.01,rel:0.1,knee:4,makeup:p=>p.comp*3},{t:'gain',db:p=>p.output}],
+    {'Hip-hop knock':{drive:0.4,boom:4,boomF:55,punch:0.7,comp:0.6},'Rock room':{drive:0.5,crunch:0.3,punch:0.5,comp:0.7},'Electronic tight':{drive:0.2,boom:3,boomF:50,punch:0.8,comp:0.4}},{hasGRMeter:true}),
+  kickEnh:pxPlugin('Kick Enhancer',['Drums','EQ','Bass'],'Adds sub weight and beater click; cuts the cardboard boxiness.',
+    [pxP('sub','Sub',0,10,4,'dB'),pxP('subF','Sub freq',35,90,55,'Hz'),pxP('box','Box cut',0,10,4,'dB'),pxP('click','Click',0,10,3,'dB')],
+    [{t:'peak',f:p=>p.subF,g:p=>p.sub,q:1.4},{t:'peak',f:380,g:p=>-p.box,q:1.5},{t:'peak',f:4000,g:p=>p.click,q:1.2},{t:'hp',f:25}],{'808 thump':{sub:6,subF:48,click:1},'Rock kick':{sub:3,box:5,click:5}}),
+  snareCrack:pxPlugin('Snare Crack',['Drums','EQ','Enhance'],'Body, crack and snap for snares and claps.',
+    [pxP('body','Body',0,8,2,'dB'),pxP('crack','Crack',0,10,4,'dB'),pxP('snap','Snap',0,1,0.5),pxP('ring','Ring cut',0,8,2,'dB')],
+    [{t:'peak',f:200,g:p=>p.body,q:1},{t:'peak',f:900,g:p=>-p.ring,q:3},{t:'peak',f:5000,g:p=>p.crack,q:0.9},{t:'fx',type:'transient',map:{attack:p=>p.snap*90,sustain:-10}}],{'Pop snare':{body:2,crack:5,snap:0.6},'Fat clap':{body:4,crack:3,snap:0.4}}),
+  drumRoom:pxPlugin('Drum Room Mic',['Drums','Reverb','Space'],'Adds the sound of room microphones: crushed, wide room ambience under the kit.',
+    [pxP('size','Size',0.2,1.5,0.7,'s'),pxP('crush','Crush',0,1,0.6),pxP('amount','Amount',0,1,0.35)],
+    [{t:'par',mix:p=>p.amount,mode:'add',mods:[{t:'verb',type:'room',decay:p=>p.size,pre:0.008,damp:0.4,hp:150,mix:1,insert:false},{t:'comp',thr:p=>-30*p.crush,ratio:10,att:0.002,rel:0.1,knee:0,makeup:p=>p.crush*12},{t:'width',w:1.6}]}],{'Big room':{size:1.2,crush:0.7,amount:0.45}}),
+  // ───────────── Guitar ─────────────
+  ampClean:pxPlugin('Clean Combo',['Guitar','Amp','Analog'],'Sparkly clean combo amp with spring-ready tone stack and cabinet.',
+    [pxP('gain','Gain',0,1,0.25),pxP('bass','Bass',-8,8,0,'dB'),pxP('mid','Mid',-8,8,0,'dB'),pxP('treble','Treble',-8,8,2,'dB'),pxP('bright','Bright',0,6,2,'dB'),pxP('level','Level',-18,12,0,'dB')],
+    [{t:'hp',f:90},{t:'hs',f:3000,g:p=>p.bright},{t:'sat',drive:p=>p.gain*0.35,kind:'tube',asym:0.2},{t:'ls',f:120,g:p=>p.bass},{t:'peak',f:700,g:p=>p.mid,q:0.7},{t:'hs',f:2800,g:p=>p.treble},{t:'lp',f:7000,q:0.9},{t:'peak',f:2400,g:3,q:1.6},{t:'gain',db:p=>p.level}],{'Glassy':{gain:0.15,treble:4,bright:4},'Jazz':{gain:0.2,bass:2,treble:-3,bright:0}}),
+  ampCrunch:pxPlugin('British Crunch',['Guitar','Amp','Distortion'],'Classic British crunch: chiming mids, edge-of-breakup to rock drive, 4×12 cabinet.',
+    [pxP('gain','Gain',0,1,0.55),pxP('bass','Bass',-8,8,0,'dB'),pxP('mid','Mid',-8,8,2,'dB'),pxP('treble','Treble',-8,8,1,'dB'),pxP('presence','Presence',-6,6,1,'dB'),pxP('level','Level',-24,12,-1,'dB')],
+    [{t:'hp',f:100},{t:'sat',drive:p=>p.gain*0.5,kind:'tube',asym:0.3},{t:'peak',f:800,g:p=>p.mid,q:0.8},{t:'sat',drive:p=>p.gain*0.6,kind:'tube',asym:0.1},{t:'ls',f:120,g:p=>p.bass},{t:'hs',f:2500,g:p=>p.treble},{t:'peak',f:4000,g:p=>p.presence,q:0.8},{t:'lp',f:5500,q:1},{t:'peak',f:110,g:3,q:1.2},{t:'notch',f:420,q:1.2},{t:'gain',db:p=>p.level}],
+    {'Edge of breakup':{gain:0.35},'Rock rhythm':{gain:0.7,mid:3},'Lead':{gain:0.9,mid:4,presence:2}}),
+  ampHigh:pxPlugin('High-Gain Stack',['Guitar','Amp','Distortion'],'Modern high-gain amp for metal and heavy rock: tight lows, scooped or aggressive mids.',
+    [pxP('gain','Gain',0,1,0.75),pxP('tight','Tight',60,300,140,'Hz'),pxP('bass','Bass',-8,8,2,'dB'),pxP('mid','Mid',-10,8,-3,'dB'),pxP('treble','Treble',-8,8,2,'dB'),pxP('level','Level',-30,12,-3,'dB')],
+    [{t:'hp',f:p=>p.tight},{t:'sat',drive:p=>0.5+p.gain*0.5,kind:'tube',asym:0.15},{t:'peak',f:1600,g:3,q:0.8},{t:'sat',drive:p=>p.gain,kind:'fuzz'},{t:'ls',f:110,g:p=>p.bass},{t:'peak',f:650,g:p=>p.mid,q:0.7},{t:'hs',f:3000,g:p=>p.treble},{t:'lp',f:5200,q:1.1},{t:'lp',f:7000},{t:'peak',f:100,g:4,q:1.4},{t:'gain',db:p=>p.level}],
+    {'Metal scoop':{gain:0.85,mid:-6},'Modern rock':{gain:0.7,mid:0},'Djent tight':{gain:0.8,tight:220,mid:2}}),
+  bassAmp:pxPlugin('Bass Amp',['Guitar','Amp','Bass'],'Bass amp and cab: round lows, growl control and a clean DI blend.',
+    [pxP('drive','Drive',0,1,0.3),pxP('growl','Growl',0,8,3,'dB'),pxP('lows','Lows',-6,8,2,'dB'),pxP('blend','Amp blend',0,1,0.6)],
+    [{t:'par',mix:p=>p.blend,mode:'blend',mods:[{t:'sat',drive:p=>p.drive*0.7,kind:'tube',asym:0.2},{t:'peak',f:800,g:p=>p.growl,q:1},{t:'lp',f:4000},{t:'ls',f:90,g:p=>p.lows}]}],{'Motown round':{drive:0.2,growl:1,lows:3},'Rock growl':{drive:0.6,growl:5}}),
+  acousticBody:pxPlugin('Acoustic Body',['Guitar','EQ','Space'],'Makes a piezo or thin acoustic sound full and natural: body resonance, sparkle and a small room.',
+    [pxP('body','Body',0,8,3,'dB'),pxP('sparkle','Sparkle',0,8,3,'dB'),pxP('quack','Piezo cut',0,10,4,'dB'),pxP('room','Room',0,1,0.2)],
+    [{t:'peak',f:110,g:p=>p.body,q:1.2},{t:'peak',f:1200,g:p=>-p.quack,q:1.5},{t:'hs',f:8000,g:p=>p.sparkle},{t:'verb',type:'room',decay:0.5,damp:0.5,hp:200,mix:p=>p.room}],{'Studio acoustic':{body:3,sparkle:3,quack:4,room:0.2}}),
+  autoWah:pxPlugin('Auto Wah',['Guitar','Modulation','Funk'],'Sweeping wah filter on an LFO: funk rhythm and vocal-like leads.',
+    [pxP('rate','Rate',0.2,8,2,'Hz'),pxP('depth','Depth',0,1,0.7),pxP('reso','Reso',1,15,6)],
+    [{t:'fx',type:'filter',map:{type:'bandpass',frequency:900,Q:p=>p.reso,lfoRate:p=>p.rate,lfoDepth:p=>p.depth*1.6}},{t:'gain',db:p=>10+p.reso*0.9}],{'Funk':{rate:4,depth:0.8},'Slow vowel':{rate:0.6,depth:0.9}}),
+  // ───────────── One-knob ─────────────
+  oneBright:pxPlugin('One Bright',['One-Knob','Brightness'],'Turn up to make anything brighter and clearer.',[pxP('amount','Amount',0,1,0.4)],[{t:'hs',f:6000,g:p=>p.amount*8},{t:'peak',f:3000,g:p=>p.amount*2,q:0.7},{t:'peak',f:300,g:p=>-p.amount*2,q:0.8}]),
+  oneLoud:pxPlugin('One Loud',['One-Knob','Loudness','Mastering'],'One knob from gentle to loud: compression, saturation and limiting together.',[pxP('amount','Amount',0,1,0.4)],
+    [{t:'comp',thr:p=>-6-p.amount*16,ratio:3,att:0.01,rel:0.15,knee:8,makeup:p=>p.amount*6},{t:'sat',drive:p=>p.amount*0.3,kind:'console'},{t:'fx',type:'limiter',map:{threshold:p=>-1-p.amount*8,ceiling:-1,release:0.08}}],null,{hasGRMeter:true}),
+  oneFat:pxPlugin('One Fat',['One-Knob','Bass','Enhance'],'Thicker, fatter, warmer: low-end weight plus harmonic body.',[pxP('amount','Amount',0,1,0.4)],[{t:'ls',f:120,g:p=>p.amount*6},{t:'peak',f:250,g:p=>p.amount*2,q:0.8},{t:'sat',drive:p=>p.amount*0.4,kind:'tube',asym:0.3}]),
+  onePress:pxPlugin('One Press',['One-Knob','Dynamics'],'Instant, musical compression on a single knob.',[pxP('amount','Amount',0,1,0.4)],[{t:'comp',thr:p=>-4-p.amount*26,ratio:p=>2+p.amount*4,att:0.008,rel:0.15,knee:10,makeup:p=>p.amount*9}],null,{hasGRMeter:true}),
+  oneWet:pxPlugin('One Wet',['One-Knob','Reverb','Space'],'From dry to drenched: room, then plate, then a big hall, on one knob.',[pxP('amount','Amount',0,1,0.3)],[{t:'verb',type:'plate',decay:p=>0.6+p.amount*4,pre:0.02,damp:0.4,hp:180,mix:p=>p.amount*0.6}]),
+  oneDrive:pxPlugin('One Drive',['One-Knob','Distortion'],'Warmth to grit to full fuzz, with automatic level matching.',[pxP('amount','Amount',0,1,0.3)],[{t:'sat',drive:p=>p.amount,kind:'tube',asym:0.2},{t:'lp',f:p=>16000-p.amount*8000}]),
+  oneSweep:pxPlugin('One Sweep',['One-Knob','Modulation','FX'],'DJ filter on one knob: left for low-pass, right for high-pass, centre off.',[pxP('amount','Filter',-1,1,0)],
+    [{t:'lp',f:p=>p.amount<0?Math.max(80,20000*Math.pow(2,p.amount*8)):20000,q:p=>p.amount<0?1+Math.abs(p.amount)*4:0.707},{t:'hp',f:p=>p.amount>0?Math.min(8000,20*Math.pow(2,p.amount*8.5)):10,q:p=>p.amount>0?1+p.amount*4:0.707}]),
+  oneWide:pxPlugin('One Wide',['One-Knob','Stereo','Space'],'Wider stereo image while keeping bass mono.',[pxP('amount','Amount',0,1,0.4)],[{t:'split2',f:150,low:[{t:'width',w:0}],high:[{t:'width',w:p=>1+p.amount}]},{t:'mod',delay:0.012,rate:0.3,depth:p=>p.amount,mix:p=>p.amount*0.25}]),
+  onePunch:pxPlugin('One Punch',['One-Knob','Drums','Dynamics'],'More punch and attack on drums, bass and plucks.',[pxP('amount','Amount',0,1,0.4)],[{t:'fx',type:'transient',map:{attack:p=>p.amount*90,sustain:p=>-p.amount*20}},{t:'peak',f:100,g:p=>p.amount*2,q:1}]),
+  oneAir:pxPlugin('One Air',['One-Knob','Vocals','Brightness'],'Breathy, expensive-sounding top end for vocals and mixes.',[pxP('amount','Amount',0,1,0.4)],[{t:'hs',f:12000,g:p=>p.amount*9},{t:'par',mix:p=>p.amount*0.3,mode:'add',mods:[{t:'hp',f:9000},{t:'sat',drive:0.6,kind:'tube'}]}]),
+  // ───────────── Signature chains (producer-style starting points) ─────────────
+  sigPopVox:pxPlugin('Signature: Chart Pop Vocal',['Signature','Vocals','Vocal Chain'],'Glossy, upfront pop lead vocal: tight dynamics, bright air, short plate.',
+    [pxP('amount','Amount',0,1,0.6),pxP('space','Space',0,1,0.3),pxP('bright','Brightness',0,1,0.6)],
+    [{t:'hp',f:100},{t:'comp',thr:p=>-14-p.amount*12,ratio:4,att:0.004,rel:0.1,knee:6,makeup:p=>1+p.amount*3},{t:'fx',type:'deesser',map:{frequency:7000,threshold:-24,reduction:8}},{t:'peak',f:3500,g:p=>p.bright*3,q:0.8},{t:'hs',f:12000,g:p=>p.bright*6},{t:'comp',thr:-10,ratio:2,att:0.02,rel:0.2,knee:10,makeup:1},{t:'verb',type:'plate',decay:1.4,pre:0.03,damp:0.4,hp:300,mix:p=>p.space*0.35}]),
+  sigRapVox:pxPlugin('Signature: Trap Vocal',['Signature','Vocals','Vocal Chain'],'Hard, present rap vocal with grit, slap delay and controlled sibilance.',
+    [pxP('amount','Amount',0,1,0.6),pxP('grit','Grit',0,1,0.3),pxP('slap','Slap',0,1,0.3)],
+    [{t:'hp',f:110},{t:'comp',thr:p=>-12-p.amount*14,ratio:6,att:0.002,rel:0.08,knee:2,makeup:p=>1+p.amount*4},{t:'sat',drive:p=>p.grit*0.4,kind:'console'},{t:'peak',f:4000,g:3,q:0.9},{t:'fx',type:'deesser',map:{frequency:6500,threshold:-22,reduction:9}},{t:'delay',time:0.11,fb:0.1,lp:4000,mix:p=>p.slap*0.3}]),
+  sigRnbVox:pxPlugin('Signature: Silk R&B Vocal',['Signature','Vocals','Vocal Chain'],'Smooth, intimate R&B vocal: warm body, silky air, lush long plate.',
+    [pxP('amount','Amount',0,1,0.5),pxP('space','Space',0,1,0.45)],
+    [{t:'hp',f:80},{t:'comp',thr:p=>-18-p.amount*8,ratio:3,att:0.012,rel:0.3,knee:14,makeup:p=>3+p.amount*4},{t:'ls',f:180,g:1.5},{t:'hs',f:13000,g:4},{t:'mod',delay:0.02,rate:0.3,depth:0.4,mix:0.15},{t:'verb',type:'plate',decay:2.8,pre:0.04,damp:0.3,hp:250,mix:p=>p.space*0.4}]),
+  sigRockGtr:pxPlugin('Signature: Arena Guitars',['Signature','Guitar'],'Big rhythm-guitar sound: crunch amp, mid push, room and width.',
+    [pxP('gain','Gain',0,1,0.65),pxP('room','Room',0,1,0.25)],
+    [{t:'hp',f:100},{t:'sat',drive:p=>0.3+p.gain*0.5,kind:'tube',asym:0.25},{t:'peak',f:900,g:3,q:0.8},{t:'sat',drive:p=>p.gain*0.6,kind:'tube'},{t:'lp',f:5500,q:1},{t:'peak',f:110,g:2,q:1.2},{t:'gain',db:0},{t:'verb',type:'room',decay:0.8,damp:0.5,hp:200,mix:p=>p.room*0.35},{t:'width',w:1.3}]),
+  sigHipHopDrums:pxPlugin('Signature: Boom-Bap Drums',['Signature','Drums'],'Dusty, knocking hip-hop drums: tape drive, low thump, parallel smash.',
+    [pxP('knock','Knock',0,1,0.6),pxP('dust','Dust',0,1,0.3)],
+    [{t:'sat',drive:p=>0.25+p.dust*0.3,kind:'tape'},{t:'peak',f:60,g:p=>p.knock*5,q:1.2},{t:'lp',f:p=>16000-p.dust*8000},{t:'par',mix:p=>p.knock*0.4,mode:'add',mods:[{t:'comp',thr:-35,ratio:20,att:0.001,rel:0.08,knee:0,makeup:18}]},{t:'noise',kind:'crackle',amt:p=>p.dust*0.5}]),
+  sigEdmLead:pxPlugin('Signature: Festival Lead',['Signature','Synth','EDM'],'Huge EDM lead: width, sidechain-free pump-ready compression, shimmer space and delay.',
+    [pxP('size','Size',0,1,0.6),pxP('bright','Bright',0,1,0.5)],
+    [{t:'comp',thr:-18,ratio:4,att:0.003,rel:0.1,knee:6,makeup:4},{t:'hs',f:8000,g:p=>p.bright*5},{t:'mod',delay:0.015,rate:0.4,depth:0.8,mix:0.3},{t:'delay',time:0.375,fb:0.35,lp:5000,mix:p=>p.size*0.25},{t:'verb',type:'hall',decay:3,pre:0.03,damp:0.35,hp:400,mix:p=>p.size*0.3},{t:'width',w:p=>1+p.size*0.5}]),
+  sigLofiBus:pxPlugin('Signature: Lo-Fi Tape Bus',['Signature','Lo-Fi','Mastering'],'Instant lo-fi: worn tape, wobble, rolled-off highs and vinyl dust over the whole mix.',
+    [pxP('age','Age',0,1,0.5),pxP('wobble','Wobble',0,1,0.4),pxP('dust','Dust',0,1,0.3)],
+    [{t:'sat',drive:p=>0.3+p.age*0.3,kind:'tape'},{t:'lp',f:p=>9000-p.age*5000},{t:'hp',f:p=>40+p.age*80},{t:'delay',time:0.014,fb:0,mix:1,insert:false,wow:p=>p.wobble*3,lp:20000,hp:10},{t:'noise',kind:'crackle',amt:p=>p.dust},{t:'noise',kind:'hiss',amt:p=>p.age*0.5}]),
+  sigCineStrings:pxPlugin('Signature: Cinematic Strings',['Signature','Orchestral','Cinematic'],'Wide, lush string sheen with a huge hall.',
+    [pxP('size','Size',0,1,0.6),pxP('warmth','Warmth',0,1,0.5)],
+    [{t:'ls',f:200,g:p=>p.warmth*2},{t:'peak',f:2800,g:-1.5,q:0.8},{t:'hs',f:10000,g:2},{t:'width',w:1.3},{t:'verb',type:'hall',decay:p=>2.5+p.size*4,pre:0.04,damp:0.4,hp:200,mix:p=>0.2+p.size*0.25}]),
+  sigAcoustic:pxPlugin('Signature: Singer-Songwriter',['Signature','Guitar','Vocals'],'Natural, intimate acoustic: body, gentle compression, sparkle, small room.',
+    [pxP('amount','Amount',0,1,0.5)],[{t:'hp',f:80},{t:'peak',f:250,g:-2,q:1},{t:'comp',thr:p=>-16-p.amount*8,ratio:2.5,att:0.015,rel:0.2,knee:10,makeup:p=>2+p.amount*3},{t:'hs',f:9000,g:3},{t:'verb',type:'chamber',decay:1.2,pre:0.015,damp:0.5,hp:250,mix:0.15}]),
+  // ───────────── Curves (curve-shaped EQ & dynamics) ─────────────
+  curveEq:pxPlugin('Curve EQ',['Curves','EQ','Mastering'],'Smooth, wide curve-shaped EQ: shape the whole spectrum with five broad, overlapping bands.',
+    [pxP('sub','Sub',-6,6,0,'dB'),pxP('low','Low',-6,6,0,'dB'),pxP('mid','Mid',-6,6,0,'dB'),pxP('high','High',-6,6,0,'dB'),pxP('air','Air',-6,6,0,'dB')],
+    [{t:'peak',f:40,g:p=>p.sub,q:0.5},{t:'peak',f:150,g:p=>p.low,q:0.5},{t:'peak',f:900,g:p=>p.mid,q:0.45},{t:'peak',f:4500,g:p=>p.high,q:0.5},{t:'hs',f:14000,g:p=>p.air}],{'Smile curve':{sub:2,low:1,mid:-1.5,high:1,air:2},'Mid forward':{mid:2,high:1}}),
+  curveDyn:pxPlugin('Curve Resonance Tamer',['Curves','Dynamics','EQ','Mastering'],'Dynamically pushes down harsh mids and resonances only when they poke out; leaves the rest alone.',
+    [pxP('amount','Amount',0,1,0.5),pxP('focus','Focus',800,6000,2500,'Hz'),pxP('smooth','Smooth',0,1,0.5)],
+    [{t:'bands',f1:p=>p.focus*0.55,f2:p=>p.focus*1.8,low:[],mid:[{t:'comp',thr:p=>-12-p.amount*18,ratio:p=>2+p.amount*4,att:0.002,rel:p=>0.05+p.smooth*0.2,knee:p=>4+p.smooth*20,makeup:0}],high:[{t:'comp',thr:p=>-14-p.amount*16,ratio:2,att:0.002,rel:0.08,knee:12,makeup:0}]}],{'Vocal harshness':{amount:0.6,focus:3000},'Bright mix':{amount:0.4,focus:4000,smooth:0.7}},{hasGRMeter:true}),
+  curveTone:pxPlugin('Curve Tone Balance',['Curves','Mastering','AI Mixing'],'Pulls the mix toward a balanced reference curve. Press ✦ Learn and it measures your track and sets itself.',
+    [pxP('b60','60 Hz',-6,6,0,'dB'),pxP('b250','250 Hz',-6,6,0,'dB'),pxP('b1k','1 kHz',-6,6,0,'dB'),pxP('b4k','4 kHz',-6,6,0,'dB'),pxP('b12k','12 kHz',-6,6,0,'dB'),pxP('amount','Amount',0,1,1)],
+    [{t:'peak',f:60,g:p=>p.b60*p.amount,q:0.6},{t:'peak',f:250,g:p=>p.b250*p.amount,q:0.6},{t:'peak',f:1000,g:p=>p.b1k*p.amount,q:0.6},{t:'peak',f:4000,g:p=>p.b4k*p.amount,q:0.6},{t:'hs',f:12000,g:p=>p.b12k*p.amount}],null,{learn:'tone'}),
+  // ───────────── AI mixing (learn from the track's audio) ─────────────
+  aiEq:pxPlugin('AI Smart EQ',['AI Mixing','EQ'],'Listens to the track, compares it with a balanced curve for its role (vocal, bass, drums…) and sets a corrective EQ. Press ✦ Learn.',
+    [pxP('b80','80 Hz',-8,8,0,'dB'),pxP('b250','250 Hz',-8,8,0,'dB'),pxP('b800','800 Hz',-8,8,0,'dB'),pxP('b2500','2.5 kHz',-8,8,0,'dB'),pxP('b6k','6 kHz',-8,8,0,'dB'),pxP('b12k','12 kHz',-8,8,0,'dB'),pxP('amount','Amount',0,1,0.8),pxP('hp','Low cut',20,200,30,'Hz')],
+    [{t:'hp',f:p=>p.hp},{t:'peak',f:80,g:p=>p.b80*p.amount,q:0.9},{t:'peak',f:250,g:p=>p.b250*p.amount,q:0.9},{t:'peak',f:800,g:p=>p.b800*p.amount,q:0.9},{t:'peak',f:2500,g:p=>p.b2500*p.amount,q:0.9},{t:'peak',f:6000,g:p=>p.b6k*p.amount,q:0.9},{t:'hs',f:12000,g:p=>p.b12k*p.amount}],null,{learn:'eq'}),
+  aiComp:pxPlugin('AI Smart Comp',['AI Mixing','Dynamics'],'Measures the track\'s dynamics and sets threshold, ratio and timing for about 3–5 dB of natural compression. Press ✦ Learn.',
+    [pxP('threshold','Threshold',-50,0,-20,'dB'),pxP('ratio','Ratio',1,10,3),pxP('attack','Attack',0,0.08,0.01,'s'),pxP('release','Release',0.03,0.6,0.15,'s'),pxP('makeup','Makeup',0,18,3,'dB')],
+    [{t:'comp',thr:p=>p.threshold,ratio:p=>p.ratio,att:p=>p.attack,rel:p=>p.release,knee:8,makeup:p=>p.makeup}],null,{learn:'comp',hasGRMeter:true}),
+  aiVocal:pxPlugin('AI Vocal Assistant',['AI Mixing','Vocals','Vocal Chain'],'Analyses your recorded vocal and builds a matching chain: cleanup, tone, de-ess and level. Press ✦ Learn.',
+    [pxP('hp','Low cut',40,200,90,'Hz'),pxP('mud','Mud',-8,2,0,'dB'),pxP('presence','Presence',-4,6,0,'dB'),pxP('air','Air',-2,8,2,'dB'),pxP('deess','De-ess',0,1,0.4),pxP('thr','Comp thr',-40,0,-18,'dB'),pxP('makeup','Makeup',0,15,4,'dB')],
+    [{t:'hp',f:p=>p.hp},{t:'peak',f:300,g:p=>p.mud,q:1},{t:'peak',f:3200,g:p=>p.presence,q:0.8},{t:'fx',type:'deesser',map:{frequency:6800,threshold:p=>-12-p.deess*18,reduction:p=>p.deess*10}},{t:'comp',thr:p=>p.thr,ratio:3.5,att:0.006,rel:0.12,knee:8,makeup:p=>p.makeup},{t:'hs',f:11000,g:p=>p.air}],null,{learn:'vocal',hasGRMeter:true}),
+  aiMaster:pxPlugin('AI Master Assistant',['AI Mixing','Mastering','Loudness'],'Put it on a track or bus: measures loudness and tone, then sets EQ, glue and a limiter to hit −14 LUFS. Press ✦ Learn.',
+    [pxP('low','Low',-4,4,0,'dB'),pxP('high','High',-4,4,0,'dB'),pxP('glue','Glue',0,1,0.4),pxP('gain','Gain',0,18,4,'dB'),pxP('ceiling','Ceiling',-3,0,-1,'dB')],
+    [{t:'ls',f:100,g:p=>p.low},{t:'hs',f:8000,g:p=>p.high},{t:'comp',thr:p=>-6-p.glue*12,ratio:2,att:0.03,rel:0.25,knee:10,makeup:p=>p.glue*2},{t:'gain',db:p=>p.gain},{t:'fx',type:'limiter',map:{threshold:-1,ceiling:p=>p.ceiling,release:0.08}}],null,{learn:'master',hasGRMeter:true}),
+};
+// ── ✦ Learn: analyse the track's own audio and set the plugin ──
+async function pxAnalyseTrack(track){
+  if(typeof dawPreloadForTracks==='function') await dawPreloadForTracks([track]);
+  const spb=60/dawProject.bpm, dur=Math.min(40,dawFurthestBeat()*spb+1), sr=44100, bufs=[];
+  const fr=await dawFreezeTrack(track,dur,sr); if(fr) bufs.push(fr);
+  track.clips.forEach(c=>{ if(c.kind==='audio'&&c.payload&&c.payload.getChannelData) bufs.push(c.payload); });
+  if(!bufs.length) return null;
+  const N=4096, bands=[[40,120],[120,400],[400,1300],[1300,4000],[4000,9000],[9000,16000],[5000,9000]], acc=new Float64Array(bands.length); let frames=0, peaks=[], rmss=[];
+  bufs.forEach(b=>{ const d=b.getChannelData(0), bsr=b.sampleRate;
+    for(let o=0;o+N<=d.length;o+=N*2){ let e=0,pk=0; for(let i=o;i<o+N;i++){ e+=d[i]*d[i]; pk=Math.max(pk,Math.abs(d[i])); } const rms=Math.sqrt(e/N); if(rms<0.003) continue; peaks.push(pk); rmss.push(rms);
+      const re=new Float32Array(N),im=new Float32Array(N); for(let i=0;i<N;i++) re[i]=d[o+i]*(0.5-0.5*Math.cos(2*Math.PI*i/(N-1))); dtFFT(re,im);
+      bands.forEach(([lo,hi],k)=>{ let s=0; const a=Math.max(1,Math.floor(lo/bsr*N)), z=Math.min(N/2,Math.ceil(hi/bsr*N)); for(let i=a;i<z;i++) s+=re[i]*re[i]+im[i]*im[i]; acc[k]+=s; }); frames++; } }); // total power per band (≈ what the ear sums), not per-bin average
+  if(!frames) return null;
+  const db=[...acc].map(x=>10*Math.log10(x/frames+1e-12)), lufs=bufs.map(b=>dawMeasureLoudness(b).lufs).filter(isFinite);
+  peaks.sort((a,b)=>a-b); rmss.sort((a,b)=>a-b);
+  return {db, lufs:lufs.length?Math.max(...lufs):-30, crest:20*Math.log10((peaks[Math.floor(peaks.length*0.95)]||0.1)/(rmss[Math.floor(rmss.length*0.5)]||0.01)), rmsDb:20*Math.log10(rmss[Math.floor(rmss.length*0.5)]||0.01)};
+}
+// target spectral shape per role, dB per band relative to the mean (40-120, 120-400, 400-1.3k, 1.3-4k, 4-9k, 9-16k)
+const PX_TARGETS={vocals:[-14,-2,0,-1,-6,-13],drums:[2,-1,-4,-5,-6,-10],bass:[6,3,-3,-12,-20,-30],keys:[-6,1,1,-3,-9,-16],guitar:[-12,0,2,0,-7,-15],synth:[-4,0,0,-3,-8,-14],sample:[0,0,0,-4,-9,-15],mix:[2,0,-1,-4,-8,-13]};
+async function pxLearn(track,effect){
+  const def=STUDIO_FX[effect.type]; if(!def||!def.learn) return;
+  toast('✦ Listening to '+track.name+'…');
+  const a=await pxAnalyseTrack(track); if(!a){ toast('Nothing to analyse yet: add some audio or notes to this track'); return; }
+  const p=effect.params, tgt=PX_TARGETS[def.learn==='master'||def.learn==='tone'?'mix':track.type]||PX_TARGETS.synth, top0=Math.max(...a.db.slice(0,6));
+  // line the target curve up with the track using only bands that actually have content (median offset), then compare band by band
+  const live=[0,1,2,3,4,5].filter(i=>a.db[i]>=top0-30), offs=live.map(i=>a.db[i]-tgt[i]).sort((x,y)=>x-y), off=offs.length?offs[offs.length>>1]:0;
+  const mean=0, diff=tgt.map((t,i)=>(t+off)-a.db[i]);
+  const clamp=(x,l)=>Math.max(-l,Math.min(l,Math.round(x*2)/2)), top=Math.max(...a.db.slice(0,6));
+  // a correction per band: cut what's too strong (up to 6 dB), boost only bands that have real content (up to 3 dB) — never invent highs on an 808
+  const corr=(i,scale,maxCut,maxBoost)=>{ const d=diff[i]*scale; if(d>0&&a.db[i]<top-30) return 0; return Math.round(Math.max(-maxCut,Math.min(maxBoost,d))*2)/2; };
+  if(def.learn==='eq'){ ['b80','b250','b800','b2500','b6k','b12k'].forEach((k,i)=>p[k]=corr(i,0.4,6,3)); p.hp=track.type==='bass'||track.type==='drums'?25:track.type==='vocals'?90:60; }
+  else if(def.learn==='tone'){ ['b60','b250','b1k','b4k','b12k'].forEach((k,i)=>p[k]=i<4?corr(i,0.35,4,2.5):Math.round(corr(4,0.35,4,2.5)+corr(5,0.35,4,2.5))/2); }
+  else if(def.learn==='comp'){ p.threshold=Math.round(Math.max(-50,Math.min(-6,a.rmsDb+Math.min(10,a.crest*0.35)))); p.ratio=+(a.crest>16?4:a.crest>11?3:2).toFixed(1);
+    p.attack=track.type==='drums'?0.02:track.type==='bass'?0.012:0.006; p.release=track.type==='drums'?0.09:0.16; p.makeup=Math.round(Math.min(10,(p.ratio-1)/p.ratio*4+1)); }
+  else if(def.learn==='vocal'){ p.hp=a.db[0]>top0-18?120:a.db[0]>top0-30?100:80; p.mud=Math.min(0,corr(1,0.5,6,0)); p.presence=corr(3,0.4,4,3); p.air=Math.max(1,corr(5,0.4,0,4)); p.deess=Math.max(0.2,Math.min(1,(a.db[6]-a.db[3]+12)/14));
+    p.thr=Math.round(Math.max(-40,a.rmsDb+4)); p.makeup=Math.round(Math.min(12,Math.max(2,-14-a.lufs)/2+2)); }
+  else if(def.learn==='master'){ p.low=corr(0,0.3,3,2); p.high=Math.round((corr(4,0.3,3,2)+corr(5,0.3,3,2)))/2; p.glue=a.crest>15?0.6:0.35; p.gain=Math.max(0,Math.min(18,Math.round(-14-a.lufs))); p.ceiling=-1; }
+  dawRebuildTrackFxChain(track); dawRenderFxChainList(track);
+  toast('✦ '+def.name+' set from '+track.name+(def.learn==='master'?' (measured '+a.lufs.toFixed(1)+' LUFS)':''));
+}
+Object.assign(STUDIO_FX,PX_FX);
+STUDIO_FX.reverb.cats.push('Reverb');
+
+// ✦ Learn button on AI plugins + an Instruments strip in the plugin library (synths, sampler, virtual instruments)
+(function(){
+  const chainList=dawRenderFxChainList;
+  dawRenderFxChainList=function(track){ chainList(track); const wrap=document.getElementById('dawFxChainList'); if(!wrap||!track) return;
+    [...wrap.querySelectorAll('.fxc')].forEach((card,i)=>{ const eff=track.effects.filter(e=>STUDIO_FX[e.type])[i]; const def=eff&&STUDIO_FX[eff.type]; if(!def||!def.learn) return;
+      const b=document.createElement('button'); b.className='px-learn'; b.textContent='✦ Learn'; b.title='Analyse this track and set the plugin'; b.onclick=async()=>{ b.disabled=true; b.textContent='✦ Listening…'; try{ await pxLearn(track,eff); }finally{ b.disabled=false; b.textContent='✦ Learn'; } };
+      card.insertBefore(b,card.children[1]||null); }); };
+  const lib=dawRenderFxLibrary;
+  dawRenderFxLibrary=function(track){ lib(track); const cards=document.getElementById('dawFxLibCards'); if(!cards||dawFxLibCatFilter||(dawFxSearch||'').trim()) return;
+    const strip=document.createElement('div'); strip.className='px-inst';
+    strip.innerHTML='<b>Instruments</b><button data-i="nova">Nova synth · '+NOVA_PRESETS.length.toLocaleString()+' presets</button><button data-i="samp">Sampler · your samples</button><button data-i="inst">'+STUDIO_INSTRUMENTS.length+' virtual instruments</button><button data-i="kits">'+Object.keys(DAW_DRUM_KITS).length+' drum kits</button>';
+    strip.querySelectorAll('button').forEach(b=>b.onclick=()=>{ if(!track){ toast('Select a track first'); return; } const k=b.dataset.i;
+      if(k==='kits'){ dawSwitchPanelTab('beatmaker'); return; }
+      if(k==='nova'||k==='samp'){ if(!String(track.instrument).startsWith('Nova:')) novaAssign(track,NOVA_PRESETS[0]); if(k==='samp'){ const pp=novaPatchFor(track.instrument); pp.A.eng='samp'; } dawSwitchPanelTab('instrument'); if(k==='samp') setTimeout(()=>document.getElementById('nvImpS')?.click(),50); return; }
+      dawSwitchPanelTab('instrument'); });
+    cards.parentNode.insertBefore(strip,cards); };
+})();
 
 // ══════════════════════════════════════════════════════════════════════════
 // TIER 11 — Song Builder: your own lyrics → a full arranged song in Studio

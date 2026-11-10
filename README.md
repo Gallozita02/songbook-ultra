@@ -183,6 +183,22 @@ The **Studio** page has its own engine:
   - Every preset is loudness-matched automatically the first time you load it, so browsing never jumps in volume.
   - **↓ Sample** loads your own audio onto layer A (also usable as a granular source). **↓ Wavetable** turns any audio file into an 8-frame wavetable. Imported sounds are saved inside the project file.
 - **Drum kits** — Studio, 808, 909, Techno and Lo-Fi, all synthesized.
+- **Pro plugin collections** — 119 plugins in total. The new pack is built on a shared DSP toolkit (EQ bands, opto/FET/vari-mu/VCA-style compression, tape/tube/transformer/console saturation, mid/side, crossovers, parallel paths, algorithmic reverbs), all original designs and names:
+  - *Vocal*: Vox Polish, Level Rider, Air Lift, Vocal Thickener, Radio Voice, Breath Control
+  - *Mastering*: Master Glue, Loudness Maximizer, Tilt Master EQ, Tri-Band Dynamics, Stereo Imager, Master Chain One, Vinyl Master
+  - *Analog*: Tape Machine, Tube Preamp, Transformer Color, Opto Leveler, FET Crusher, Vari-Mu Bus, Passive Program EQ, Dimension Chorus
+  - *Dynamics*: Studio Comp, Parallel Smash, Detail Lift (upward), Drum Gate, Sibilance Tamer
+  - *EQ*: Precision EQ, Mid/Side EQ, Low-End Focus
+  - *Reverb*: Studio Plate, Concert Hall, Live Room, Echo Chamber, Spring Tank, Gated Verb, Reverse Swell, Bloom Space
+  - *Channel strips*: Clean Channel, Vintage Channel, plus the *Console 4K* set (4K Console Channel, 4K Bus Compressor, 4K Console EQ, in the style of British large-format consoles)
+  - *Heritage Studio* (classic British recording-studio sounds): Heritage Desk, Heritage ADT, Heritage Tape Echo, Echo Chamber, Studio Plate, Tape Machine, Opto Leveler, Passive Program EQ, Vinyl Master
+  - *Drums*: Drum Bus, Kick Enhancer, Snare Crack, Drum Room Mic. *Guitar*: Clean Combo, British Crunch, High-Gain Stack, Bass Amp, Acoustic Body, Auto Wah
+  - *One-Knob*: Bright, Loud, Fat, Press, Wet, Drive, Sweep, Wide, Punch, Air
+  - *Signature* chains: Chart Pop Vocal, Trap Vocal, Silk R&B Vocal, Arena Guitars, Boom-Bap Drums, Festival Lead, Lo-Fi Tape Bus, Cinematic Strings, Singer-Songwriter
+  - *Curves*: Curve EQ, Curve Resonance Tamer, Curve Tone Balance
+  - *AI Mixing*: AI Smart EQ, AI Smart Comp, AI Vocal Assistant, AI Master Assistant. Press **✦ Learn** and the plugin analyses the track's own audio (spectrum, dynamics, loudness), compares it with a balanced curve for the track's role, and sets itself (gentle corrections only, and it never boosts a band the track has no content in).
+  - Every new plugin is level-matched: saturation keeps loudness at normal levels, and the browser compressor's hidden auto-makeup gain is cancelled so the Makeup knob is the only gain applied.
+  - *Instruments* (synths, sampling, virtual instruments) open from the strip at the top of the plugin library: Nova, the Sampler, the 33 instruments and the drum kits.
 - **Automation** — the *Automation* tab draws how a track's **volume** (relative to its fader), **pan** and **filter** move through the song: click to add points, drag, double-click to delete, or start from a shape (Fade in/out, Filter rise, Build-up, Duck the drop, Auto-pan). Lanes show over the track on the timeline, play live and are rendered into exports and stems.
 - **Auto-mix** — one button in the Mixer (or the ☰ menu) measures each track's perceived loudness (BS.1770) and sets levels and pan by role (vocals up front, drums and bass centred, keys and guitars spread). *Undo auto-mix* puts your own mix back.
 - **Remix a demo** — 8 finished demo songs on the Home page (Phonk, Drill, K-Pop, Amapiano, Lo-Fi, Synthwave, UK Garage, Tech House). Each opens in the Studio with sections, automation and an auto-mix, ready to take apart.
@@ -287,13 +303,13 @@ Everything is self-contained. No build step, no npm, no framework.
 ## 📌 Roadmap Ideas
 
 - [x] Chord progression AI using Claude API
-- [ ] Cloud save / sync across devices
-- [ ] More songs (50+ target)
-- [ ] Custom tuning support (Drop D, Open G, DADGAD)
-- [ ] Export to PDF chord sheet
+- [ ] Cloud save / sync across devices (Supabase, next)
+- [x] More songs (50+ target)
+- [x] Custom tuning support (Drop D, Open G, DADGAD and more)
+- [x] Export to PDF chord sheet (Print / Save as PDF)
 - [ ] Mobile touch support for the guitar fretboard
-- [ ] Collaborative editing via WebSockets
-- [ ] Wire Claude into chord explanations (function ready, not yet on a button) and full song-idea generation
+- [ ] Collaborative editing (Supabase Realtime, next)
+- [x] Wire Claude into chord explanations (✦ Explain with Claude) and full song-idea generation
 
 ---
 
