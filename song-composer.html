@@ -1132,6 +1132,9 @@ body.hm-open .hm-drawer{transform:none}
 .classic-fb-str-btn.muted{color:#ff4444;border-color:#ff4444}
 .classic-fb-scroll{overflow-x:auto;overflow-y:hidden;border-radius:10px;border:1px solid var(--bd-def);box-shadow:0 4px 20px rgba(0,0,0,.35);-webkit-overflow-scrolling:touch}
 .classic-fb-canvas{display:block;width:100%;height:auto;aspect-ratio:3.2/1;cursor:pointer;background:linear-gradient(90deg,#2c1a0e 0%,#3d2010 8%,#2c1a0e 16%,#4a2810 24%,#3d2010 32%,#2c1a0e 40%,#4a2810 48%,#3d2010 56%,#2c1a0e 64%,#4a2810 72%,#3d2010 80%,#2c1a0e 88%,#3d2010 100%)}
+.classic-fb-canvas{touch-action:pan-x;-webkit-user-select:none;user-select:none;-webkit-tap-highlight-color:transparent;-webkit-touch-callout:none}
+.classic-fb-hint{display:none;margin-top:6px;font-size:11px;color:var(--mu);text-align:center}
+@media (pointer:coarse){.classic-fb-hint{display:block}}
 .classic-fb-footer{display:flex;align-items:center;gap:10px;margin-top:10px;flex-wrap:wrap}
 .classic-capo-ctl,.classic-speed-ctl{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--mu)}
 .classic-capo-ctl button{width:20px;height:20px;border-radius:var(--rad-sm);border:1px solid var(--bd-def);background:var(--s2);color:var(--tx);cursor:pointer;font-size:10px}
@@ -1776,6 +1779,14 @@ body.hm-open .hm-drawer{transform:none}
      minimum tap target instead of below it. */
   .classic-fb-canvas{width:1400px!important;max-width:none!important;height:280px;aspect-ratio:unset}
   .classic-fb-str-btn{min-height:44px;min-width:44px}
+  .classic-fb-scroll{scroll-snap-type:none;overscroll-behavior-x:contain}
+  /* Phones: the side panel stacks under the neck, so the fretboard gets the full screen
+     width (side by side it was squeezed into a ~170px strip showing two frets).
+     1100px puts frets 0-4 on a typical phone screen, each wider than a fingertip. */
+  .classic-wrap{flex-direction:column;padding:12px}
+  .classic-fretboard-wrap,.classic-side-panel{flex:none;width:100%}
+  .classic-side-panel{overflow-y:visible}
+  .classic-fb-canvas{width:1100px!important;height:260px}
   .classic-root-btn,.classic-qual-btn,.classic-capo-btn,.learn-filter-btn{min-height:40px}
   .classic-show-btn,.classic-strum-btn,.classic-toggle-btn,.nbtn,.ins-btn{min-height:44px}
   .custom-tuning-input{min-height:40px}
@@ -3026,6 +3037,7 @@ body.pg-stems .sh-transport{display:none!important}
     <div class="classic-fretboard-wrap">
       <div class="classic-fb-header" id="classicFbHeader"></div>
       <div class="classic-fb-scroll"><canvas id="classicFbCanvas" class="classic-fb-canvas" width="900" height="280"></canvas></div>
+      <div class="classic-fb-hint">Tap a fret to place a note · swipe sideways to move along the neck · swipe up or down across the strings to strum</div>
       <div class="classic-fb-footer">
         <button class="nbtn" onclick="classicStrum('down')">▼ Strum Down</button>
         <button class="nbtn" onclick="classicStrum('up')">▲ Strum Up</button>
@@ -7709,8 +7721,11 @@ function classicDrawFretboard(){
   const canvas=document.getElementById('classicFbCanvas');
   if(!canvas) return;
   const c=canvas.getContext('2d');
-  const W=canvas.width,H=canvas.height;
-  c.clearRect(0,0,W,H);
+  // Draw in CSS pixels on a devicePixelRatio-sized backing store, so the neck stays sharp
+  // and round on phones/retina instead of being stretched from a fixed 900x280 bitmap.
+  const {w:W,h:H}=classicFbSize(canvas);
+  c.setTransform(1,0,0,1,0,0);c.clearRect(0,0,canvas.width,canvas.height);
+  const dpr=canvas.width/W; c.setTransform(dpr,0,0,dpr,0,0);
   const totalWidth=W-CLASSIC_NUT_X-20;
   const topPad=20,bottomPad=26;
   const rowH=(H-topPad-bottomPad)/5;
@@ -7822,14 +7837,85 @@ function classicDrawFretboard(){
   for(let n=0;n<=15;n++) c.fillText(String(n),fretCenterX(n),numY);
   c.textAlign='left';
 }
+// ── FRETBOARD SIZE + GESTURES (mouse, touch and pen through one Pointer Events path) ──
+// Logical drawing size = the canvas's on-screen CSS size; the backing bitmap is that times
+// devicePixelRatio. While the Guitar page is hidden (0x0) it keeps the old 900x280 size.
+function classicFbSize(canvas){
+  const r=canvas.getBoundingClientRect();
+  if(r.width<50||r.height<20) return {w:canvas._lw||900,h:canvas._lh||280};
+  const w=Math.round(r.width),h=Math.round(r.height);
+  const dpr=Math.min(3,Math.max(1,window.devicePixelRatio||1));
+  const bw=Math.round(w*dpr),bh=Math.round(h*dpr);
+  if(canvas.width!==bw||canvas.height!==bh){ canvas.width=bw; canvas.height=bh; }
+  canvas._lw=w; canvas._lh=h;
+  return {w,h};
+}
+// Which visual string row (0 = high e at top … 5 = low E) a screen Y is nearest to.
+function classicFbRowAt(canvas,clientY){
+  const rect=canvas.getBoundingClientRect();
+  const {h}=classicFbSize(canvas);
+  const y=(clientY-rect.top)*h/rect.height;
+  const rowH=(h-20-26)/5;
+  return Math.max(0,Math.min(5,Math.round((y-20)/rowH)));
+}
+// Pluck one string as it sounds right now (its fret + capo); muted strings stay silent.
+function classicPluckRow(r){
+  const li=5-r, f=classicFrets[li];
+  if(f===-1) return;
+  playClassicalGuitar(midiFreq(OPEN_MIDI[li]+Math.max(0,f)+classicCapo),getCtx().currentTime,1.6);
+}
+// Tap = place/remove a note (same as a mouse click). Swipe sideways = scroll the neck
+// (handled natively thanks to touch-action:pan-x). Swipe up/down across the strings =
+// strum, sounding each string the moment the finger crosses it. Before this, the old
+// touchend handler also fired at the end of a scroll swipe and dropped stray notes.
+function classicFbBindGestures(canvas){
+  if(canvas._fbBound) return; canvas._fbBound=true;
+  const TAP=12; let g=null;
+  canvas.addEventListener('pointerdown',e=>{
+    if(e.pointerType==='mouse'&&e.button!==0) return;
+    g={id:e.pointerId,x0:e.clientX,y0:e.clientY,strum:false,row:classicFbRowAt(canvas,e.clientY)};
+  });
+  canvas.addEventListener('pointermove',e=>{
+    if(!g||e.pointerId!==g.id) return;
+    const dx=e.clientX-g.x0, dy=e.clientY-g.y0;
+    if(!g.strum){
+      if(Math.abs(dy)<TAP||Math.abs(dy)<Math.abs(dx)) return;
+      g.strum=true;
+      try{ canvas.setPointerCapture(e.pointerId); }catch(err){}
+      try{ navigator.vibrate&&navigator.vibrate(6); }catch(err){}
+      classicPluckRow(g.row);
+    }
+    e.preventDefault();
+    const r=classicFbRowAt(canvas,e.clientY);
+    if(r===g.row) return;
+    const step=r>g.row?1:-1;
+    for(let k=g.row+step;k!==r+step;k+=step) classicPluckRow(k);
+    g.row=r;
+  });
+  canvas.addEventListener('pointerup',e=>{
+    if(!g||e.pointerId!==g.id) return;
+    const moved=Math.hypot(e.clientX-g.x0,e.clientY-g.y0);
+    const wasStrum=g.strum; g=null;
+    if(!wasStrum&&moved<TAP) classicCanvasClick(e);
+  });
+  // The browser took over (sideways scroll) or the touch was interrupted: never place a note.
+  canvas.addEventListener('pointercancel',()=>{ g=null; });
+  canvas.addEventListener('contextmenu',e=>{ if(e.pointerType!=='mouse') e.preventDefault(); });
+  if(window.ResizeObserver){
+    let raf=0;
+    new ResizeObserver(()=>{ cancelAnimationFrame(raf); raf=requestAnimationFrame(()=>classicDrawFretboard()); }).observe(canvas);
+  }
+}
 function classicCanvasClick(e){
   const canvas=document.getElementById('classicFbCanvas');
   const rect=canvas.getBoundingClientRect();
-  const scaleX=canvas.width/rect.width, scaleY=canvas.height/rect.height;
+  const {w:LW,h:LH}=classicFbSize(canvas);
+  const scaleX=LW/rect.width, scaleY=LH/rect.height;
   const x=(e.clientX-rect.left)*scaleX, y=(e.clientY-rect.top)*scaleY;
-  const totalWidth=canvas.width-CLASSIC_NUT_X-20;
+  const totalWidth=LW-CLASSIC_NUT_X-20;
   const topPad=20,bottomPad=26;
-  const rowH=(canvas.height-topPad-bottomPad)/5;
+  const rowH=(LH-topPad-bottomPad)/5;
+  if(e.pointerType==='touch'||e.pointerType==='pen'){ try{ navigator.vibrate&&navigator.vibrate(8); }catch(err){} }
   let r=Math.round((y-topPad)/rowH);
   r=Math.max(0,Math.min(5,r));
   const li=5-r;
@@ -8036,14 +8122,7 @@ function classicInit(){
   classicBuildCapoTool();
   const canvas=document.getElementById('classicFbCanvas');
   if(canvas){
-    canvas.addEventListener('click',classicCanvasClick);
-    // Touch support (mobile/tablet): fire the same handler off the touch point, and
-    // preventDefault so the browser doesn't also replay it as a synthetic ghost click.
-    canvas.addEventListener('touchend',(e)=>{
-      e.preventDefault();
-      const t=e.changedTouches[0];
-      if(t) classicCanvasClick({clientX:t.clientX,clientY:t.clientY});
-    },{passive:false});
+    classicFbBindGestures(canvas);
   }
   classicDrawFretboard();
   classicUpdateCapoShapes();

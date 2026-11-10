@@ -307,7 +307,7 @@ Everything is self-contained. No build step, no npm, no framework.
 - [x] More songs (50+ target)
 - [x] Custom tuning support (Drop D, Open G, DADGAD and more)
 - [x] Export to PDF chord sheet (Print / Save as PDF)
-- [ ] Mobile touch support for the guitar fretboard
+- [x] Mobile touch support for the guitar fretboard (tap to place notes, swipe to scroll the neck, swipe across strings to strum)
 - [ ] Collaborative editing (Supabase Realtime, next)
 - [x] Wire Claude into chord explanations (✦ Explain with Claude) and full song-idea generation
 
