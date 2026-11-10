@@ -5065,7 +5065,9 @@ function playPiano(freq,start,duration){
   panner.connect(analyser);
   const masterGain=ctx.createGain();
   masterGain.connect(panner);
-  masterGain.gain.setValueAtTime(0.18,start);
+  // 1.0 (was 0.18): the synth piano peaked ~0.04 — about 20 dB under the organ/guitars —
+  // so the Piano page, Sheet playback and Piano Roll (all piano by default) were near-silent.
+  masterGain.gain.setValueAtTime(1.0,start);
   masterGain.gain.exponentialRampToValueAtTime(0.001,start+Math.min(duration,4.5));
   harmonics.forEach(({n,amp,decay})=>{
     const B=0.0001;
@@ -5089,7 +5091,7 @@ function playPiano(freq,start,duration){
   const hammerFilter=ctx.createBiquadFilter();
   hammerFilter.type='bandpass';hammerFilter.frequency.value=freq*2;hammerFilter.Q.value=3;
   const hammerGain=ctx.createGain();
-  hammerGain.gain.setValueAtTime(0.04,start);
+  hammerGain.gain.setValueAtTime(0.22,start); // scaled with masterGain so the attack keeps its balance
   hammerGain.gain.exponentialRampToValueAtTime(0.0001,start+0.02);
   hammerSrc.connect(hammerFilter);hammerFilter.connect(hammerGain);hammerGain.connect(analyser);
   hammerSrc.start(start);
@@ -5284,7 +5286,8 @@ function transposeChordName(name,delta){
 
 // ── DRUM SOUNDS ────────────────────────────────────────────────────
 function drumSound(type){
-  const ctx=getCtx();const vol=.7;const t=ctx.currentTime;
+  // .55 (was .7): kick + hat/snare on the same step summed past full scale (peak 1.07) and clipped.
+  const ctx=getCtx();const vol=.55;const t=ctx.currentTime;
   if(type==='kick'){
     const o=ctx.createOscillator(),g=ctx.createGain();
     o.connect(g);g.connect(analyser);
